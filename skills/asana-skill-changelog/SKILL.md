@@ -125,9 +125,10 @@ Then, before writing anything:
    - Capture the returned `gid`, then `page_get` it once to get its
      `permalink_url` (`page_create`'s response doesn't include it).
 
-4. **Update Page 2**: keep the "How to use" section above the `<hr>`
-   untouched, prepend a new `<li>` (newest first) to the changelog `<ul>`
-   below it, `page_update` with the full merged body.
+4. **Update Page 2**: keep the Breadcrumb and Skill Details sections
+   untouched, prepend a new `<li>` (newest first) to the `<ul>` in the
+   Change log section (the last section, below the second `<hr>`), then
+   `page_update` with the full merged body.
 
 5. **Upsert the row on Page 1** (central registry) as described above.
 
@@ -151,22 +152,35 @@ Then, before writing anything:
 
 ### Page 2 — first creation
 
+Three labeled sections, each separated by an `<hr>`: **Breadcrumb**,
+**Skill Details** (how to use + download link), **Change log**.
+
 ```html
 <body>
-<i>⚠ Best viewed on Web.</i>
+<strong>Breadcrumb:</strong>
 
 <a href="<central_registry_permalink>"><central_registry_name — from page_get, don't hardcode></a> / <strong><skill_name></strong>
 
+<hr>
+
+<strong>Skill Details</strong>
+
+<strong>Download</strong>: <a href="<github raw url, if the skill file is published there>">SKILL.md (GitHub)</a> · <a href="<github blob url>">repo</a>
+
 <strong>How to use</strong>
 Trigger: <code><trigger></code>
+
 <strong>Prompt example (real usage):</strong>
+
 <pre>Use the <this skill's own name> skill.
 Skill: <skill name e.g. <skill_name>></pre>
-Required: skill name. Claude checks/asks for the rest. <any other short usage notes>
+
+Required: skill name. Claude checks/asks for the rest. First time logging a skill also adds a row for it on the <a href="<central_registry_permalink>"><central_registry_name></a> central page.
 
 <hr>
 
-<strong>Changelog</strong>
+<strong>Change log</strong>
+
 Version history for the <skill_name> skill. Click a version's link for the full detail.
 
 <ul>
@@ -175,18 +189,30 @@ Version history for the <skill_name> skill. Click a version's link for the full 
 </body>
 ```
 
+Omit the Download line if the skill isn't published anywhere downloadable yet.
+
 ### Page 2 — later versions
 
-Keep everything already in `html_text` (How-to-use section + divider
-untouched) — only touch the `<ul>` below the divider. Insert the new
-`<li>` as the **first** item (newest-first), then `page_update` the whole
-body.
+Keep the Breadcrumb and Skill Details sections untouched — only touch the
+`<ul>` inside the Change log section (last, below the second `<hr>`).
+Insert the new `<li>` as the **first** item (newest-first), then
+`page_update` the whole body.
 
 ### Page 3 — detail page
 
+Three labeled sections, each separated by an `<hr>`: **Breadcrumb**,
+**Log detail information** (what changed + why), **Markdown detail**
+(full file snapshot).
+
 ```html
 <body>
+<strong>Breadcrumb</strong>
 <a href="<page1_permalink>"><central_registry_name — from page_get></a> / <a href="<page2_permalink>"><skill_name></a> / <strong>v<version></strong>
+
+<hr>
+
+<strong>Log detail information</strong>
+
 <date> · logged by <author>
 
 <strong>What changed</strong>
@@ -201,6 +227,7 @@ body.
 <hr>
 
 <strong>Markdown detail</strong>
+
 <pre><the FULL raw content of the skill's own SKILL.md (or equivalent) file, verbatim, exactly as it stands at this version — not a summary, not just the diff. This is the archived snapshot of the file at this version.></pre>
 </body>
 ```
