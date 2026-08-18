@@ -39,9 +39,13 @@ with linked lists and separate flat pages instead of a real nested table.
 
 ## Central registry page (Page 1)
 
-Right now that's `"Design system Governance "` (gid `1217561826992798`,
-https://app.asana.com/1/1153565613997788/note/1217561826992798). It holds
-one row per skill under a `"🆕 Skill changelogs"` list.
+Right now that's gid `1217561826992798`
+(https://app.asana.com/1/1153565613997788/note/1217561826992798) — its
+name has been renamed before ("Design system Governance " →
+"Operation Skills") and may be renamed again, so **always `page_get` it
+and use its live `name` field** for breadcrumb text — never hardcode a
+title string in a page you write. It holds one row per skill under a
+`"🆕 Skill changelogs"` list.
 
 Each skill gets one **block** (not a single `<li>` — see template below):
 a `🔹` heading line with the skill name linked to its Page 2, followed by
@@ -151,8 +155,7 @@ Then, before writing anything:
 <body>
 <i>⚠ Best viewed on Web.</i>
 
-<strong><skill_name></strong>
-Part of: <a href="<central_registry_permalink>">Design system Governance</a>
+<a href="<central_registry_permalink>"><central_registry_name — from page_get, don't hardcode></a> / <strong><skill_name></strong>
 
 <strong>How to use</strong>
 Trigger: <code><trigger></code>
@@ -183,9 +186,8 @@ body.
 
 ```html
 <body>
-<strong><skill_name> v<version></strong>
+<a href="<page1_permalink>"><central_registry_name — from page_get></a> / <a href="<page2_permalink>"><skill_name></a> / <strong>v<version></strong>
 <date> · logged by <author>
-Changelog: <a href="<page2_permalink>"><skill_name></a> · Registry: <a href="<page1_permalink>">Design system Governance</a>
 
 <strong>What changed</strong>
 <ul>
