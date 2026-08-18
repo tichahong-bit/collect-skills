@@ -111,7 +111,13 @@ Then, before writing anything:
 
 3. **Create Page 3** (this version's detail page) via `page_create`:
    - `name`: `"<skill_name> — v<version>"`.
-   - `html_text`: full detail write-up (template below).
+   - `html_text`: full detail write-up (template below) — this MUST
+     include the "Markdown detail" section holding the skill's own
+     `SKILL.md` (or equivalent) file content, **verbatim, in full**, as it
+     stands at this version. Read the actual file (ask the owner for its
+     path if you don't have it) and paste its raw text into the `<pre>` —
+     don't summarize or truncate it. Each version's Page 3 is a full
+     snapshot of the file at that point, not just a diff.
    - Capture the returned `gid`, then `page_get` it once to get its
      `permalink_url` (`page_create`'s response doesn't include it).
 
@@ -152,7 +158,6 @@ Part of: <a href="<central_registry_permalink>">Design system Governance</a>
 Trigger: <code><trigger></code>
 <strong>Prompt example (real usage):</strong>
 <pre>Use the <this skill's own name> skill.
-
 Skill: <skill name e.g. <skill_name>></pre>
 Required: skill name. Claude checks/asks for the rest. <any other short usage notes>
 
@@ -190,10 +195,18 @@ Changelog: <a href="<page2_permalink>"><skill_name></a> · Registry: <a href="<p
 
 <strong>Why</strong>
 <why this change was needed — bug hit, gap found, request, etc.>
+
+<hr>
+
+<strong>Markdown detail</strong>
+<pre><the FULL raw content of the skill's own SKILL.md (or equivalent) file, verbatim, exactly as it stands at this version — not a summary, not just the diff. This is the archived snapshot of the file at this version.></pre>
 </body>
 ```
 
-This part was already right — keep this shape.
+The `<pre>` block holds the actual file's raw markdown source (frontmatter,
+headings, everything) copy-pasted as-is — don't convert it to rendered
+`<ul>`/`<h2>` tags, and don't shorten it. This makes every version's Page 3
+a full, standalone snapshot of the skill file at that point in time.
 
 ## Boundaries
 
