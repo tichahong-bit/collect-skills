@@ -125,10 +125,10 @@ Then, before writing anything:
    - Capture the returned `gid`, then `page_get` it once to get its
      `permalink_url` (`page_create`'s response doesn't include it).
 
-4. **Update Page 2**: keep the Breadcrumb and Skill Details sections
-   untouched, prepend a new `<li>` (newest first) to the `<ul>` in the
-   Change log section (the last section, below the second `<hr>`), then
-   `page_update` with the full merged body.
+4. **Update Page 2**: keep the Breadcrumb, Skill Details, and Example
+   scenario sections untouched, prepend a new `<li>` (newest first) to the
+   `<ul>` in the Change log section (the last section), then `page_update`
+   with the full merged body.
 
 5. **Upsert the row on Page 1** (central registry) as described above.
 
@@ -152,8 +152,9 @@ Then, before writing anything:
 
 ### Page 2 — first creation
 
-Three labeled sections, each separated by an `<hr>`: **Breadcrumb**,
-**Skill Details** (how to use + download link), **Change log**.
+Four labeled sections, each separated by an `<hr>`: **Breadcrumb**,
+**Skill Details** (how to use + download link), **Example scenario**
+(a short walkthrough story), **Change log**.
 
 ```html
 <body>
@@ -179,6 +180,17 @@ Required: skill name. Claude checks/asks for the rest. First time logging a skil
 
 <hr>
 
+<strong>Example scenario</strong>
+
+<a short, concrete walkthrough of someone actually using this specific
+skill end-to-end — not generic filler. For asana-skill-changelog itself,
+this is: build + test your own skill → push it somewhere downloadable
+(Asana Knowledge can't attach files) → log it here with a one-line prompt
+→ share the Page 2 link so teammates can read how to use it and download
+it. Numbered list (<ol>) reads well here.>
+
+<hr>
+
 <strong>Change log</strong>
 
 Version history for the <skill_name> skill. Click a version's link for the full detail.
@@ -189,12 +201,15 @@ Version history for the <skill_name> skill. Click a version's link for the full 
 </body>
 ```
 
-Omit the Download line if the skill isn't published anywhere downloadable yet.
+Omit the Download line if the skill isn't published anywhere downloadable
+yet. The Example scenario should be specific to the skill being logged —
+ask the owner what a real end-to-end use of their skill looks like rather
+than inventing a generic one.
 
 ### Page 2 — later versions
 
-Keep the Breadcrumb and Skill Details sections untouched — only touch the
-`<ul>` inside the Change log section (last, below the second `<hr>`).
+Keep the Breadcrumb, Skill Details, and Example scenario sections
+untouched — only touch the `<ul>` inside the Change log section (last).
 Insert the new `<li>` as the **first** item (newest-first), then
 `page_update` the whole body.
 
