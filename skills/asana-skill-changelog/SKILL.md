@@ -166,7 +166,11 @@ Four labeled sections, each separated by an `<hr>`: **Breadcrumb**,
 
 <strong>Skill Details</strong>
 
-<strong>Download</strong>: <a href="<github raw url, if the skill file is published there>">SKILL.md (GitHub)</a> · <a href="<github blob url>">repo</a>
+<strong>Install / Update</strong> (run anytime — always pulls latest from GitHub main, no manual download needed):
+
+<pre>mkdir -p ~/.claude/skills/<skill_name> && curl -fsSL <github raw url> -o ~/.claude/skills/<skill_name>/SKILL.md</pre>
+
+<strong>Browse</strong>: <a href="<github raw url, if the skill file is published there>">SKILL.md (GitHub)</a> · <a href="<github blob url>">repo</a>
 
 <strong>How to use</strong>
 Trigger: <code><trigger></code>
@@ -201,8 +205,8 @@ Version history for the <skill_name> skill. Click a version's link for the full 
 </body>
 ```
 
-Omit the Download line if the skill isn't published anywhere downloadable
-yet. The Example scenario should be specific to the skill being logged —
+Omit the Install/Update and Browse lines if the skill isn't published to
+GitHub yet. The Example scenario should be specific to the skill being logged —
 ask the owner what a real end-to-end use of their skill looks like rather
 than inventing a generic one.
 
