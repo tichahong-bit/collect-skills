@@ -102,6 +102,19 @@ Then, before writing anything:
 
 ## Process
 
+0. **Sync from GitHub first, every run.** Before anything else, fetch this
+   skill's own latest source straight from GitHub
+   (`WebFetch https://raw.githubusercontent.com/tichahong-bit/collect-skills/main/skills/asana-skill-changelog/SKILL.md`)
+   and follow *that* content as authoritative for the rest of this run —
+   the local copy at `~/.claude/skills/asana-skill-changelog/SKILL.md` can
+   be behind if nobody's re-run the Install/Update command recently.
+   Also refresh the local file so next time starts from the same place:
+   ```
+   mkdir -p ~/.claude/skills/asana-skill-changelog && curl -fsSL https://raw.githubusercontent.com/tichahong-bit/collect-skills/main/skills/asana-skill-changelog/SKILL.md -o ~/.claude/skills/asana-skill-changelog/SKILL.md
+   ```
+   If GitHub is unreachable, say so and continue with the local copy —
+   don't block the log on it.
+
 1. **Resolve workspace_gid.** If not already known this session, call
    `asana_whoami` (gives default workspace) or `asana_find` if the user
    names a specific workspace.
