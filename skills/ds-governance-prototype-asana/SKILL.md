@@ -41,9 +41,12 @@ Asana-backed path as the team migrates knowledge sources over.
 - **Requirement** (required) — the raw requirement text, or a link to the doc that has it.
   Business input is sometimes complete, sometimes just a one-line ask — either is fine, Step 2
   is what resolves the gap.
-- **Design system** (optional) — which of the three live DS sites governs this project, if known
-  (see Step 1). If omitted and it isn't obvious from the requirement/project context, ask once
-  rather than guessing.
+- **Design system(s)** (optional) — one or more of the three live DS sites to build against (see
+  Step 1). Supplying **two** links means the requester wants to compare the same prototype under
+  two DS themes side by side (e.g. deciding between a current and a proposed theme, or two
+  brand/product variants) — build the theme-switch described in Step 4, not two separate
+  prototypes. If omitted and it isn't obvious from the requirement/project context, ask once
+  rather than guessing; don't assume a compare is wanted unless 2+ links are actually given.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
@@ -132,11 +135,20 @@ For each screen/section the requirement implies:
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
 
-## Step 4 — presentation mode, per-screen dynamic panel
+## Step 4 — presentation mode, per-screen dynamic panel, optional DS A/B toggle
 
 Build a walkthrough view (or whatever presentation surface the tool you're running in supports)
-with a toggleable side panel. The panel's content **changes per screen** — this is the specific
-fix this skill exists to make over the static single-panel pattern seen elsewhere. Concretely:
+with a **presentation-mode toggle** (chrome control, off by default so the initial view is the
+clean product surface) that reveals the side panel. The panel's content **changes per screen** —
+this is the specific fix this skill exists to make over the static single-panel pattern seen
+elsewhere. Concretely:
+
+**If Step 1 was given two DS links (a compare request):** also add a Design System A/B toggle in
+the same chrome control, swapping the rendered screen's tokens (color, radius, type, whatever
+each site actually defines) between the two — same screens, same content, different DS. Build
+this as a real token swap (e.g. a `data-ds` attribute driving a second CSS token block sourced
+from the second site's actual values), not a second copy of the prototype. If only one DS link
+was given, skip this toggle entirely — don't add a compare control nobody asked for.
 
 - Keep a per-screen data structure (screen id → that screen's own insight cards / DS rows), built
   from Steps 1–3's knowledge as it actually applies to *that* screen — not one global list reused
