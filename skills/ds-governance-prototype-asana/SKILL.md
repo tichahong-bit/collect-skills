@@ -84,7 +84,11 @@ brand-new and may have little or nothing in them yet).
    Notion-backed sibling skill only knew about this one; it was a gap, not a feature):
    - https://webds-bbl.vercel.app/#/
    - https://mbds-bbl.vercel.app/
-   - https://cds-bbl.vercel.app/
+   - https://cds-bbl.vercel.app/ — generated from the Figma **⭐️ Core Design Library**
+     (fileKey `ON8Azjo7wIi3P2oxnxKiBb`,
+     https://www.figma.com/design/ON8Azjo7wIi3P2oxnxKiBb/%E2%AD%90%EF%B8%8F-Core-Design-Library).
+     If a token/component looks wrong or missing on the live site, this Figma file is the
+     upstream source to check before assuming the live site itself is wrong.
    These are the freshest, most authoritative source of what's actually real in code right now —
    weight them over Asana/repo sources if the two disagree about whether something exists. If
    it's unclear which site governs this project, ask once rather than guessing or reading all
