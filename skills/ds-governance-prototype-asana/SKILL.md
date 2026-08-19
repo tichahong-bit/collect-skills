@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.0.0
+version: 1.1.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
