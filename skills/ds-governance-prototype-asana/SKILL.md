@@ -1,14 +1,18 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.2.0
+version: 1.3.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
-  from Notion to Asana Knowledge, per the team's ongoing Notion→Asana migration). Pulls
-  Research, Copy Writing Guideline, Requirement collections, and Branding Guideline from Asana,
-  and reads all three live design-system sites (webds-bbl, mbds-bbl, cds-bbl) directly for
-  ground truth. Presentation mode's side panel is per-screen dynamic, not one static panel
-  repeated on every screen. Also writes back to Requirement collections as it clarifies a
+  from Notion to Asana Knowledge, per the team's ongoing Notion→Asana migration). Every screen
+  composes from two design-system layers: the Core Design System (cds-bbl, always the base for
+  every project in the bank) plus, when the project has one, its own project-specific pattern
+  library (e.g. webds-bbl, mbds-bbl) layered on top — never picks just one of several as if they
+  were interchangeable alternatives. Pulls Research, Copy Writing Guideline (the user must name
+  which specific tone-of-voice guide to use — the page holds several), Requirement collections,
+  and Branding Guideline from Asana. Presentation mode's side panel is per-screen dynamic, not
+  one static panel repeated on every screen, and includes its own Copywriting section explaining
+  the word choice per screen. Also writes back to Requirement collections as it clarifies a
   requirement, so the next run benefits.
 metadata:
   status: proposal, untested — never run end to end
@@ -20,10 +24,11 @@ metadata:
 # Prototype Agent (Asana-backed)
 
 > **Status: proposal, not yet verified working.** Composed from Asana-knowledge sources that
-> didn't exist as Asana pages until 2026-08-19, plus three live design-system sites this
-> skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`). The
-> first real run should be treated as a test — report back anything that didn't behave as
-> described here so this file can be corrected from what actually happened, not left on faith.
+> didn't exist as Asana pages until 2026-08-19, plus a Core + project-layer design-system model
+> this skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`, and
+> didn't distinguish Core from a project-specific layer). The first real run should be treated
+> as a test — report back anything that didn't behave as described here so this file can be
+> corrected from what actually happened, not left on faith.
 >
 > **This skill never touches Figma.** Output is a prototype in whatever presentation medium the
 > tool you're running in produces (e.g. an HTML/web mockup), not a Figma file. Turning it into
@@ -41,12 +46,20 @@ Asana-backed path as the team migrates knowledge sources over.
 - **Requirement** (required) — the raw requirement text, or a link to the doc that has it.
   Business input is sometimes complete, sometimes just a one-line ask — either is fine, Step 2
   is what resolves the gap.
-- **Design system(s)** (optional) — one or more of the three live DS sites to build against (see
-  Step 1). Supplying **two** links means the requester wants to compare the same prototype under
-  two DS themes side by side (e.g. deciding between a current and a proposed theme, or two
-  brand/product variants) — build the theme-switch described in Step 4, not two separate
-  prototypes. If omitted and it isn't obvious from the requirement/project context, ask once
-  rather than guessing; don't assume a compare is wanted unless 2+ links are actually given.
+- **Project-specific design system** (optional) — if this project has its own pattern library
+  beyond Core (see Step 1), a link to it. Core (`cds-bbl` + its Figma library) is **always**
+  read regardless of this input — it's not one of several choices, it's the fixed base every
+  project composes from. Ask once if it's unclear whether this project has a project-specific
+  layer; don't assume it doesn't just because nothing was mentioned, and don't assume it does
+  either — ask.
+- **Compare request** (optional) — supplying **two** project-specific (or theme) links instead of
+  one means the requester wants to compare the same prototype under two variants side by side
+  (e.g. deciding between a current and a proposed pattern set) — build the A/B toggle described
+  in Step 4, not two separate prototypes. Don't assume a compare is wanted unless 2+ links are
+  actually given.
+- **Tone of voice guide** (required whenever the screen has real copy to write — see Copy
+  Writing Guideline below) — which specific guide on that page to use (e.g. "MB Writing Style
+  Guide V2"). Ask if not given; never silently pick one or blend multiple guides together.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
@@ -65,10 +78,15 @@ brand-new and may have little or nothing in them yet).
    dropped. (Format follows `asana-research-log`'s adaptive-structure reports.)
 
 2. **Copy Writing Guideline** — gid `1217629510106643`
-   (https://app.asana.com/1/1153565613997788/note/1217629510106643). Tone/voice rules for any
-   copy you write into the prototype (labels, headings, error/empty states, CTAs). If this page
-   is still empty, say so in the final summary and write plain, ordinary product copy instead of
-   inventing a "guideline-compliant" voice with nothing to check it against.
+   (https://app.asana.com/1/1153565613997788/note/1217629510106643). This index holds **multiple
+   distinct sources** (logged via `asana-copywriting-log`) — a house style guide, a tone-of-voice
+   quick guide, a grammar reference, etc. are all separate 🔹 rows here, not one guideline.
+   **Use only the specific guide the user named** (see "Tone of voice guide" input above) — find
+   its row, open its detail page, and apply that guide's rules to any copy you write into the
+   prototype (labels, headings, error/empty states, CTAs). If the user didn't name one, ask —
+   don't guess which row applies or blend several rows' rules together. If the named guide isn't
+   on the page yet, say so in the final summary and write plain, ordinary product copy instead of
+   inventing a "guideline-compliant" voice with nothing real to check it against.
 
 3. **Requirement collections** — index gid `1217617725712351`
    (https://app.asana.com/1/1153565613997788/note/1217617725712351). Check for an existing row
@@ -82,25 +100,34 @@ brand-new and may have little or nothing in them yet).
    rules — same treatment as Copy Writing Guideline: cite the specific rule behind any branding
    decision in Step 4's panel, don't just assert "on-brand."
 
-5. **All three live design-system sites** — read whichever one(s) actually govern this project
-   directly, and follow every rule documented there. Don't assume `cds-bbl` is the only one (the
-   Notion-backed sibling skill only knew about this one; it was a gap, not a feature):
-   - https://webds-bbl.vercel.app/#/
-   - https://mbds-bbl.vercel.app/
-   - https://cds-bbl.vercel.app/ — generated from the Figma **⭐️ Core Design Library**
-     (fileKey `ON8Azjo7wIi3P2oxnxKiBb`,
-     https://www.figma.com/design/ON8Azjo7wIi3P2oxnxKiBb/%E2%AD%90%EF%B8%8F-Core-Design-Library).
+5. **Design system — two layers, composed, not three interchangeable choices.** Every project in
+   the bank builds on **Core** as its base; a project may *also* have its own project-specific
+   pattern library layered on top. These are not peer alternatives to pick one of — read Core
+   every time, and read the project layer too when this project has one.
+
+   - **Core Design System (always read)**: https://cds-bbl.vercel.app/, generated from the Figma
+     **⭐️ Core Design Library** (fileKey `ON8Azjo7wIi3P2oxnxKiBb`,
+     https://www.figma.com/design/ON8Azjo7wIi3P2oxnxKiBb/%E2%AD%90%EF%B8%8F-Core-Design-Library —
+     the Overview page, node `31:176`, is a good orientation starting point for a new session).
      If a token/component looks wrong or missing on the live site, this Figma file is the
      upstream source to check before assuming the live site itself is wrong.
-   These are the freshest, most authoritative source of what's actually real in code right now —
-   weight them over Asana/repo sources if the two disagree about whether something exists. If
-   it's unclear which site governs this project, ask once rather than guessing or reading all
-   three as equally authoritative for a project that only uses one.
+   - **Project-specific pattern library (read only if this project has one)**: a separate link
+     the requester supplies — `webds-bbl.vercel.app` and `mbds-bbl.vercel.app` are examples of
+     project-specific libraries (web and mobile respectively) already in use elsewhere, not a
+     fixed list to choose from. When present, its patterns extend/override Core for this
+     project's specific screens; Core still governs anything the project layer doesn't touch.
+   - Live sites are the freshest, most authoritative source of what's actually real in code right
+     now — weight them over Asana/repo sources if the two disagree about whether something
+     exists.
 
-## Step 1 — confirm which DS site applies
+## Step 1 — establish the design-system composition
 
-Before building anything, establish which of the three live sites is this project's design
-system (from the input, or ask once). This determines which site's rules Step 3 checks against.
+Core is always in play — no need to ask about it. Ask once, only if genuinely unclear, whether
+this project has its own project-specific pattern library on top of Core, and if so get its
+link. Don't assume a project layer exists just because one might be typical, and don't assume it
+doesn't just because none was mentioned — resolve it, don't guess either way. This determines
+what Step 3 checks new/existing components against: Core first, project layer for anything it
+covers.
 
 ## Step 2 — clear the requirement before building
 
@@ -143,12 +170,13 @@ clean product surface) that reveals the side panel. The panel's content **change
 this is the specific fix this skill exists to make over the static single-panel pattern seen
 elsewhere. Concretely:
 
-**If Step 1 was given two DS links (a compare request):** also add a Design System A/B toggle in
-the same chrome control, swapping the rendered screen's tokens (color, radius, type, whatever
-each site actually defines) between the two — same screens, same content, different DS. Build
-this as a real token swap (e.g. a `data-ds` attribute driving a second CSS token block sourced
-from the second site's actual values), not a second copy of the prototype. If only one DS link
-was given, skip this toggle entirely — don't add a compare control nobody asked for.
+**If the requester gave two project-layer/theme links (a compare request):** also add a Design
+System A/B toggle in the same chrome control, swapping the rendered screen's project-layer
+tokens (color, radius, type, whatever each link actually defines) between the two, on top of the
+same Core base both times — same screens, same content, same Core, different project layer.
+Build this as a real token swap (e.g. a `data-ds` attribute driving a second CSS token block
+sourced from the second link's actual values), not a second copy of the prototype. If no compare
+was requested, skip this toggle entirely — don't add a compare control nobody asked for.
 
 - Keep a per-screen data structure (screen id → that screen's own insight cards / DS rows), built
   from Steps 1–3's knowledge as it actually applies to *that* screen — not one global list reused
@@ -164,8 +192,11 @@ Panel sections, per screen:
   does not yet address it* line (cite the specific finding, not "informed by research" in the
   abstract). Include what was reviewed and judged not applicable to this screen, not just what
   was used.
-- **Copywriting rationale** — wherever the screen has real copy decisions, cite the specific
-  Copy Writing Guideline rule behind the wording choice.
+- **Copywriting** (its own section, not folded into another) — for every real copy decision on
+  this screen (labels, headings, error/empty states, CTAs), state the wording chosen and cite
+  the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide V2") that
+  it follows — never a vague "per guidelines." If no guide was named for this run, this section
+  says so plainly instead of pretending copy was guideline-checked.
 - **Branding rationale** — same treatment, citing the Bradning Guidline page, wherever a
   branding decision is visible on this screen.
 - **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
@@ -178,7 +209,9 @@ Panel sections, per screen:
 
 ## Final chat summary
 
-- Which DS site governed this build, and whether it had to be asked (Step 1).
+- Which project-specific pattern library (if any) layered on top of Core for this build, and
+  whether that had to be asked (Step 1) — plus which tone-of-voice guide was used for copy, if
+  any copy was written.
 - Requirement questions resolved, and how each was resolved — from existing knowledge (including
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
