@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.4.0
+version: 1.5.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -13,8 +13,11 @@ description: >
   "MB Writing Style Guide V2" for copy) rather than the skill guessing or blending. Presentation
   mode's side panel is per-screen dynamic, not one static panel repeated on every screen, and
   has its own Copywriting section and its own Branding section (placed directly above Design
-  System Evaluation), each citing the specific named guide behind a decision. Also writes back
-  to Requirement collections as it clarifies a requirement, so the next run benefits.
+  System Evaluation), each citing the specific named guide behind a decision. Also pulls (git
+  clone/pull, always re-synced) from โย's `cds-consumer` repo for exact component specs and
+  Drift rulings, and defers to กัน's `agent-design-kit` repo's real `requirement-intake` tool
+  when a convergence sheet exists. Also writes back to Requirement collections as it clarifies a
+  requirement, so the next run benefits.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -110,7 +113,40 @@ brand-new and may have little or nothing in them yet).
    the page yet, say so in the final summary and don't assert "on-brand" with nothing real to
    check it against.
 
-5. **Design system — two layers, composed, not three interchangeable choices.** Every project in
+5. **โย's (Yo's) `cds-consumer` repo** — https://github.com/therealveldt/cds-consumer.git (real
+   repo, confirmed 2026-08-20; private but this session's git credentials reach it). Clone it if
+   not already present locally, `git pull` if it is — always re-sync before reading, since Yo
+   updates it independently of this skill:
+   ```
+   git -C ~/design-system-repos/cds-consumer pull 2>/dev/null || git clone https://github.com/therealveldt/cds-consumer.git ~/design-system-repos/cds-consumer
+   ```
+   This is a **read-only reference lookup**, not a Figma tool — it's how Step 3 gets exact
+   component props/states/token names without needing Figma access at prototype stage. Read:
+   - `context/COMPONENTS.md` + `context/REGISTRY.md` — real component specs and token values,
+     more precise than scraping the live DS site; prefer these when they and the live site
+     disagree on a component's exact props.
+   - `context/DRIFT.md` — prior "intentional difference, don't re-flag" rulings. Check before
+     placeholdering something in Step 3 that Yo already ruled deliberate.
+   - `guidelines/writing.md` — Yo's own writing guideline. Secondary to the *named* Copy Writing
+     Guideline source from Asana (that one is still required and primary) — use this only as
+     extra context, never in place of the guide the user actually named.
+   - `guidelines/accessibility.md`, `guidelines/motion.md`, `guidelines/responsive.md`,
+     `guidelines/layout.md` — general build-time rules for Step 3.
+
+6. **กัน's (Kan's) `agent-design-kit` repo** — https://github.com/KanKaoLab/agent-design-kit.git
+   (public, confirmed 2026-08-20). Same sync-then-read pattern:
+   ```
+   git -C ~/design-system-repos/agent-design-kit pull 2>/dev/null || git clone https://github.com/KanKaoLab/agent-design-kit.git ~/design-system-repos/agent-design-kit
+   ```
+   Its `.claude/skills/requirement-intake/SKILL.md` is the **real** requirement-intake tool
+   Step 2 below defers to — it runs
+   `python agent-design-kit/scripts/phase8-workflow.py clarify <input.json> --json` against a
+   "convergence sheet" JSON and returns a `single-question-bundle` of only shape-changing
+   questions (exit code 2 = still blocked). If no convergence-sheet JSON exists yet for this
+   requirement, say so plainly and fall back to Step 2's manual shape-question gate below rather
+   than fabricating one — don't force real tooling to run against input it wasn't built for.
+
+7. **Design system — two layers, composed, not three interchangeable choices.** Every project in
    the bank builds on **Core** as its base; a project may *also* have its own project-specific
    pattern library layered on top. These are not peer alternatives to pick one of — read Core
    every time, and read the project layer too when this project has one.
@@ -142,11 +178,15 @@ covers.
 ## Step 2 — clear the requirement before building
 
 Check Requirement collections (source 3 above) for an existing entry on this feature area first.
-Resolve what you can from that plus the other knowledge sources; ask the user directly only for
-questions that would actually change the UI's *shape* — same hard gate as the Notion-backed
-sibling (a prototype built on a wrong shape assumption wastes the whole downstream chain). Don't
-ask about every open question, only shape-changing ones; record non-blocking ones instead of
-raising them.
+Resolve what you can from that plus the other knowledge sources.
+
+**Prefer the real tool over improvising.** If a convergence-sheet JSON exists for this
+requirement, run it through กัน's `requirement-intake` (source 6 above) and present its
+`single-question-bundle` — only decisions it marks `changes_ui_shape: true`. If no convergence
+sheet exists yet, fall back to asking the user directly only for questions that would actually
+change the UI's *shape* — same hard gate either way (a prototype built on a wrong shape
+assumption wastes the whole downstream chain). Don't ask about every open question, only
+shape-changing ones; record non-blocking ones instead of raising them.
 
 **Writing back to Requirement collections:** whether or not you had to ask the user anything,
 log this requirement to the index (upsert — read `html_text` first, never overwrite another
@@ -163,11 +203,14 @@ instance.
 
 For each screen/section the requirement implies:
 
-1. **Component exists in the governing DS site** → match its real props/states/token values as
+1. **Component exists** (governing DS site, or `cds-consumer`'s `COMPONENTS.md`/`REGISTRY.md` —
+   source 5 above, preferred when the two disagree) → match its real props/states/token values as
    closely as the prototype medium allows.
-2. **Component doesn't exist yet** → mock it up freehand, clearly labeled as a placeholder in the
-   prototype's own annotations — never let a placeholder look indistinguishable from an
-   accurately-rendered real component to whoever reviews this next.
+2. **Component doesn't exist yet** → check `cds-consumer`'s `DRIFT.md` first — an owner may have
+   already ruled this a deliberate difference, not a real gap. If it's still a genuine gap, mock
+   it up freehand, clearly labeled as a placeholder in the prototype's own annotations — never
+   let a placeholder look indistinguishable from an accurately-rendered real component to
+   whoever reviews this next.
 
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
@@ -229,8 +272,9 @@ Panel sections, per screen:
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
 - Screens built, and for each: real-DS component count vs. placeholder count.
-- Any of the five knowledge sources that was missing/empty or the user hadn't linked yet — say so
-  plainly, don't paper over a gap.
+- Any knowledge source that was missing/empty, unreachable, or the user hadn't linked yet — say
+  so plainly, don't paper over a gap. Include whether `cds-consumer`/`agent-design-kit` synced
+  successfully and whether the real `requirement-intake` tool ran or the manual fallback was used.
 - Explicitly say this run is feeding a proposal-status skill and invite a correction if any step
   didn't behave as described — same transparency standard as the Notion-backed sibling's own
   "proposal, not yet verified working" banner.
