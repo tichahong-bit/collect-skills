@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.7.0
+version: 1.8.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -24,7 +24,9 @@ description: >
   `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
   color/token a theme needs that the DS doesn't have yet gets invented and tagged `New token`,
   never presented as if it were already in the DS. Also writes back to Requirement collections
-  as it clarifies a requirement, so the next run benefits.
+  as it clarifies a requirement, so the next run benefits. Presentation-mode panel content
+  (section headers, card text, rationale) defaults to Thai, since this is the team's working
+  language — write in English only if the requester asks for it.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -284,6 +286,13 @@ requester gets one exact build with nothing to compare, per "No compare wanted" 
 - An insight that genuinely applies to the whole flow (not one screen) goes in its own
   "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
   identically into every screen's section.
+
+**Language:** write the panel's section headers, card titles, summaries, and rationale in
+**Thai by default** — this is the team's working language, and the panel is read by BU
+stakeholders in a walkthrough, not just designers. Use English only if the requester specifically
+asks for an English build (e.g. for an audience that doesn't read Thai). Copy actually rendered
+on the product screen still follows whatever the named tone-of-voice guide specifies — this
+Thai-default is about the panel's own explanatory text, not a rule to translate the product copy.
 
 Panel section order, top to bottom:
 
