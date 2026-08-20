@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.3.0
+version: 1.4.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -8,12 +8,13 @@ description: >
   composes from two design-system layers: the Core Design System (cds-bbl, always the base for
   every project in the bank) plus, when the project has one, its own project-specific pattern
   library (e.g. webds-bbl, mbds-bbl) layered on top — never picks just one of several as if they
-  were interchangeable alternatives. Pulls Research, Copy Writing Guideline (the user must name
-  which specific tone-of-voice guide to use — the page holds several), Requirement collections,
-  and Branding Guideline from Asana. Presentation mode's side panel is per-screen dynamic, not
-  one static panel repeated on every screen, and includes its own Copywriting section explaining
-  the word choice per screen. Also writes back to Requirement collections as it clarifies a
-  requirement, so the next run benefits.
+  were interchangeable alternatives. Both Copy Writing Guideline and Bradning Guidline hold
+  multiple named sources each — the user must name which specific guide to use from each (e.g.
+  "MB Writing Style Guide V2" for copy) rather than the skill guessing or blending. Presentation
+  mode's side panel is per-screen dynamic, not one static panel repeated on every screen, and
+  has its own Copywriting section and its own Branding section (placed directly above Design
+  System Evaluation), each citing the specific named guide behind a decision. Also writes back
+  to Requirement collections as it clarifies a requirement, so the next run benefits.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -60,6 +61,9 @@ Asana-backed path as the team migrates knowledge sources over.
 - **Tone of voice guide** (required whenever the screen has real copy to write — see Copy
   Writing Guideline below) — which specific guide on that page to use (e.g. "MB Writing Style
   Guide V2"). Ask if not given; never silently pick one or blend multiple guides together.
+- **Branding guide** (required whenever the screen has a real branding decision to make — see
+  Bradning Guidline below) — same rule as tone of voice: which specific guide on that page to
+  use. Ask if not given; never silently pick one or blend multiple guides together.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
@@ -96,9 +100,15 @@ brand-new and may have little or nothing in them yet).
    **This skill also writes to this page** — see "Writing back to Requirement collections" below.
 
 4. **Bradning Guidline** [page title as created, gid unchanged regardless of the typo] — gid
-   `1217632285949369` (https://app.asana.com/1/1153565613997788/note/1217632285949369). Branding
-   rules — same treatment as Copy Writing Guideline: cite the specific rule behind any branding
-   decision in Step 4's panel, don't just assert "on-brand."
+   `1217632285949369` (https://app.asana.com/1/1153565613997788/note/1217632285949369). Same
+   shape and same rule as Copy Writing Guideline above — this index holds **multiple distinct
+   sources** (logged via `asana-branding-log`: a master guideline file, a vendor workshop deck,
+   meeting notes, etc.), not one guideline. **Use only the specific guide the user named** (see
+   "Branding guide" input above) — find its row, open its detail page, and apply that guide's
+   rules to any branding decision in the prototype. If the user didn't name one, ask — don't
+   guess which row applies or blend several rows' rules together. If the named guide isn't on
+   the page yet, say so in the final summary and don't assert "on-brand" with nothing real to
+   check it against.
 
 5. **Design system — two layers, composed, not three interchangeable choices.** Every project in
    the bank builds on **Core** as its base; a project may *also* have its own project-specific
@@ -197,8 +207,11 @@ Panel sections, per screen:
   the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide V2") that
   it follows — never a vague "per guidelines." If no guide was named for this run, this section
   says so plainly instead of pretending copy was guideline-checked.
-- **Branding rationale** — same treatment, citing the Bradning Guidline page, wherever a
-  branding decision is visible on this screen.
+- **Branding** (its own section, same treatment as Copywriting, placed directly above Design
+  System Evaluation) — for every real branding decision on this screen, cite the specific rule
+  from the *named* branding guide (e.g. which one the user pointed to on the Bradning Guidline
+  page) that it follows — never a vague "on-brand." If no guide was named for this run, this
+  section says so plainly instead of asserting brand-compliance with nothing real behind it.
 - **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
   `New variant` / `Assumption` / `New content` / `Adjustment`. Per screen, not one flow-wide
   list. **Every `Reused` or `New variant` row gets a Figma link** to the actual component
@@ -210,8 +223,8 @@ Panel sections, per screen:
 ## Final chat summary
 
 - Which project-specific pattern library (if any) layered on top of Core for this build, and
-  whether that had to be asked (Step 1) — plus which tone-of-voice guide was used for copy, if
-  any copy was written.
+  whether that had to be asked (Step 1) — plus which tone-of-voice guide was used for copy and
+  which branding guide was used for branding decisions, if either applied.
 - Requirement questions resolved, and how each was resolved — from existing knowledge (including
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
