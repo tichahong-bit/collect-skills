@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.9.0
+version: 1.10.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -26,7 +26,12 @@ description: >
   never presented as if it were already in the DS. Also writes back to Requirement collections
   as it clarifies a requirement, so the next run benefits. Presentation-mode panel content
   (section headers, card text, rationale) defaults to Thai, since this is the team's working
-  language — write in English only if the requester asks for it.
+  language — write in English only if the requester asks for it. When a screen's decision has
+  **no supporting research anywhere in the Research index** (not just "reviewed, doesn't apply
+  here" — genuinely never covered before), the Research Insight panel flags it distinctly and
+  recommends the research team investigate, and the gap gets written onto that requirement's
+  User Story leaf in Requirement collections (per the fixed tree `asana-requirement-log` builds),
+  scoped to that specific user story, not just left inside the prototype's own panel.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -229,6 +234,18 @@ resolved (from existing knowledge vs. asked the user) — never touch the leaf's
 Acceptance Criteria sections, those stay verbatim as originally logged. This is what makes the
 next prototype run against the same feature area faster.
 
+**Writing research gaps back to Requirement collections:** whenever Step 4's Research Insight
+section flags a genuine research gap (see "Research gap flag" there), also write it onto the
+*same* User Story leaf — not a different page, not just the prototype's own panel — so the
+research team finds it by browsing Requirement collections per user story, the same place PO/BA
+clarifications already land. Add it under a new optional section on the leaf, **Research gaps
+flagged** (same pattern as `asana-requirement-log`'s existing optional "Related prototype runs"
+section — additive, doesn't touch the leaf's fixed User Story/Acceptance Criteria/Status/
+Clarifications sections). Each entry: which screen/decision has no supporting research, dated,
+plus a one-line recommendation for what the research team should go find out. Read-then-merge
+like every other write to this leaf — append, never overwrite a prior gap entry, and don't
+re-list a gap that's already there from an earlier run against the same story.
+
 ## Step 3 — build the prototype, DS-first, gaps placeholdered not blocked
 
 Nothing in this step touches Figma — "using" a component means rendering it accurately in the
@@ -324,6 +341,17 @@ leave the panel untouched:
    was used. An insight that genuinely applies to the whole flow (not one screen) goes in its own
    "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
    identically into every screen's section.
+
+   **Research gap flag — distinct from "reviewed, not applicable."** If a screen's decision has
+   genuinely nothing in the Research index that speaks to it at all (not "something exists but
+   doesn't apply here" — this specific kind of question has never been covered), don't quietly
+   fall back to `Assumption` in the DS Evaluation and move on. Show a visually distinct card in
+   this section — different treatment from a normal insight card, e.g. a "🔬 ยังไม่มีข้อมูลวิจัยรองรับ"
+   flag — naming the specific decision that's unsupported and recommending the research team
+   investigate it. Then write that same gap onto the requirement's **User Story leaf** in
+   Requirement collections (see "Writing research gaps back to Requirement collections" below) —
+   the panel flag alone isn't enough, the research team needs to find it from Requirement
+   collections too, not just from inside a prototype they may never open.
 3. **Branding** (its own section, placed directly above Design System Evaluation) — for every
    real branding decision on this screen, cite the specific rule from the *named* branding
    guide(s) (e.g. which one(s) the user pointed to on the Bradning Guidline page) that it follows
@@ -362,6 +390,9 @@ leave the panel untouched:
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
 - Screens built, and for each: real-DS component count vs. placeholder count.
+- Any research gaps flagged (Step 4's Research Insight "gap flag") — which screen/decision, and
+  confirmation each was written onto the requirement's User Story leaf under Research gaps
+  flagged, so the research team can pick them up from Requirement collections.
 - Any knowledge source that was missing/empty, unreachable, or the user hadn't linked yet — say
   so plainly, don't paper over a gap. Include whether `cds-consumer`/`agent-design-kit` synced
   successfully and whether the real `requirement-intake` tool ran or the manual fallback was used.
