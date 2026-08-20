@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.10.0
+version: 1.11.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -31,7 +31,10 @@ description: >
   here" — genuinely never covered before), the Research Insight panel flags it distinctly and
   recommends the research team investigate, and the gap gets written onto that requirement's
   User Story leaf in Requirement collections (per the fixed tree `asana-requirement-log` builds),
-  scoped to that specific user story, not just left inside the prototype's own panel.
+  scoped to that specific user story, not just left inside the prototype's own panel. Mobile and
+  tablet builds get a realistic device bezel with its own internal scroll (distinct frames per
+  viewport, not one scaled generic frame), so scrolling behaves like the real device rather than
+  a webpage with a phone graphic on it.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -265,6 +268,15 @@ For each screen/section the requirement implies:
 
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
+
+**Device frame for mobile/tablet viewports.** When the target viewport is mobile or tablet (not
+desktop/web), wrap the rendered screen in a realistic device bezel sized to that viewport — a
+fixed-size frame with its own internal scroll, not the full page scrolling. This is what makes
+scroll behavior in the walkthrough feel like the real device instead of a webpage with a phone
+graphic pasted over it: the frame's height stays fixed to the viewport, and content taller than
+that scrolls *inside* the frame. Don't build one generic "phone-ish" frame for both — a tablet
+frame is wider/shorter-relative-to-width than a mobile one, and shouldn't just be a scaled-up
+phone. If the target viewport isn't stated, ask rather than assuming mobile by default.
 
 ## Step 4 — presentation mode, per-screen dynamic panel, up to three optional compare toggles
 
