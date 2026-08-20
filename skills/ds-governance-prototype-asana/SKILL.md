@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.6.0
+version: 1.7.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -11,13 +11,17 @@ description: >
   were interchangeable alternatives. Both Copy Writing Guideline and Bradning Guidline hold
   multiple named sources each — the user must name which specific guide to use from each (e.g.
   "MB Writing Style Guide V2" for copy) rather than the skill guessing or blending. Presentation
-  mode's side panel is per-screen dynamic, not one static panel repeated on every screen, and
-  has its own Copywriting section and its own Branding section (placed directly above Design
-  System Evaluation), each citing the specific named guide behind a decision. Also pulls (git
-  clone/pull, always re-synced) from โย's `cds-consumer` repo for exact component specs and
-  Drift rulings, and defers to กัน's `agent-design-kit` repo's real `requirement-intake` tool
-  when a convergence sheet exists. Naming two branding guides (e.g. a Wealth-segment theme vs a
-  regular one) builds a Branding Theme toggle comparing the same screens under both — any
+  mode opens a draggable, collapsible chrome bar; its side panel always leads with a constant
+  Requirement summary, then four per-screen sections that change as the viewer clicks between
+  screens: Research Insight, Branding, Design System Evaluation, Copywriting (in that order —
+  Copywriting sits after the DS Evaluation, not before it). Up to three independent optional
+  compare toggles can appear in the chrome, each built only when its own specific trigger was
+  actually given — a Design System A/B toggle (two project-layer links), a Branding Theme toggle
+  (two named branding guides), and a Tone of Voice toggle (two named copywriting guides) — if
+  none were given, the requester gets an exact single build with nothing to compare, and the
+  chrome shows only the Presentation Mode toggle. Also pulls (git clone/pull, always re-synced)
+  from โย's `cds-consumer` repo for exact component specs and Drift rulings, and defers to กัน's
+  `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
   color/token a theme needs that the DS doesn't have yet gets invented and tagged `New token`,
   never presented as if it were already in the DS. Also writes back to Requirement collections
   as it clarifies a requirement, so the next run benefits.
@@ -64,19 +68,27 @@ Asana-backed path as the team migrates knowledge sources over.
   (e.g. deciding between a current and a proposed pattern set) — build the A/B toggle described
   in Step 4, not two separate prototypes. Don't assume a compare is wanted unless 2+ links are
   actually given.
-- **Tone of voice guide** (required whenever the screen has real copy to write — see Copy
-  Writing Guideline below) — which specific guide on that page to use (e.g. "MB Writing Style
-  Guide V2"). Ask if not given; never silently pick one or blend multiple guides together.
+- **Tone of voice guide(s)** (required whenever the screen has real copy to write — see Copy
+  Writing Guideline below) — which specific guide(s) on that page to use, named. Naming **one**
+  (e.g. "MB Writing Style Guide V2") means write every copy decision to that guide, no toggle.
+  Naming **two** (e.g. "MB Writing Style Guide V2" vs "Trip Space") means the requester wants to
+  compare the same screens' copy under two tones side by side — build the Tone of Voice toggle
+  described in Step 4, not two separate prototypes. Ask if not given; never silently pick one,
+  blend multiple guides together, or assume a compare is wanted with only one guide named.
 - **Branding guide(s)** (required whenever the screen has a real branding decision to make — see
   Bradning Guidline below) — which specific guide(s) on that page to use, named. Naming **two**
-  (e.g. "Wealth Branding Guide" vs a standard/regular one) means the requester wants to compare
-  the same prototype under two branding themes side by side (e.g. Wealth segment vs regular
-  segment) — build the Branding Theme toggle described in Step 4, not two separate prototypes.
-  Ask if not given; never silently pick one, blend multiple guides together, or assume a compare
-  is wanted with only one guide named.
+  (e.g. "Wealth Sub-brand Visual Identity" vs "Lynxeye x BBL — Digital Rebranding Workshop")
+  means the requester wants to compare the same prototype under two branding themes side by side
+  — build the Branding Theme toggle described in Step 4, not two separate prototypes. Ask if not
+  given; never silently pick one, blend multiple guides together, or assume a compare is wanted
+  with only one guide named.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
+- **No compare wanted** — if the requester has one exact spec in mind and never gave a second
+  link/guide for any of the three inputs above (project-layer link, branding guide, tone-of-voice
+  guide), don't build any A/B toggle at all. The presentation chrome then shows only the
+  Presentation Mode toggle — never add a compare control speculatively "in case it's useful."
 
 ## Knowledge sources (all Asana + live sites — this skill does not read Notion)
 
@@ -223,16 +235,20 @@ For each screen/section the requirement implies:
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
 
-## Step 4 — presentation mode, per-screen dynamic panel, optional DS A/B toggle
+## Step 4 — presentation mode, per-screen dynamic panel, up to three optional compare toggles
 
 Build a walkthrough view (or whatever presentation surface the tool you're running in supports)
 with a **presentation-mode toggle** (chrome control, off by default so the initial view is the
-clean product surface) that reveals the side panel. The panel's content **changes per screen** —
+clean product surface) that reveals the side panel. The chrome itself is a single draggable,
+collapsible control bar — a grip so the requester can move it out of the way of whatever screen
+area they're looking at, and a collapse button so it can be shrunk to just the grip when not
+needed — not a fixed strip pinned in one corner. The panel's content **changes per screen** —
 this is the specific fix this skill exists to make over the static single-panel pattern seen
 elsewhere. Concretely:
 
-Two independent optional toggles can appear in the same chrome control, each only when its own
-compare request was actually made — never add either speculatively:
+Up to three independent optional toggles can appear in the same chrome control, each only when
+its own compare request was actually made — never add one speculatively, and never skip one that
+was actually requested:
 
 - **Design System A/B toggle** — if the requester gave two project-layer/theme links (Expected
   input above). Swaps the rendered screen's project-layer tokens (color, radius, type, whatever
@@ -241,15 +257,24 @@ compare request was actually made — never add either speculatively:
   (e.g. a `data-ds` attribute driving a second CSS token block sourced from the second link's
   actual values), not a second copy of the prototype.
 - **Branding Theme toggle** — if the requester named two branding guides (Expected input above),
-  e.g. comparing a Wealth-segment theme against a regular/standard one. Swaps the same screens'
-  branding-driven visual identity (colors, imagery treatment, whatever that guide's rules
-  actually cover) between the two named guides — same screens, same content, same Core/project
-  DS, different branding theme. If a theme's guide calls for a color/token that doesn't exist in
-  the DS yet, invent it rather than blocking — but tag it `New token` in that screen's Design
-  System Evaluation (below), never let an invented brand color look like it came from the DS.
+  e.g. comparing a Wealth sub-brand identity against another named identity. Swaps the same
+  screens' branding-driven visual identity (colors, imagery treatment, whatever that guide's
+  rules actually cover) between the two named guides — same screens, same content, same
+  Core/project DS, different branding theme. If a theme's guide calls for a color/token that
+  doesn't exist in the DS yet, invent it rather than blocking — but tag it `New token` in that
+  screen's Design System Evaluation (below), never let an invented brand color look like it came
+  from the DS.
+- **Tone of Voice toggle** — if the requester named two tone-of-voice guides (Expected input
+  above). Swaps every real copy decision on the current screen (labels, headings, error/empty
+  states, CTAs) between the wording each named guide produces — same screens, same layout, same
+  DS, different words. Independent of the Branding Theme toggle: a tone compare can be requested
+  alone, a branding compare can be requested alone, or both together (they commonly pair — e.g. a
+  Wealth branding theme paired with a more formal guide, a second identity paired with a more
+  casual one — but the skill builds whichever toggles were actually requested, never assumes a
+  pairing that wasn't named).
 
-Either toggle, both, or neither can be present depending on what was actually requested — don't
-add a compare control nobody asked for, and don't skip one that was.
+If none of the three were requested, the chrome shows **only** the Presentation Mode toggle — the
+requester gets one exact build with nothing to compare, per "No compare wanted" in Expected input.
 
 - Keep a per-screen data structure (screen id → that screen's own insight cards / DS rows), built
   from Steps 1–3's knowledge as it actually applies to *that* screen — not one global list reused
@@ -260,39 +285,58 @@ add a compare control nobody asked for, and don't skip one that was.
   "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
   identically into every screen's section.
 
-Panel sections, per screen:
-- **Research Insight** — cards with: title, summary, and an explicit *why this design does /
-  does not yet address it* line (cite the specific finding, not "informed by research" in the
-  abstract). Include what was reviewed and judged not applicable to this screen, not just what
-  was used.
-- **Copywriting** (its own section, not folded into another) — for every real copy decision on
-  this screen (labels, headings, error/empty states, CTAs), state the wording chosen and cite
-  the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide V2") that
-  it follows — never a vague "per guidelines." If no guide was named for this run, this section
-  says so plainly instead of pretending copy was guideline-checked.
-- **Branding** (its own section, same treatment as Copywriting, placed directly above Design
-  System Evaluation) — for every real branding decision on this screen, cite the specific rule
-  from the *named* branding guide (e.g. which one the user pointed to on the Bradning Guidline
-  page) that it follows — never a vague "on-brand." If no guide was named for this run, this
-  section says so plainly instead of asserting brand-compliance with nothing real behind it.
-- **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
-  `New variant` / `New token` / `Assumption` / `New content` / `Adjustment`. Per screen, not one
-  flow-wide list. `New token` is specifically for a color/spacing/type value invented because a
-  named branding theme calls for it (see Branding Theme toggle above) but the DS doesn't have it
-  yet — distinct from `Assumption` (a guess made for lack of any source) since a `New token` was
-  deliberately chosen to match a real guide's intent, just not yet formalized in the DS. **Every
-  `Reused` or `New variant` row gets a Figma link** to the actual component (resolve the real
-  node via the Figma tools' `search_design_system`/component lookup against the governing DS's
-  own library file — don't just link the library file's root, link the specific component/node).
-  `New token` / `Assumption` / `New content` / `Adjustment` rows have no Figma component to link
-  to — leave them without a link rather than linking something unrelated.
+Panel section order, top to bottom:
+
+1. **Requirement summary** — the one section that stays **constant** across every screen (it
+   describes the build as a whole, not one screen). One card: what's being built and why, in
+   plain terms, paraphrased from Step 2's resolved requirement — link to the Requirement
+   collections detail page this run wrote/updated. If the requirement was never formally logged
+   there, say so in the card rather than presenting an informal paraphrase as if it were.
+
+The remaining four sections are **per screen** — when the viewer clicks between screens in the
+prototype, re-render all four from that screen's own data, not just toggle screen visibility and
+leave the panel untouched:
+
+2. **Research Insight** — cards with: title, summary, and an explicit *why this design does /
+   does not yet address it* line (cite the specific finding, not "informed by research" in the
+   abstract). Include what was reviewed and judged not applicable to this screen, not just what
+   was used. An insight that genuinely applies to the whole flow (not one screen) goes in its own
+   "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
+   identically into every screen's section.
+3. **Branding** (its own section, placed directly above Design System Evaluation) — for every
+   real branding decision on this screen, cite the specific rule from the *named* branding
+   guide(s) (e.g. which one(s) the user pointed to on the Bradning Guidline page) that it follows
+   — never a vague "on-brand." If the Branding Theme toggle is active, this section's content
+   swaps with it. If no guide was named for this run, this section says so plainly instead of
+   asserting brand-compliance with nothing real behind it.
+4. **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
+   `New variant` / `New token` / `Assumption` / `New content` / `Adjustment`. Per screen, not one
+   flow-wide list. `New token` is specifically for a color/spacing/type value invented because a
+   named branding theme calls for it (see Branding Theme toggle above) but the DS doesn't have it
+   yet — distinct from `Assumption` (a guess made for lack of any source) since a `New token` was
+   deliberately chosen to match a real guide's intent, just not yet formalized in the DS. **Every
+   `Reused` or `New variant` row gets a Figma link** to the actual component (resolve the real
+   node via the Figma tools' `search_design_system`/component lookup against the governing DS's
+   own library file — don't just link the library file's root, link the specific component/node).
+   `New token` / `Assumption` / `New content` / `Adjustment` rows have no Figma component to link
+   to — leave them without a link rather than linking something unrelated.
+5. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
+   decision on this screen (labels, headings, error/empty states, CTAs), state the wording chosen
+   and cite the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide
+   V2") that it follows — never a vague "per guidelines." If the Tone of Voice toggle is active,
+   this section's content (and the copy actually rendered on the screen) swaps with it. If no
+   guide was named for this run, this section says so plainly instead of pretending copy was
+   guideline-checked.
 
 ## Final chat summary
 
 - Which project-specific pattern library (if any) layered on top of Core for this build, and
-  whether that had to be asked (Step 1) — plus which tone-of-voice guide was used for copy and
-  which branding guide(s) were used for branding decisions (name both if a Branding Theme
-  compare was built), if either applied.
+  whether that had to be asked (Step 1) — plus which tone-of-voice guide(s) were used for copy
+  and which branding guide(s) were used for branding decisions (name both if a Tone of Voice or
+  Branding Theme compare was built), if either applied.
+- Which of the three optional compare toggles (Design System A/B, Branding Theme, Tone of Voice)
+  were built, if any — and confirm explicitly when none were, so it's clear the requester got one
+  exact build and not an accidentally-omitted compare.
 - Requirement questions resolved, and how each was resolved — from existing knowledge (including
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
