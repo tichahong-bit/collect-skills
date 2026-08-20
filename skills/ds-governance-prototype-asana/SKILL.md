@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.1.0
+version: 1.2.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -170,7 +170,11 @@ Panel sections, per screen:
   branding decision is visible on this screen.
 - **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
   `New variant` / `Assumption` / `New content` / `Adjustment`. Per screen, not one flow-wide
-  list.
+  list. **Every `Reused` or `New variant` row gets a Figma link** to the actual component
+  (resolve the real node via the Figma tools' `search_design_system`/component lookup against
+  the governing DS's own library file — don't just link the library file's root, link the
+  specific component/node). `Assumption` / `New content` / `Adjustment` rows have no Figma
+  component to link to — leave them without a link rather than linking something unrelated.
 
 ## Final chat summary
 
