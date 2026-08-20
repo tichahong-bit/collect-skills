@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.5.0
+version: 1.6.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -16,8 +16,11 @@ description: >
   System Evaluation), each citing the specific named guide behind a decision. Also pulls (git
   clone/pull, always re-synced) from โย's `cds-consumer` repo for exact component specs and
   Drift rulings, and defers to กัน's `agent-design-kit` repo's real `requirement-intake` tool
-  when a convergence sheet exists. Also writes back to Requirement collections as it clarifies a
-  requirement, so the next run benefits.
+  when a convergence sheet exists. Naming two branding guides (e.g. a Wealth-segment theme vs a
+  regular one) builds a Branding Theme toggle comparing the same screens under both — any
+  color/token a theme needs that the DS doesn't have yet gets invented and tagged `New token`,
+  never presented as if it were already in the DS. Also writes back to Requirement collections
+  as it clarifies a requirement, so the next run benefits.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -64,9 +67,13 @@ Asana-backed path as the team migrates knowledge sources over.
 - **Tone of voice guide** (required whenever the screen has real copy to write — see Copy
   Writing Guideline below) — which specific guide on that page to use (e.g. "MB Writing Style
   Guide V2"). Ask if not given; never silently pick one or blend multiple guides together.
-- **Branding guide** (required whenever the screen has a real branding decision to make — see
-  Bradning Guidline below) — same rule as tone of voice: which specific guide on that page to
-  use. Ask if not given; never silently pick one or blend multiple guides together.
+- **Branding guide(s)** (required whenever the screen has a real branding decision to make — see
+  Bradning Guidline below) — which specific guide(s) on that page to use, named. Naming **two**
+  (e.g. "Wealth Branding Guide" vs a standard/regular one) means the requester wants to compare
+  the same prototype under two branding themes side by side (e.g. Wealth segment vs regular
+  segment) — build the Branding Theme toggle described in Step 4, not two separate prototypes.
+  Ask if not given; never silently pick one, blend multiple guides together, or assume a compare
+  is wanted with only one guide named.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
@@ -106,12 +113,13 @@ brand-new and may have little or nothing in them yet).
    `1217632285949369` (https://app.asana.com/1/1153565613997788/note/1217632285949369). Same
    shape and same rule as Copy Writing Guideline above — this index holds **multiple distinct
    sources** (logged via `asana-branding-log`: a master guideline file, a vendor workshop deck,
-   meeting notes, etc.), not one guideline. **Use only the specific guide the user named** (see
-   "Branding guide" input above) — find its row, open its detail page, and apply that guide's
-   rules to any branding decision in the prototype. If the user didn't name one, ask — don't
-   guess which row applies or blend several rows' rules together. If the named guide isn't on
-   the page yet, say so in the final summary and don't assert "on-brand" with nothing real to
-   check it against.
+   meeting notes, etc.) — and can include **segment-specific themes** (e.g. a Wealth Branding
+   Guide alongside a standard/regular one), not one guideline. **Use only the specific guide(s)
+   the user named** (see "Branding guide(s)" input above) — find each named row, open its detail
+   page, and apply that guide's rules to any branding decision in the prototype. If the user
+   didn't name one, ask — don't guess which row applies or blend several rows' rules together.
+   If a named guide isn't on the page yet, say so in the final summary and don't assert
+   "on-brand" with nothing real to check it against.
 
 5. **โย's (Yo's) `cds-consumer` repo** — https://github.com/therealveldt/cds-consumer.git (real
    repo, confirmed 2026-08-20; private but this session's git credentials reach it). Clone it if
@@ -223,13 +231,25 @@ clean product surface) that reveals the side panel. The panel's content **change
 this is the specific fix this skill exists to make over the static single-panel pattern seen
 elsewhere. Concretely:
 
-**If the requester gave two project-layer/theme links (a compare request):** also add a Design
-System A/B toggle in the same chrome control, swapping the rendered screen's project-layer
-tokens (color, radius, type, whatever each link actually defines) between the two, on top of the
-same Core base both times — same screens, same content, same Core, different project layer.
-Build this as a real token swap (e.g. a `data-ds` attribute driving a second CSS token block
-sourced from the second link's actual values), not a second copy of the prototype. If no compare
-was requested, skip this toggle entirely — don't add a compare control nobody asked for.
+Two independent optional toggles can appear in the same chrome control, each only when its own
+compare request was actually made — never add either speculatively:
+
+- **Design System A/B toggle** — if the requester gave two project-layer/theme links (Expected
+  input above). Swaps the rendered screen's project-layer tokens (color, radius, type, whatever
+  each link actually defines) between the two, on top of the same Core base both times — same
+  screens, same content, same Core, different project layer. Build this as a real token swap
+  (e.g. a `data-ds` attribute driving a second CSS token block sourced from the second link's
+  actual values), not a second copy of the prototype.
+- **Branding Theme toggle** — if the requester named two branding guides (Expected input above),
+  e.g. comparing a Wealth-segment theme against a regular/standard one. Swaps the same screens'
+  branding-driven visual identity (colors, imagery treatment, whatever that guide's rules
+  actually cover) between the two named guides — same screens, same content, same Core/project
+  DS, different branding theme. If a theme's guide calls for a color/token that doesn't exist in
+  the DS yet, invent it rather than blocking — but tag it `New token` in that screen's Design
+  System Evaluation (below), never let an invented brand color look like it came from the DS.
+
+Either toggle, both, or neither can be present depending on what was actually requested — don't
+add a compare control nobody asked for, and don't skip one that was.
 
 - Keep a per-screen data structure (screen id → that screen's own insight cards / DS rows), built
   from Steps 1–3's knowledge as it actually applies to *that* screen — not one global list reused
@@ -256,18 +276,23 @@ Panel sections, per screen:
   page) that it follows — never a vague "on-brand." If no guide was named for this run, this
   section says so plainly instead of asserting brand-compliance with nothing real behind it.
 - **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
-  `New variant` / `Assumption` / `New content` / `Adjustment`. Per screen, not one flow-wide
-  list. **Every `Reused` or `New variant` row gets a Figma link** to the actual component
-  (resolve the real node via the Figma tools' `search_design_system`/component lookup against
-  the governing DS's own library file — don't just link the library file's root, link the
-  specific component/node). `Assumption` / `New content` / `Adjustment` rows have no Figma
-  component to link to — leave them without a link rather than linking something unrelated.
+  `New variant` / `New token` / `Assumption` / `New content` / `Adjustment`. Per screen, not one
+  flow-wide list. `New token` is specifically for a color/spacing/type value invented because a
+  named branding theme calls for it (see Branding Theme toggle above) but the DS doesn't have it
+  yet — distinct from `Assumption` (a guess made for lack of any source) since a `New token` was
+  deliberately chosen to match a real guide's intent, just not yet formalized in the DS. **Every
+  `Reused` or `New variant` row gets a Figma link** to the actual component (resolve the real
+  node via the Figma tools' `search_design_system`/component lookup against the governing DS's
+  own library file — don't just link the library file's root, link the specific component/node).
+  `New token` / `Assumption` / `New content` / `Adjustment` rows have no Figma component to link
+  to — leave them without a link rather than linking something unrelated.
 
 ## Final chat summary
 
 - Which project-specific pattern library (if any) layered on top of Core for this build, and
   whether that had to be asked (Step 1) — plus which tone-of-voice guide was used for copy and
-  which branding guide was used for branding decisions, if either applied.
+  which branding guide(s) were used for branding decisions (name both if a Branding Theme
+  compare was built), if either applied.
 - Requirement questions resolved, and how each was resolved — from existing knowledge (including
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
