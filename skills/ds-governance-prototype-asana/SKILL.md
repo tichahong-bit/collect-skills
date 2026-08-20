@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.11.0
+version: 1.12.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -32,9 +32,10 @@ description: >
   recommends the research team investigate, and the gap gets written onto that requirement's
   User Story leaf in Requirement collections (per the fixed tree `asana-requirement-log` builds),
   scoped to that specific user story, not just left inside the prototype's own panel. Mobile and
-  tablet builds get a realistic device bezel with its own internal scroll (distinct frames per
-  viewport, not one scaled generic frame), so scrolling behaves like the real device rather than
-  a webpage with a phone graphic on it.
+  tablet builds get a realistic device bezel with its own internal scroll (mobile 375×812,
+  tablet 768×1024 by default — distinct frames, not one scaled generic frame), so scrolling
+  behaves like the real device rather than a webpage with a phone graphic on it. Web/desktop
+  targets get no device bezel at all.
 metadata:
   status: proposal, untested — never run end to end
   mode: mixed
@@ -276,7 +277,18 @@ scroll behavior in the walkthrough feel like the real device instead of a webpag
 graphic pasted over it: the frame's height stays fixed to the viewport, and content taller than
 that scrolls *inside* the frame. Don't build one generic "phone-ish" frame for both — a tablet
 frame is wider/shorter-relative-to-width than a mobile one, and shouldn't just be a scaled-up
-phone. If the target viewport isn't stated, ask rather than assuming mobile by default.
+phone.
+
+Default frame sizes (use these unless the requester states a different target device):
+- **Mobile**: 375×812 (iPhone-standard portrait).
+- **Tablet**: 768×1024 (iPad-standard portrait).
+- **Web/desktop**: no device bezel at all — render the screen plainly (rounded card or full
+  layout as the design calls for), same as before this device-frame behavior existed. "Web" isn't
+  a device frame variant, it's the absence of one.
+
+If the target viewport isn't stated, ask rather than assuming mobile by default. If the requester
+names a specific device or size that differs from the defaults above (e.g. a specific tablet
+model), use theirs instead of the default.
 
 ## Step 4 — presentation mode, per-screen dynamic panel, up to three optional compare toggles
 
