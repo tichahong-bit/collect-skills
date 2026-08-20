@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.8.0
+version: 1.9.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -116,12 +116,18 @@ brand-new and may have little or nothing in them yet).
    on the page yet, say so in the final summary and write plain, ordinary product copy instead of
    inventing a "guideline-compliant" voice with nothing real to check it against.
 
-3. **Requirement collections** — index gid `1217617725712351`
-   (https://app.asana.com/1/1153565613997788/note/1217617725712351). Check for an existing row
+3. **Requirement collections** — hub gid `1217617725712351`
+   (https://app.asana.com/1/1153565613997788/note/1217617725712351). Check for an existing entry
    for this feature/requirement area before asking the user anything in Step 2 — someone may have
-   already clarified this. Structure mirrors `asana-research-log`: one 🔹 index row per
-   requirement area (title, one-line summary, date, who) linking to a page with the full detail.
-   **This skill also writes to this page** — see "Writing back to Requirement collections" below.
+   already clarified this. **This is a fixed three-level tree, not a flat index** (logged via
+   `asana-requirement-log`): `Requirement collections → Project → Feature/Epic → User Story`.
+   `page_get` the hub for the Project link (e.g. "Wealth"), `page_get` that Project page for the
+   Feature/Epic link (e.g. "Wealth Dashboard (Web)"), `page_get` that for the User Story leaf
+   (e.g. "US01") — the leaf is where the real content (User Story / Acceptance Criteria / Status
+   / Clarifications) lives; the Project and Feature/Epic pages above it are just link lists. If
+   any level doesn't exist yet for this requirement, that level is simply missing — not an error,
+   just means nothing's been logged for it yet. **This skill also writes to the User Story leaf**
+   — see "Writing back to Requirement collections" below.
 
 4. **Bradning Guidline** [page title as created, gid unchanged regardless of the typo] — gid
    `1217632285949369` (https://app.asana.com/1/1153565613997788/note/1217632285949369). Same
@@ -199,8 +205,10 @@ covers.
 
 ## Step 2 — clear the requirement before building
 
-Check Requirement collections (source 3 above) for an existing entry on this feature area first.
-Resolve what you can from that plus the other knowledge sources.
+Walk Requirement collections (source 3 above) — hub → Project → Feature/Epic → User Story leaf —
+for an existing entry on this feature area first. Resolve what you can from the leaf's own
+content (User Story, Acceptance Criteria, any prior Clarifications) plus the other knowledge
+sources.
 
 **Prefer the real tool over improvising.** If a convergence-sheet JSON exists for this
 requirement, run it through กัน's `requirement-intake` (source 6 above) and present its
@@ -211,11 +219,15 @@ assumption wastes the whole downstream chain). Don't ask about every open questi
 shape-changing ones; record non-blocking ones instead of raising them.
 
 **Writing back to Requirement collections:** whether or not you had to ask the user anything,
-log this requirement to the index (upsert — read `html_text` first, never overwrite another
-entry) and create/update its detail page with what's now understood: the requirement as
-resolved, what was originally ambiguous, and how each ambiguity got resolved (from existing
-knowledge vs. asked the user). This is what makes the next prototype run against the same
-feature area faster.
+write the outcome onto the User Story leaf (upsert — read `html_text` first, never overwrite an
+existing entry). If the Project and/or Feature/Epic level didn't exist yet, create the missing
+level(s) first (same tree-building `asana-requirement-log` uses: create the leaf, link it in from
+its parent, create/link that parent from the hub if it was also missing) rather than bolting the
+story onto an unrelated branch. Update the leaf's **Clarifications** section specifically — append
+a new entry with what's now understood, what was originally ambiguous, and how each ambiguity got
+resolved (from existing knowledge vs. asked the user) — never touch the leaf's User Story or
+Acceptance Criteria sections, those stay verbatim as originally logged. This is what makes the
+next prototype run against the same feature area faster.
 
 ## Step 3 — build the prototype, DS-first, gaps placeholdered not blocked
 
