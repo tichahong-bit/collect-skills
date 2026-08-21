@@ -1,14 +1,16 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.13.0
+version: 1.14.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
-  from Notion to Asana Knowledge, per the team's ongoing Notion→Asana migration). Every screen
-  composes from two design-system layers: the Core Design System (cds-bbl, always the base for
-  every project in the bank) plus, when the project has one, its own project-specific pattern
-  library (e.g. webds-bbl, mbds-bbl) layered on top — never picks just one of several as if they
-  were interchangeable alternatives. Both Copy Writing Guideline and Bradning Guidline hold
+  from Notion to Asana Knowledge, per the team's ongoing Notion→Asana migration). Core Design
+  System (cds-bbl) is always the base; the project layer on top follows one of three explicit
+  modes the requester picks — Core only (no project layer), an existing project DS reused as-is
+  (e.g. "MBDS — MB Design System" at mbds-bbl.vercel.app), or Core as foundation with a brand-new
+  pattern layer composed fresh for this project this run. These are never inferred or blended —
+  ask which mode applies whenever it's unclear. Both Copy Writing Guideline and Bradning Guidline
+  hold
   multiple named sources each — the user must name which specific guide to use from each (e.g.
   "MB Writing Style Guide V2" for copy) rather than the skill guessing or blending. Presentation
   mode opens a draggable, collapsible chrome bar; its side panel always leads with a constant
@@ -83,12 +85,19 @@ Asana-backed path as the team migrates knowledge sources over.
 - **Requirement** (required) — the raw requirement text, or a link to the doc that has it.
   Business input is sometimes complete, sometimes just a one-line ask — either is fine, Step 2
   is what resolves the gap.
-- **Project-specific design system** (optional) — if this project has its own pattern library
-  beyond Core (see Step 1), a link to it. Core (`cds-bbl` + its Figma library) is **always**
-  read regardless of this input — it's not one of several choices, it's the fixed base every
-  project composes from. Ask once if it's unclear whether this project has a project-specific
-  layer; don't assume it doesn't just because nothing was mentioned, and don't assume it does
-  either — ask.
+- **Design system composition mode** (required — see Step 1) — which of three ways this build
+  relates to a project-specific layer beyond Core:
+  1. **Core only** — no project layer at all.
+  2. **Existing project design system** — reuse an already-built, complete project DS as-is (e.g.
+     "MBDS — MB Design System" at mbds-bbl.vercel.app), named/linked by the requester.
+  3. **Core + new composed layer** — Core as foundation, this run composes a *new* pattern layer
+     specific to this project (the project doesn't already have one; this build is creating it).
+
+  Core (`cds-bbl` + its Figma library) is **always** read regardless of mode — it's not one of
+  three choices, it's the fixed base every mode still starts from. Never assume which of the
+  three applies just because a project link was or wasn't mentioned — ask if unclear, since modes
+  2 and 3 both involve "a project has its own thing" but mean opposite things about where that
+  thing comes from (borrowed whole vs. built fresh this run).
 - **Compare request** (optional) — supplying **two** project-specific (or theme) links instead of
   one means the requester wants to compare the same prototype under two variants side by side
   (e.g. deciding between a current and a proposed pattern set) — build the A/B toggle described
@@ -198,34 +207,54 @@ brand-new and may have little or nothing in them yet).
    requirement, say so plainly and fall back to Step 2's manual shape-question gate below rather
    than fabricating one — don't force real tooling to run against input it wasn't built for.
 
-7. **Design system — two layers, composed, not three interchangeable choices.** Every project in
-   the bank builds on **Core** as its base; a project may *also* have its own project-specific
-   pattern library layered on top. These are not peer alternatives to pick one of — read Core
-   every time, and read the project layer too when this project has one.
+7. **Design system — Core always, plus one of three modes for the project layer (see Expected
+   input "Design system composition mode" and Step 1).** Core is never optional; what varies is
+   whether there's a project layer at all, and if so, whether it's borrowed whole or composed
+   fresh.
 
-   - **Core Design System (always read)**: https://cds-bbl.vercel.app/, generated from the Figma
-     **⭐️ Core Design Library** (fileKey `ON8Azjo7wIi3P2oxnxKiBb`,
+   - **Core Design System (always read, all three modes)**: https://cds-bbl.vercel.app/, generated
+     from the Figma **⭐️ Core Design Library** (fileKey `ON8Azjo7wIi3P2oxnxKiBb`,
      https://www.figma.com/design/ON8Azjo7wIi3P2oxnxKiBb/%E2%AD%90%EF%B8%8F-Core-Design-Library —
      the Overview page, node `31:176`, is a good orientation starting point for a new session).
      If a token/component looks wrong or missing on the live site, this Figma file is the
      upstream source to check before assuming the live site itself is wrong.
-   - **Project-specific pattern library (read only if this project has one)**: a separate link
-     the requester supplies — `webds-bbl.vercel.app` and `mbds-bbl.vercel.app` are examples of
-     project-specific libraries (web and mobile respectively) already in use elsewhere, not a
-     fixed list to choose from. When present, its patterns extend/override Core for this
-     project's specific screens; Core still governs anything the project layer doesn't touch.
+   - **Existing project design system (mode 2 only)**: a separate, already-built project DS the
+     requester names/links — `webds-bbl.vercel.app` and `mbds-bbl.vercel.app` are real examples
+     (web and mobile respectively) already in use elsewhere, not a fixed list to choose from. Read
+     it the same way as Core: its own live site is the primary authority for anything it covers,
+     weighted over Core for its own components (Core still governs whatever the project DS
+     doesn't touch). This is a *reused* library, not something this run composes.
+   - **Newly composed project layer (mode 3 only)**: no separate site to read — this run *creates*
+     the project-specific patterns during Step 3, informed by Core, and tags each one
+     `New component` in Step 4's Design System Evaluation since nothing pre-existing was reused.
    - Live sites are the freshest, most authoritative source of what's actually real in code right
      now — weight them over Asana/repo sources if the two disagree about whether something
      exists.
 
 ## Step 1 — establish the design-system composition
 
-Core is always in play — no need to ask about it. Ask once, only if genuinely unclear, whether
-this project has its own project-specific pattern library on top of Core, and if so get its
-link. Don't assume a project layer exists just because one might be typical, and don't assume it
-doesn't just because none was mentioned — resolve it, don't guess either way. This determines
-what Step 3 checks new/existing components against: Core first, project layer for anything it
-covers.
+Core is always in play — no need to ask about it. What varies is which of the three composition
+modes (Expected input above) this build uses; resolve it explicitly, don't guess:
+
+1. **Core only** — the requester says (or it's clear from context) this project has no pattern
+   needs beyond Core. Step 3 checks every component against Core alone.
+2. **Existing project design system** — the requester names/links an already-built project DS
+   (e.g. "use MBDS," `mbds-bbl.vercel.app`). Step 3 checks components against **that project's own
+   site** (and its own repo, if it has one, the same way source 5/6 work for Core) as the primary
+   authority for anything the project DS covers — Core still governs anything outside it, but this
+   build isn't composing anything new, it's reusing what already exists there wholesale.
+3. **Core + new composed layer** — the requester wants a project-specific layer, but this project
+   doesn't have one yet (or isn't reusing another project's) — this run is building it fresh,
+   informed by Core. Step 3 checks Core first, and any pattern this build originates for the
+   project gets flagged `New component` (Design System Evaluation, Step 4) since it's being
+   created here, not pulled from an existing library.
+
+If it's unclear which mode applies, ask — don't infer mode 2 vs. mode 3 from a project name alone
+("Wealth" could mean "compose a new Wealth-specific layer" or "reuse the existing Wealth DS if one
+already exists"; these are opposite operations that produce different `Reused`/`New component`
+tagging in Step 4). This determines what Step 3 checks new/existing components against: Core
+alone (mode 1), the named existing project DS (mode 2), or Core with everything project-specific
+tagged as newly composed (mode 3).
 
 ## Step 2 — clear the requirement before building
 
@@ -429,10 +458,11 @@ leave the panel untouched:
 
 ## Final chat summary
 
-- Which project-specific pattern library (if any) layered on top of Core for this build, and
-  whether that had to be asked (Step 1) — plus which tone-of-voice guide(s) were used for copy
-  and which branding guide(s) were used for branding decisions (name both if a Tone of Voice or
-  Branding Theme compare was built), if either applied.
+- Which design-system composition mode this build used — Core only, an existing project DS
+  reused (name it), or a new project layer composed fresh — and whether the mode had to be asked
+  (Step 1) — plus which tone-of-voice guide(s) were used for copy and which branding guide(s)
+  were used for branding decisions (name both if a Tone of Voice or Branding Theme compare was
+  built), if either applied.
 - Which of the three optional compare toggles (Design System A/B, Branding Theme, Tone of Voice)
   were built, if any — and confirm explicitly when none were, so it's clear the requester got one
   exact build and not an accidentally-omitted compare.
