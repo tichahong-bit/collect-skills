@@ -125,6 +125,19 @@ duplicating the full write-up three times.
 - Never fabricate specs, measurements, or rules that aren't actually in
   the source.
 
+## Write-up language — Thai, easy to read, still accurate
+
+Write the captured leaf content in **Thai**, phrased so it's easy to
+read (plain, everyday wording — not a stiff word-for-word translation),
+while keeping every fact, number, and rule from the source exactly as
+accurate as the English original. This applies to the body content —
+not to things that should stay untranslated: proper nouns, source
+titles, author names, URLs, and load-bearing technical terms (e.g.
+"confidence interval", "nondeterministic") can stay in English inline,
+optionally with a short Thai gloss, when a Thai term would be unclear or
+lose precision. Never let "easy to read" become "vaguer than the
+source" — simplify sentence structure, not the substance.
+
 ## Process
 
 1. **Resolve workspace_gid** if not already known this session.
