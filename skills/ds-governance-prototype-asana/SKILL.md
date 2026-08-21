@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.12.0
+version: 1.13.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -19,10 +19,17 @@ description: >
   actually given — a Design System A/B toggle (two project-layer links), a Branding Theme toggle
   (two named branding guides), and a Tone of Voice toggle (two named copywriting guides) — if
   none were given, the requester gets an exact single build with nothing to compare, and the
-  chrome shows only the Presentation Mode toggle. Also pulls (git clone/pull, always re-synced)
+  chrome shows only the Presentation Mode toggle. When a Tone of Voice toggle is built, both
+  variants render in the **same language** — a language switch is not a tone comparison, it hides
+  the feeling difference the toggle exists to show. Every Research Insight card links back to the
+  specific Asana research report(s) it cites, the same way the constant Requirement summary card
+  links to its Requirement collections page — so a reader can always open the source, and a card
+  that draws on more than one report links all of them. Design System Evaluation uses exactly two
+  tags, `Reused` and `New component` — no `New variant`/`New token`/`Assumption`/`New content`/
+  `Adjustment` split. Also pulls (git clone/pull, always re-synced)
   from โย's `cds-consumer` repo for exact component specs and Drift rulings, and defers to กัน's
   `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
-  color/token a theme needs that the DS doesn't have yet gets invented and tagged `New token`,
+  color/token a theme needs that the DS doesn't have yet gets invented and tagged `New component`,
   never presented as if it were already in the DS. Also writes back to Requirement collections
   as it clarifies a requirement, so the next run benefits. Presentation-mode panel content
   (section headers, card text, rationale) defaults to Thai, since this is the team's working
@@ -45,12 +52,20 @@ metadata:
 
 # Prototype Agent (Asana-backed)
 
-> **Status: proposal, not yet verified working.** Composed from Asana-knowledge sources that
-> didn't exist as Asana pages until 2026-08-19, plus a Core + project-layer design-system model
-> this skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`, and
-> didn't distinguish Core from a project-specific layer). The first real run should be treated
-> as a test — report back anything that didn't behave as described here so this file can be
-> corrected from what actually happened, not left on faith.
+> **Status: proposal, not yet verified working end to end.** Composed from Asana-knowledge sources
+> that didn't exist as Asana pages until 2026-08-19, plus a Core + project-layer design-system
+> model this skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`,
+> and didn't distinguish Core from a project-specific layer). Report back anything that doesn't
+> behave as described here so this file keeps getting corrected from what actually happened.
+>
+> **Corrections from the first real run (2026-08-20, Wealth Dashboard US01):** the requester liked
+> the presentation format overall but flagged three things, now folded into Step 4 above — (1)
+> Research Insight cards need a source link per report, same as the Requirement summary card; (2)
+> a Tone of Voice compare must render both variants in the same language, or the toggle shows a
+> language switch instead of a feeling difference; (3) Design System Evaluation collapses to two
+> tags, `Reused` / `New component`, not the original six-way split. Everything else in this run —
+> the draggable/collapsible chrome, the per-screen panel re-render, the DS A/B and Branding Theme
+> toggles, writing back to Requirement collections — behaved as described below.
 >
 > **This skill never touches Figma.** Output is a prototype in whatever presentation medium the
 > tool you're running in produces (e.g. an HTML/web mockup), not a Figma file. Turning it into
@@ -316,13 +331,20 @@ was actually requested:
   screens' branding-driven visual identity (colors, imagery treatment, whatever that guide's
   rules actually cover) between the two named guides — same screens, same content, same
   Core/project DS, different branding theme. If a theme's guide calls for a color/token that
-  doesn't exist in the DS yet, invent it rather than blocking — but tag it `New token` in that
+  doesn't exist in the DS yet, invent it rather than blocking — but tag it `New component` in that
   screen's Design System Evaluation (below), never let an invented brand color look like it came
   from the DS.
 - **Tone of Voice toggle** — if the requester named two tone-of-voice guides (Expected input
   above). Swaps every real copy decision on the current screen (labels, headings, error/empty
   states, CTAs) between the wording each named guide produces — same screens, same layout, same
-  DS, different words. Independent of the Branding Theme toggle: a tone compare can be requested
+  DS, different words. **Both variants must be written in the same language.** The toggle exists
+  to show a *feeling* difference (formal vs. casual, terse vs. warm) — if one variant is English
+  and the other is Thai, the comparison shows a language switch instead, and the actual tone
+  contrast is invisible. Pick whichever language the screen's copy is naturally in and write both
+  variants in it, even if a named guide's own examples lean toward one language (e.g. a Thai-heavy
+  quick guide like Trip Space still has to be matched by an equally-Thai formal variant, not by
+  falling back to English for the formal side just because the house style guide's own body text
+  is in English). Independent of the Branding Theme toggle: a tone compare can be requested
   alone, a branding compare can be requested alone, or both together (they commonly pair — e.g. a
   Wealth branding theme paired with a more formal guide, a second identity paired with a more
   casual one — but the skill builds whichever toggles were actually requested, never assumes a
@@ -362,14 +384,19 @@ leave the panel untouched:
 2. **Research Insight** — cards with: title, summary, and an explicit *why this design does /
    does not yet address it* line (cite the specific finding, not "informed by research" in the
    abstract). Include what was reviewed and judged not applicable to this screen, not just what
-   was used. An insight that genuinely applies to the whole flow (not one screen) goes in its own
-   "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
-   identically into every screen's section.
+   was used. **Every card links back to the specific Asana research report(s) it draws on** —
+   same pattern as the Requirement summary card's link to its Requirement collections page, not a
+   citation you have to take on faith. A card built from more than one report links every one of
+   them; a "reviewed, not applicable" card still links the report it reviewed. An insight that
+   genuinely applies to the whole flow (not one screen) goes in its own "Flow-wide" group so it
+   isn't lost when switching screens, rather than being duplicated identically into every screen's
+   section.
 
    **Research gap flag — distinct from "reviewed, not applicable."** If a screen's decision has
    genuinely nothing in the Research index that speaks to it at all (not "something exists but
    doesn't apply here" — this specific kind of question has never been covered), don't quietly
-   fall back to `Assumption` in the DS Evaluation and move on. Show a visually distinct card in
+   tag it `New component` in the DS Evaluation and move on without surfacing the gap. Show a
+   visually distinct card in
    this section — different treatment from a normal insight card, e.g. a "🔬 ยังไม่มีข้อมูลวิจัยรองรับ"
    flag — naming the specific decision that's unsupported and recommending the research team
    investigate it. Then write that same gap onto the requirement's **User Story leaf** in
@@ -382,17 +409,16 @@ leave the panel untouched:
    — never a vague "on-brand." If the Branding Theme toggle is active, this section's content
    swaps with it. If no guide was named for this run, this section says so plainly instead of
    asserting brand-compliance with nothing real behind it.
-4. **Design System Evaluation** — every element on this screen tagged one of: `Reused` /
-   `New variant` / `New token` / `Assumption` / `New content` / `Adjustment`. Per screen, not one
-   flow-wide list. `New token` is specifically for a color/spacing/type value invented because a
-   named branding theme calls for it (see Branding Theme toggle above) but the DS doesn't have it
-   yet — distinct from `Assumption` (a guess made for lack of any source) since a `New token` was
-   deliberately chosen to match a real guide's intent, just not yet formalized in the DS. **Every
-   `Reused` or `New variant` row gets a Figma link** to the actual component (resolve the real
-   node via the Figma tools' `search_design_system`/component lookup against the governing DS's
-   own library file — don't just link the library file's root, link the specific component/node).
-   `New token` / `Assumption` / `New content` / `Adjustment` rows have no Figma component to link
-   to — leave them without a link rather than linking something unrelated.
+4. **Design System Evaluation** — every element on this screen tagged one of exactly two values:
+   `Reused` (a real DS component, in Core or the project layer) or `New component` (anything else
+   — freehand-built because no DS component covers it, an invented token a branding theme called
+   for, copy-only content, a one-off layout adjustment). Don't split `New component` further into
+   variant/token/assumption/content/adjustment sub-tags — two tags is the whole vocabulary. Per
+   screen, not one flow-wide list. **Every `Reused` row gets a Figma link** to the actual component
+   (resolve the real node via the Figma tools' `search_design_system`/component lookup against the
+   governing DS's own library file — don't just link the library file's root, link the specific
+   component/node). `New component` rows have no Figma component to link to — leave them without a
+   link rather than linking something unrelated.
 5. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
    decision on this screen (labels, headings, error/empty states, CTAs), state the wording chosen
    and cite the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide
