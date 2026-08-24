@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.14.0
+version: 1.15.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -72,6 +72,17 @@ metadata:
 > **This skill never touches Figma.** Output is a prototype in whatever presentation medium the
 > tool you're running in produces (e.g. an HTML/web mockup), not a Figma file. Turning it into
 > real Figma frames is a later step in the wider Requirement → Applied chain, out of scope here.
+>
+> **Corrections from the second real run (2026-08-24, Wealth Investment Insight US02):** a
+> reviewer measured the published prototype file directly (not from screenshots) and found zero
+> references to either DS site, 39 hand-picked hex values (one of which happened to match a CDS
+> token by coincidence), no `@font-face`/BBL Sans anywhere, an invented token vocabulary instead
+> of the DS's own, and 13 `verify_code` errors — i.e. no design system was actually used, despite
+> Step 3's old wording technically permitting exactly that ("using a component means rendering it
+> accurately... not placing a Figma instance"). Step 3 now requires installing from the real
+> registry, Step 3b adds a mandatory audit/verify gate, and a new section covers the single-file
+> Artifact case specifically, since the CSP constraint there was the actual root cause the old
+> wording was quietly working around. Treat any future run that skips Step 3b as not done.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -296,15 +307,32 @@ re-list a gap that's already there from an earlier run against the same story.
 
 ## Step 3 — build the prototype, DS-first, gaps placeholdered not blocked
 
-Nothing in this step touches Figma — "using" a component means rendering it accurately in the
-prototype's own medium (HTML/CSS matching the DS site's real values), not placing a Figma
-instance.
+Nothing in this step touches Figma. **"Using" a component means installing it from that DS's
+real registry — `npx shadcn@latest add <docs-site>/r/components/<slug>.json` — never
+hand-authoring HTML/CSS that merely renders close to the DS site's values.** A hand-written twin
+of a component the DS already ships is a defect, not an acceptable substitute, no matter how
+closely its hex/px values were copied — this is the exact failure both cds-bbl's and mbds-bbl's
+own `llms.txt` call out by name ("writing a component by hand when a registry item exists is the
+failure this site exists to prevent"), and copying values by hand cannot follow a mode axis
+(theme, density, shape, device, language) the way an installed component bound to real tokens
+does. Every installed item pulls in that system's foundation (`cds-foundation` /
+`mbds-foundation` — the full token/class layer and the system's own web font) automatically; a
+prototype that has components but no foundation renders unstyled, which is its own tell that
+something was hand-drawn instead of installed.
+
+Before writing any UI for a screen, call that DS's `search_components` (and `list_templates` for
+MBDS, which ships whole screens) — the piece you need may already exist. Never write a literal
+color, spacing, radius, or font-family value in code that's presented as this DS; every value
+must resolve to that system's own token/class. If the deliverable format makes a real install
+physically impossible at runtime (see "When the deliverable is a single HTML file / Artifact"
+below) — that is a delivery-format constraint to solve, never a license to hand-author a look-alike
+component instead.
 
 For each screen/section the requirement implies:
 
 1. **Component exists** (governing DS site, or `cds-consumer`'s `COMPONENTS.md`/`REGISTRY.md` —
-   source 5 above, preferred when the two disagree) → match its real props/states/token values as
-   closely as the prototype medium allows.
+   source 5 above, preferred when the two disagree) → install it from the registry and use it with
+   real props/variants; don't redraw it even if the DS site's values are fully known.
 2. **Component doesn't exist yet** → check `cds-consumer`'s `DRIFT.md` first — an owner may have
    already ruled this a deliberate difference, not a real gap. If it's still a genuine gap, mock
    it up freehand, clearly labeled as a placeholder in the prototype's own annotations — never
@@ -313,6 +341,25 @@ For each screen/section the requirement implies:
 
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
+
+## Step 3b — verify before calling it done (do not skip)
+
+Before presenting any screen as "built with CDS" or "built with MBDS," run that system's own
+audit, and fix everything it flags before moving on — never report a run as done with an open
+`error` finding:
+
+```
+curl -sO https://cds-bbl.vercel.app/audit.mjs && node audit.mjs .
+```
+(swap the host for `mbds-bbl.vercel.app` when the screen is MBDS-governed). Exit code 1 means
+defects — fix them, don't narrate around them; every check it runs is one a reader can't perform
+just by looking at the screen. Then run that system's `verify_code` MCP tool against the actual
+code/markup you're about to present, on every screen, for every DS variant a compare toggle
+builds (Core and MBDS get verified separately — one clean pass doesn't clear the other). Treat
+any `severity: "error"` finding as a defect to fix, not a note to mention in the summary and move
+past. A finding that's only in the token-*definition* layer itself (the literal values a
+foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
+violations as blocking.
 
 **Device frame for mobile/tablet viewports.** When the target viewport is mobile or tablet (not
 desktop/web), wrap the rendered screen in a realistic device bezel sized to that viewport — a
@@ -333,6 +380,39 @@ Default frame sizes (use these unless the requester states a different target de
 If the target viewport isn't stated, ask rather than assuming mobile by default. If the requester
 names a specific device or size that differs from the defaults above (e.g. a specific tablet
 model), use theirs instead of the default.
+
+## When the deliverable is a single HTML file / Artifact
+
+An Artifact page runs under a CSP that blocks every external host except Google Fonts — it
+cannot fetch CSS, fonts, or a shadcn registry from `cds-bbl.vercel.app` / `mbds-bbl.vercel.app` at
+runtime, and there is no build step available inside it for `shadcn` to run against. **This is a
+delivery-format constraint, not a license to fall back to hand-authored look-alike CSS** — Step 3
+above still applies in full. The correct sequence when the target is one self-contained HTML file:
+
+1. Build the screen as a real Vite + React project outside the artifact sandbox (a scratch
+   directory, not the artifact's own file).
+2. Install every component from the real registry (`npx shadcn@latest add
+   https://cds-bbl.vercel.app/r/components/<slug>.json`, same for `mbds-bbl.vercel.app`) — this
+   pulls in the real foundation and the real component code, unmodified.
+3. Inline the system's web font(s) as `data:` URIs in place of the `url(...)` references the
+   foundation's font CSS ships with (BBL Sans is ~14 font files / ~620KB total as of this
+   writing — check the actual foundation CSS for the current count before assuming that number
+   is still right).
+4. Inline whatever the components fetch at runtime rather than importing statically — e.g. CDS's
+   `Icon` component fetches an SVG sprite per size from `/cds-icons/sprite-<size>.svg`; inline
+   those sprites and shim `window.fetch` to answer with the inlined sprite instead of hitting the
+   network, so the icon fetch resolves inside the sandbox instead of silently failing.
+5. Build with `vite-plugin-singlefile` (or equivalent) so the whole app — markup, styles, fonts,
+   icons — collapses into one HTML file with no external references left.
+6. [pending — retype needed from the reporter before this step is final]
+
+Never skip straight to writing CSS that merely *looks like* the DS because this pipeline is more
+work than the CSS trick — the CSS trick is exactly the defect Step 3 forbids, and looking like
+the DS is not the same as being built on it (wrong tokens under a real theme/density/shape mode
+switch, missing type-scale classes, wrong font actually loaded, etc. — see the "no design system
+at all" finding this section exists to prevent). If the pipeline above is genuinely infeasible for
+a given request, say so plainly to the requester and ask before falling back to anything else —
+don't decide unilaterally that hand-authored CSS is an acceptable substitute.
 
 ## Step 4 — presentation mode, per-screen dynamic panel, up to three optional compare toggles
 
