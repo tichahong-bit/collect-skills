@@ -1,5 +1,5 @@
 {
-  "_comment": "Source of truth for the Page 1 central registry table in Asana Knowledge. Exists because Asana's page_get API can never read a <table>'s content back (only a placeholder line) — so the table's real rows must live here, not be reconstructed from Asana. Every asana-skill-changelog run must: 1) fetch the latest copy of this file from GitHub, 2) upsert this skill's row here, 3) render the FULL table from every row here and page_update Page 1 with it, 4) commit+push this file back to GitHub so the next run (possibly a different session) has the current full state. Never write a partial table to Page 1 from a stale copy of this file.",
+  "_comment": "Source of truth for the Page 1 central registry table in Asana Knowledge. Exists because Asana's page_get API can never read a <table>'s content back (only a placeholder line) — so the table's real rows must live here, not be reconstructed from Asana. Every asana-skill-changelog run must: 1) fetch the latest copy of this file from GitHub, 2) upsert this skill's row here, 3) render the FULL table from every row here and page_update Page 1 with it, 4) commit+push this file back to GitHub so the next run (possibly a different session) has the current full state. Never write a partial table to Page 1 from a stale copy of this file. Row text (what_it_does/output) is Thai, concise, per the skill's Language & formatting rule — proper nouns/technical terms stay as-is.",
   "rows": [
     {
       "skill_name": "ds-governance-prototype-asana",
@@ -13,8 +13,8 @@
     {
       "skill_name": "asana-branding-log",
       "page2_permalink": "https://app.asana.com/0/1217640837668248/",
-      "what_it_does": "Logs a brand-identity knowledge source (Figma guideline, vendor deck, meeting notes) into Asana Knowledge as an index row + adaptive full source page — extracts real content, never guesses from filename",
-      "output": "Index row (Branding Guideline) + adaptive source detail page",
+      "what_it_does": "บันทึกแหล่งข้อมูล brand identity (Figma guideline, deck ของ vendor, meeting notes) เข้า Asana Knowledge เป็น index row + source page ที่ปรับโครงสร้างตามชนิดเนื้อหา — ดึงเนื้อหาจริงเสมอ ไม่เดาจากชื่อไฟล์",
+      "output": "Index row (Branding Guideline) + source detail page",
       "version": "1.0.0",
       "date": "2026-08-19",
       "author": "Ticha Hongsongkiat"
@@ -22,8 +22,8 @@
     {
       "skill_name": "asana-copywriting-log",
       "page2_permalink": "https://app.asana.com/0/1217640835333548/",
-      "what_it_does": "Logs a copywriting/UX-writing guideline source into Asana Knowledge as an index row + adaptive source page, preserving bilingual Thai/English examples verbatim",
-      "output": "Index row (Copy Writing Guideline table) + adaptive source detail page",
+      "what_it_does": "บันทึกแหล่งข้อมูล copywriting/UX writing เข้า Asana Knowledge เป็น index row + source page ที่ปรับโครงสร้างตามชนิดเนื้อหา — คง bilingual Thai/English example ตามต้นฉบับ",
+      "output": "Index row (Copy Writing Guideline table) + source detail page",
       "version": "1.1.0",
       "date": "2026-08-21",
       "author": "Ticha Hongsongkiat"
@@ -31,8 +31,8 @@
     {
       "skill_name": "asana-design-knowledge-capture",
       "page2_permalink": "https://app.asana.com/0/1217640837989860/",
-      "what_it_does": "Captures an external reference (web link or Asana page) into the Design Knowledge tree — walks the tree, merges into an existing page or creates a new one, writes content in Thai",
-      "output": "New/updated Design Knowledge tree page",
+      "what_it_does": "บันทึก reference จากภายนอก (web link หรือ Asana page) เข้า Design Knowledge tree — เดิน tree เอง แล้วรวมเข้า page เดิมหรือสร้าง page ใหม่ให้ตรงหมวด เขียนเนื้อหาเป็นภาษาไทย",
+      "output": "Page ใหม่/อัปเดตใน Design Knowledge tree",
       "version": "1.1.0",
       "date": "2026-08-21",
       "author": "Ticha Hongsongkiat"
@@ -40,8 +40,8 @@
     {
       "skill_name": "asana-research-log",
       "page2_permalink": "https://app.asana.com/0/1217619575546453/",
-      "what_it_does": "Logs a UX research report into Asana Knowledge as an index row + adaptive report page shaped to the research type; flags mock/placeholder studies",
-      "output": "Research index row + adaptive report page",
+      "what_it_does": "บันทึกรายงาน UX research เข้า Asana Knowledge เป็น index row + report page ที่ปรับโครงสร้างตามชนิด research — flag ข้อมูล mock/placeholder ชัดเจน",
+      "output": "Research index row + report page",
       "version": "1.0.0",
       "date": "2026-08-19",
       "author": "Ticha Hongsongkiat"
@@ -49,17 +49,17 @@
     {
       "skill_name": "asana-skill-changelog",
       "page2_permalink": "https://app.asana.com/0/1217589863840402/",
-      "what_it_does": "Logs a skill's version update into Asana Knowledge as a 3-page structure (central registry row, per-skill page, per-version detail)",
-      "output": "Registry row + Page 2 (usage/changelog) + Page 3 (version detail) per logged skill",
-      "version": "1.4.0",
-      "date": "2026-08-19",
+      "what_it_does": "บันทึก version update ของ skill เข้า Asana Knowledge เป็น 3 หน้า (registry row, per-skill page, per-version detail)",
+      "output": "Registry row + Page 2 (วิธีใช้/changelog) + Page 3 (รายละเอียด version) ต่อ skill ที่ log",
+      "version": "1.6.0",
+      "date": "2026-08-24",
       "author": "Ticha Hongsongkiat"
     },
     {
       "skill_name": "ds-governance-audit-asana",
       "page2_permalink": "https://app.asana.com/0/1217619519570017/",
-      "what_it_does": "Audits a Figma screen against Core + project DS, classifies findings as Existing DS Issue (annotation only) or Design System Gap (annotation + Asana task)",
-      "output": "Figma Dev Mode annotations + Asana tasks (Gaps only) in 📋 Component issue project",
+      "what_it_does": "ตรวจสอบหน้าจอ Figma เทียบกับ Core + project DS จัดกลุ่ม finding เป็น Existing DS Issue (annotation อย่างเดียว) หรือ Design System Gap (annotation + สร้าง Asana task)",
+      "output": "Figma Dev Mode annotation + Asana task (เฉพาะ Gap) ใน project 📋 Component issue",
       "version": "1.2.0",
       "date": "2026-08-19",
       "author": "Ticha Hongsongkiat"
