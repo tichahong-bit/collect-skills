@@ -9,6 +9,60 @@
       "version": "1.18.0",
       "date": "2026-08-24",
       "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "asana-branding-log",
+      "page2_permalink": "https://app.asana.com/0/1217640837668248/",
+      "what_it_does": "Logs a brand-identity knowledge source (Figma guideline, vendor deck, meeting notes) into Asana Knowledge as an index row + adaptive full source page — extracts real content, never guesses from filename",
+      "output": "Index row (Branding Guideline) + adaptive source detail page",
+      "version": "1.0.0",
+      "date": "2026-08-19",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "asana-copywriting-log",
+      "page2_permalink": "https://app.asana.com/0/1217640835333548/",
+      "what_it_does": "Logs a copywriting/UX-writing guideline source into Asana Knowledge as an index row + adaptive source page, preserving bilingual Thai/English examples verbatim",
+      "output": "Index row (Copy Writing Guideline table) + adaptive source detail page",
+      "version": "1.1.0",
+      "date": "2026-08-21",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "asana-design-knowledge-capture",
+      "page2_permalink": "https://app.asana.com/0/1217640837989860/",
+      "what_it_does": "Captures an external reference (web link or Asana page) into the Design Knowledge tree — walks the tree, merges into an existing page or creates a new one, writes content in Thai",
+      "output": "New/updated Design Knowledge tree page",
+      "version": "1.1.0",
+      "date": "2026-08-21",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "asana-research-log",
+      "page2_permalink": "https://app.asana.com/0/1217619575546453/",
+      "what_it_does": "Logs a UX research report into Asana Knowledge as an index row + adaptive report page shaped to the research type; flags mock/placeholder studies",
+      "output": "Research index row + adaptive report page",
+      "version": "1.0.0",
+      "date": "2026-08-19",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "asana-skill-changelog",
+      "page2_permalink": "https://app.asana.com/0/1217589863840402/",
+      "what_it_does": "Logs a skill's version update into Asana Knowledge as a 3-page structure (central registry row, per-skill page, per-version detail)",
+      "output": "Registry row + Page 2 (usage/changelog) + Page 3 (version detail) per logged skill",
+      "version": "1.4.0",
+      "date": "2026-08-19",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
+      "skill_name": "ds-governance-audit-asana",
+      "page2_permalink": "https://app.asana.com/0/1217619519570017/",
+      "what_it_does": "Audits a Figma screen against Core + project DS, classifies findings as Existing DS Issue (annotation only) or Design System Gap (annotation + Asana task)",
+      "output": "Figma Dev Mode annotations + Asana tasks (Gaps only) in 📋 Component issue project",
+      "version": "1.2.0",
+      "date": "2026-08-19",
+      "author": "Ticha Hongsongkiat"
     }
   ]
 }
