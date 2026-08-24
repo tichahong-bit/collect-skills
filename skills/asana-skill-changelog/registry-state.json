@@ -56,6 +56,15 @@
       "author": "Ticha Hongsongkiat"
     },
     {
+      "skill_name": "asana-requirement-log",
+      "page2_permalink": "https://app.asana.com/0/1217786414506428/",
+      "what_it_does": "บันทึก requirement (user story + acceptance criteria) เข้า Requirement collections tree แบบ 3 ชั้นตายตัว: Project → Feature/Epic → User Story — เดิน tree หา/สร้าง branch ที่ถูกต้องก่อน file เป็น leaf",
+      "output": "User Story leaf page (+ Project/Feature-Epic page ใหม่ถ้ายังไม่มี)",
+      "version": "1.1.0",
+      "date": "2026-08-24",
+      "author": "Ticha Hongsongkiat"
+    },
+    {
       "skill_name": "ds-governance-audit-asana",
       "page2_permalink": "https://app.asana.com/0/1217619519570017/",
       "what_it_does": "ตรวจสอบหน้าจอ Figma เทียบกับ Core + project DS จัดกลุ่ม finding เป็น Existing DS Issue (annotation อย่างเดียว) หรือ Design System Gap (annotation + สร้าง Asana task)",
