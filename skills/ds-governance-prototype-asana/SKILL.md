@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.15.0
+version: 1.16.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -83,6 +83,14 @@ metadata:
 > registry, Step 3b adds a mandatory audit/verify gate, and a new section covers the single-file
 > Artifact case specifically, since the CSP constraint there was the actual root cause the old
 > wording was quietly working around. Treat any future run that skips Step 3b as not done.
+>
+> **v1.16.0 — the single-file pipeline ran for real (2026-08-24, same US02 rebuild).** Completed
+> the pipeline's step 6 (verify what the bundler plugin can't see — icon sprite/font paths
+> computed at runtime, not import-time) and documented the token-namespace collision that shows
+> up specifically when two DS systems are installed together for a compare build (both above).
+> The rebuilt US02 prototype installed real components from both `cds-bbl` and `mbds-bbl`,
+> passed a hard-refresh visual check across all 4 screens × both DS variants × both branding
+> themes, and published under 16MB with zero remaining external runtime references.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -404,7 +412,31 @@ above still applies in full. The correct sequence when the target is one self-co
    network, so the icon fetch resolves inside the sandbox instead of silently failing.
 5. Build with `vite-plugin-singlefile` (or equivalent) so the whole app — markup, styles, fonts,
    icons — collapses into one HTML file with no external references left.
-6. [pending — retype needed from the reporter before this step is final]
+6. **Verify before publishing, don't assume the plugin caught everything.** `vite-plugin-singlefile`
+   inlines the built JS/CSS but does nothing about assets a component fetches by a *runtime*
+   string path (e.g. CDS's `Icon` sprite fetch, MBDS's `BblIcon` mask-image pointing at
+   `/bbl-icons/<name>.svg` from `public/`) — those are invisible to it because they're computed
+   in the browser, not imported in source. `grep` the built HTML for the DS's font/asset hostnames
+   and for the icon base path; anything still there needs its own inline step (a small
+   generated `icon-data-uris.ts`-style map read by the two or three call sites that actually
+   reference it, keyed only for the names this build really uses — not the whole icon set).
+   `<script type="module">` does not need stripping — it runs fine inside the Artifact sandbox;
+   confirmed by actually loading the built file in a browser and checking
+   `read_console_messages` for errors before publishing, not by assuming a clean build log means
+   a clean runtime. Serve `dist/` with a plain local static server (e.g. `python3 -m http.server`)
+   to preview it — `file://` URLs are blocked by browser automation tooling.
+
+**Two DS systems installed in the same project (a DS A/B compare build) will collide on token
+names unless scoped.** CDS and MBDS each publish their own `:root { --surface-neutral-primary: ...;
+... }` block, and where both systems happen to use the same token name (they do, for several —
+apparently by convention, not coordination) the one whose CSS is textually later in the merged
+stylesheet silently wins for *both* systems' components, because custom properties inherit down
+the DOM regardless of which system's file declared them. Fix by re-targeting each system's own
+`:root` (and `.dark`, if used) to a scoping class instead — `.ds-cds { ... }` / `.ds-mbds { ... }`
+— and mounting each system's rendered subtree inside a wrapper carrying that class. This is a
+selector-only edit (never touch a token's value) and does not require editing any component file,
+since CSS custom properties still cascade to descendants same as `:root` did. Do this before
+wiring up the compare toggle, not after noticing one system's colors bleeding into the other's.
 
 Never skip straight to writing CSS that merely *looks like* the DS because this pipeline is more
 work than the CSS trick — the CSS trick is exactly the defect Step 3 forbids, and looking like
