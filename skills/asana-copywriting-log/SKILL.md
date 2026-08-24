@@ -46,22 +46,46 @@ with `page_get` it's still the right page before writing — pages get
 renamed/restructured over time (this one started as a mock/placeholder
 page and gets replaced the first time a real source is logged).
 
-Each source gets one row/block, appended (never remove or edit another
-source's row):
+It's a real Asana `<table>`, one row per source: title (linked to the
+source page), type, one-line summary, date, who/logged by.
 
-```html
-🔹 <a href="<source_permalink>"><source_title></a>
+**Why a companion file, not `page_get`.** `page_update` replaces the
+whole body, so appending normally means "read, then merge, then write."
+But `page_get` can never return a table's actual cell content (only a
+placeholder line) — so once the index is a table, there is no way to
+recover other sources' rows from Asana itself. `copywriting-index-state.json`,
+checked into this skill's own folder in the repo, is the **real source of
+truth** for every row on the index — never trust what's currently
+rendered on the Asana page as the input to a merge.
 
-<ul>
-<li>Type: <source_type></li>
-<li>Summary: <one-line takeaway></li>
-<li>Date: <date the source itself is from, not today></li>
-<li>Who: <author/team> · logged by <logger></li>
-</ul>
-```
+**⚠ One-time reconciliation needed.** The live index page was converted
+to a table before this companion file existed, so its current rows are
+not yet captured anywhere machine-readable — `copywriting-index-state.json`
+starts empty. **Do not `page_update` the index page until a human has
+opened it in a browser and transcribed its current rows into the JSON
+file first** — writing from an empty/incomplete file would silently erase
+whatever's already there, with no way to recover it afterward. At least
+two sources are known to already exist as their own pages and likely
+correspond to existing rows: "MB Writing Style Guide V2" (gid
+`1217637687658864`) and "Quick Guide to UX Writing for Trip Space" (gid
+`1217636635097373`) — their exact row text (summary/date/who as originally
+logged) still needs to come from the live table, not be reconstructed by
+guessing.
 
-Read the index's `html_text` first, append the new block, `page_update`
-with the full merged body.
+Every run, in order:
+1. Fetch the current `copywriting-index-state.json` from GitHub raw (same
+   pattern as syncing this file) — not the local copy, which can be stale
+   if someone else logged a source since you last synced.
+2. If the file has fewer rows than you can see on the live page (check
+   visually — `page_get` won't show them), **stop and ask the user** to
+   reconcile before continuing; don't append on top of an incomplete file.
+3. Append this run's row to the fetched JSON (never remove/edit another
+   source's row).
+4. Render the table fresh from **every** row now in the JSON and
+   `page_update` the index page with the full table.
+5. Commit and push the updated JSON back to `main` — skipping this means
+   the next run starts from a stale file and silently drops rows added in
+   between.
 
 ## Source types (pick what fits, invent more if needed)
 
@@ -168,9 +192,19 @@ never invent source content:
    broader one already exists. `page_create` it.
 5. `page_get` the new page once to get its `permalink_url` (`page_create`
    doesn't return it).
-6. **Append a row to the Index page** (read-then-merge, never overwrite
-   existing rows) linking to the new source.
+6. **Append a row to the Index table** via `copywriting-index-state.json`
+   as described above — fetch, append this row, render the full table
+   from every row, `page_update`, then commit+push the JSON.
 7. **Report back both links** to the user.
+
+## Language & formatting
+
+Narrative content on the source page (breadcrumb, adaptive sections'
+framing text, index row's summary) is written in **Thai**, concise, easy
+to read — break long text into bullets rather than a wall of text.
+Exceptions (stay in original language): extracted source content itself
+(bilingual Thai/English copy examples, preserved verbatim per Extraction
+discipline), proper nouns/technical terms, and any code/CLI snippets.
 
 ## Templates
 
@@ -190,6 +224,18 @@ never invent source content:
 </body>
 ```
 
+### Index table row
+
+```html
+<tr><td><a href="<source_permalink>"><source_title></a></td><td><source_type></td><td><one-line summary></td><td><date the source itself is from></td><td><author/team> · logged by <logger></td></tr>
+```
+
+Header row (bold cells, no `thead`/`th` support):
+
+```html
+<tr><td><strong>Source</strong></td><td><strong>Type</strong></td><td><strong>Summary</strong></td><td><strong>Date</strong></td><td><strong>Who</strong></td></tr>
+```
+
 ## Boundaries
 
 - Never fabricate example copy, tone attributes, grammar rules, or
@@ -199,6 +245,12 @@ never invent source content:
   what the source actually is (house style guide vs. quick guide vs.
   word list).
 - Never edit or remove another source's row on the Index page.
+- Never `page_update` the Index page from a `copywriting-index-state.json`
+  you haven't just freshly fetched from GitHub this run, and never skip
+  pushing the updated JSON back afterward.
+- Never write to the Index table while the companion JSON is known to be
+  missing rows the live page actually has — reconcile first (see Index
+  page section above).
 - Never silently let a narrower/tactical guide read as the full house
   style — add the cross-reference note when relevant.
 - If the index page's gid/name looks wrong when you `page_get` it, stop

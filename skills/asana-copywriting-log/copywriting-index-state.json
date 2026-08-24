@@ -1,0 +1,5 @@
+{
+  "_comment": "Source of truth for the Copy Writing Guideline index table rows in Asana Knowledge. Exists because page_get can never read a <table>'s content back (only a placeholder line). ⚠ STARTS EMPTY: the live index page was already converted to a real table (v1.1.0, 2026-08-21) BEFORE this companion file existed, so its current rows were never captured anywhere machine-readable. Do NOT page_update the live index page from this file until a human has opened it in a browser and transcribed every existing row into 'rows' below — writing now would silently erase whatever's already there with no way to recover it. At least two sources are known to exist as their own pages and likely have a row each: 'MB Writing Style Guide V2' (gid 1217637687658864) and 'Quick Guide to UX Writing for Trip Space' (gid 1217636635097373) — but their exact row text (summary/date/who as originally logged) must come from the live table, not be guessed.",
+  "reconciled": false,
+  "rows": []
+}
