@@ -44,6 +44,23 @@ still needs to read the previous entries back, which a table can't give
 us. This skill reproduces the "click a row → see detail" feel with linked
 lists and separate flat pages except where noted otherwise.
 
+## Language & formatting
+
+All narrative content written into Page 1/2/3 (what it does, output, log
+detail, why, example scenarios, breadcrumbs) is written in **Thai** —
+concise, easy to read. If a piece of narrative text would run long, break
+it into bullets (`<ul>`/`<li>`) instead of a wall of text.
+
+Exceptions (stay in their original language, usually English):
+- Prompt examples (the copy-pasteable "Use the X skill..." blocks)
+- The Markdown detail snapshot (the skill's own `SKILL.md`/file content,
+  verbatim)
+- Code/CLI snippets (install commands, etc.)
+- Proper nouns, technical terms, and product/API names
+
+On Page 2, every prompt example must be wrapped in a `<pre>`/`<code>`
+block (already the template below) — never left as plain paragraph text.
+
 ## Central registry page (Page 1)
 
 Right now that's gid `1217561826992798`
