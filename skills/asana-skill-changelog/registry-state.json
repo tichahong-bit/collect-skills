@@ -51,7 +51,7 @@
       "page2_permalink": "https://app.asana.com/0/1217589863840402/",
       "what_it_does": "บันทึก version update ของ skill เข้า Asana Knowledge เป็น 3 หน้า (registry row, per-skill page, per-version detail)",
       "output": "Registry row + Page 2 (วิธีใช้/changelog) + Page 3 (รายละเอียด version) ต่อ skill ที่ log",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "date": "2026-08-24",
       "author": "Ticha Hongsongkiat"
     },
