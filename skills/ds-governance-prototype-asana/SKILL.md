@@ -342,25 +342,6 @@ For each screen/section the requirement implies:
 The requirement is the priority throughout — a screen that's mostly real-DS with some flagged
 placeholders, shipped on time, is the correct outcome, not a reason to stop and wait.
 
-## Step 3b — verify before calling it done (do not skip)
-
-Before presenting any screen as "built with CDS" or "built with MBDS," run that system's own
-audit, and fix everything it flags before moving on — never report a run as done with an open
-`error` finding:
-
-```
-curl -sO https://cds-bbl.vercel.app/audit.mjs && node audit.mjs .
-```
-(swap the host for `mbds-bbl.vercel.app` when the screen is MBDS-governed). Exit code 1 means
-defects — fix them, don't narrate around them; every check it runs is one a reader can't perform
-just by looking at the screen. Then run that system's `verify_code` MCP tool against the actual
-code/markup you're about to present, on every screen, for every DS variant a compare toggle
-builds (Core and MBDS get verified separately — one clean pass doesn't clear the other). Treat
-any `severity: "error"` finding as a defect to fix, not a note to mention in the summary and move
-past. A finding that's only in the token-*definition* layer itself (the literal values a
-foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
-violations as blocking.
-
 **Device frame for mobile/tablet viewports.** When the target viewport is mobile or tablet (not
 desktop/web), wrap the rendered screen in a realistic device bezel sized to that viewport — a
 fixed-size frame with its own internal scroll, not the full page scrolling. This is what makes
@@ -380,6 +361,25 @@ Default frame sizes (use these unless the requester states a different target de
 If the target viewport isn't stated, ask rather than assuming mobile by default. If the requester
 names a specific device or size that differs from the defaults above (e.g. a specific tablet
 model), use theirs instead of the default.
+
+## Step 3b — verify before calling it done (do not skip)
+
+Before presenting any screen as "built with CDS" or "built with MBDS," run that system's own
+audit, and fix everything it flags before moving on — never report a run as done with an open
+`error` finding:
+
+```
+curl -sO https://cds-bbl.vercel.app/audit.mjs && node audit.mjs .
+```
+(swap the host for `mbds-bbl.vercel.app` when the screen is MBDS-governed). Exit code 1 means
+defects — fix them, don't narrate around them; every check it runs is one a reader can't perform
+just by looking at the screen. Then run that system's `verify_code` MCP tool against the actual
+code/markup you're about to present, on every screen, for every DS variant a compare toggle
+builds (Core and MBDS get verified separately — one clean pass doesn't clear the other). Treat
+any `severity: "error"` finding as a defect to fix, not a note to mention in the summary and move
+past. A finding that's only in the token-*definition* layer itself (the literal values a
+foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
+violations as blocking.
 
 ## When the deliverable is a single HTML file / Artifact
 
