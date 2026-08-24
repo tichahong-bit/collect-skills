@@ -24,8 +24,8 @@
       "page2_permalink": "https://app.asana.com/0/1217640835333548/",
       "what_it_does": "บันทึกแหล่งข้อมูล copywriting/UX writing เข้า Asana Knowledge เป็น index row + source page ที่ปรับโครงสร้างตามชนิดเนื้อหา — คง bilingual Thai/English example ตามต้นฉบับ",
       "output": "Index row (Copy Writing Guideline table) + source detail page",
-      "version": "1.1.0",
-      "date": "2026-08-21",
+      "version": "1.2.0",
+      "date": "2026-08-24",
       "author": "Ticha Hongsongkiat"
     },
     {
