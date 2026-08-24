@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.16.0
+version: 1.17.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -91,6 +91,16 @@ metadata:
 > The rebuilt US02 prototype installed real components from both `cds-bbl` and `mbds-bbl`,
 > passed a hard-refresh visual check across all 4 screens × both DS variants × both branding
 > themes, and published under 16MB with zero remaining external runtime references.
+>
+> **v1.17.0 — webds elevated to full parity with CDS/MBDS; "exact, real values" made a standing
+> default (2026-08-24).** Requester's instruction: from now on, every run of this skill pulls
+> component/color/font/token exactly from whichever real DS site(s) are in play — CDS, MBDS, or
+> webds — never an approximation, regardless of delivery format. webds
+> (`webds-bbl.vercel.app`) had only been mentioned in passing as an "existing project DS" example;
+> it now gets the same rule-level treatment as CDS/MBDS: real registry install, own audit.mjs/
+> verify_code gate, its two unique caveats (patterns layer is consumer-measured, weaker claim than
+> a component — prefer a component when one fits; every component Figma key is served `null` —
+> place by name in the official library, never invent a key).
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -238,11 +248,22 @@ brand-new and may have little or nothing in them yet).
      If a token/component looks wrong or missing on the live site, this Figma file is the
      upstream source to check before assuming the live site itself is wrong.
    - **Existing project design system (mode 2 only)**: a separate, already-built project DS the
-     requester names/links — `webds-bbl.vercel.app` and `mbds-bbl.vercel.app` are real examples
-     (web and mobile respectively) already in use elsewhere, not a fixed list to choose from. Read
-     it the same way as Core: its own live site is the primary authority for anything it covers,
-     weighted over Core for its own components (Core still governs whatever the project DS
-     doesn't touch). This is a *reused* library, not something this run composes.
+     requester names/links — `webds-bbl.vercel.app` (web) and `mbds-bbl.vercel.app` (mobile) are
+     the two real, fully-registry-backed examples confirmed in this workspace (not a fixed list —
+     others may exist). Read it the same way as Core: its own live site is the primary authority
+     for anything it covers, weighted over Core for its own components (Core still governs
+     whatever the project DS doesn't touch). This is a *reused* library, not something this run
+     composes. Each publishes the same shape of tooling Step 3 depends on — `<site>/r/registry.json`
+     (the index), `<site>/r/components/<slug>.json` (install one), `<site>/audit.mjs` (Step 3b),
+     and its own `llms.txt` — so the real-install rule in Step 3 is not CDS-specific, it's the
+     same move against whichever site this mode names. **webds carries two things CDS/MBDS
+     don't:** a `patterns` layer (composed screen regions — check `list_templates`-equivalent
+     pattern search before composing a region by hand, same idea as MBDS's screen templates) that
+     is measured against a *consuming* file rather than the library itself (a weaker claim — say
+     so, don't call it as certain as a component), and **every component Figma key served as
+     `null`** — place a webds component by *name* in the official `🖥️ Core Website Design
+     Library`, never by key, and never invent one to fill the Design System Evaluation panel's
+     Figma-link requirement.
    - **Newly composed project layer (mode 3 only)**: no separate site to read — this run *creates*
      the project-specific patterns during Step 3, informed by Core, and tags each one
      `New component` in Step 4's Design System Evaluation since nothing pre-existing was reused.
@@ -258,10 +279,14 @@ modes (Expected input above) this build uses; resolve it explicitly, don't guess
 1. **Core only** — the requester says (or it's clear from context) this project has no pattern
    needs beyond Core. Step 3 checks every component against Core alone.
 2. **Existing project design system** — the requester names/links an already-built project DS
-   (e.g. "use MBDS," `mbds-bbl.vercel.app`). Step 3 checks components against **that project's own
-   site** (and its own repo, if it has one, the same way source 5/6 work for Core) as the primary
-   authority for anything the project DS covers — Core still governs anything outside it, but this
-   build isn't composing anything new, it's reusing what already exists there wholesale.
+   (e.g. "use MBDS," `mbds-bbl.vercel.app`, or "use webds," `webds-bbl.vercel.app`). Step 3 checks
+   components against **that project's own site** (and its own repo, if it has one, the same way
+   source 5/6 work for Core) as the primary authority for anything the project DS covers — Core
+   still governs anything outside it, but this build isn't composing anything new, it's reusing
+   what already exists there wholesale. Whichever system this names — CDS, MBDS, or webds — pull
+   its real install command, real token names, and real MCP tools (`search_components`,
+   `get_component`, `map_props`, `verify_code`) the same way Core does; none of the three is a
+   lesser case of the others.
 3. **Core + new composed layer** — the requester wants a project-specific layer, but this project
    doesn't have one yet (or isn't reusing another project's) — this run is building it fresh,
    informed by Core. Step 3 checks Core first, and any pattern this build originates for the
@@ -316,22 +341,33 @@ re-list a gap that's already there from an earlier run against the same story.
 ## Step 3 — build the prototype, DS-first, gaps placeholdered not blocked
 
 Nothing in this step touches Figma. **"Using" a component means installing it from that DS's
-real registry — `npx shadcn@latest add <docs-site>/r/components/<slug>.json` — never
-hand-authoring HTML/CSS that merely renders close to the DS site's values.** A hand-written twin
-of a component the DS already ships is a defect, not an acceptable substitute, no matter how
-closely its hex/px values were copied — this is the exact failure both cds-bbl's and mbds-bbl's
-own `llms.txt` call out by name ("writing a component by hand when a registry item exists is the
-failure this site exists to prevent"), and copying values by hand cannot follow a mode axis
+real registry — `npx shadcn@latest add <docs-site>/r/components/<slug>.json` (`cds-bbl`,
+`mbds-bbl`, or `webds-bbl` — whichever system is in play) — never hand-authoring HTML/CSS that
+merely renders close to the DS site's values.** A hand-written twin of a component the DS already
+ships is a defect, not an acceptable substitute, no matter how closely its hex/px values were
+copied — this is the exact failure cds-bbl's, mbds-bbl's, and webds-bbl's own `llms.txt`/MCP
+instructions all call out by name ("writing a component by hand when a registry item exists is
+the failure this site exists to prevent"), and copying values by hand cannot follow a mode axis
 (theme, density, shape, device, language) the way an installed component bound to real tokens
 does. Every installed item pulls in that system's foundation (`cds-foundation` /
-`mbds-foundation` — the full token/class layer and the system's own web font) automatically; a
-prototype that has components but no foundation renders unstyled, which is its own tell that
-something was hand-drawn instead of installed.
+`mbds-foundation` / `bbl-foundation` — the full token/class layer and the system's own web font)
+automatically; a prototype that has components but no foundation renders unstyled, which is its
+own tell that something was hand-drawn instead of installed.
 
-Before writing any UI for a screen, call that DS's `search_components` (and `list_templates` for
-MBDS, which ships whole screens) — the piece you need may already exist. Never write a literal
-color, spacing, radius, or font-family value in code that's presented as this DS; every value
-must resolve to that system's own token/class. If the deliverable format makes a real install
+**This is a standing rule, not a per-run judgment call.** Every future run of this skill, on
+whichever of CDS, MBDS, or webds is in play, pulls color/font/token/component exactly from that
+system's real registry and real live site — never an approximation, never an invented token name
+that merely looks plausible, regardless of delivery target (localhost dev server, single-file
+Artifact, or anything else). The delivery target changes *how* the real values reach the output
+(see "When the deliverable is a single HTML file / Artifact" below for the Artifact case); it
+never changes *whether* they're real.
+
+Before writing any UI for a screen, call that DS's `search_components` (`list_templates` for
+MBDS's whole-screen templates, `get_pattern`/pattern search for webds's screen-region patterns —
+remember webds patterns are consumer-measured, a weaker claim than a component, so prefer a
+component when one fits) — the piece you need may already exist. Never write a literal color,
+spacing, radius, or font-family value in code that's presented as this DS; every value must
+resolve to that system's own token/class. If the deliverable format makes a real install
 physically impossible at runtime (see "When the deliverable is a single HTML file / Artifact"
 below) — that is a delivery-format constraint to solve, never a license to hand-author a look-alike
 component instead.
@@ -379,11 +415,16 @@ audit, and fix everything it flags before moving on — never report a run as do
 ```
 curl -sO https://cds-bbl.vercel.app/audit.mjs && node audit.mjs .
 ```
-(swap the host for `mbds-bbl.vercel.app` when the screen is MBDS-governed). Exit code 1 means
-defects — fix them, don't narrate around them; every check it runs is one a reader can't perform
-just by looking at the screen. Then run that system's `verify_code` MCP tool against the actual
+(swap the host for `mbds-bbl.vercel.app` or `webds-bbl.vercel.app` when the screen is
+MBDS-/webds-governed). Exit code 1 means defects — fix them, don't narrate around them; every
+check it runs is one a reader can't perform just by looking at the screen (in practice this audit
+script is single-system-aware — it can misflag another installed system's own correctly-installed
+files as "modified"/"collision" purely from name coincidence, since it doesn't model that a
+second DS is present; read every flag before treating it as a defect, but don't use that as an
+excuse to wave away a real one). Then run that system's `verify_code` MCP tool against the actual
 code/markup you're about to present, on every screen, for every DS variant a compare toggle
-builds (Core and MBDS get verified separately — one clean pass doesn't clear the other). Treat
+builds (CDS, MBDS, and webds each get verified separately — one clean pass doesn't clear the
+others). Treat
 any `severity: "error"` finding as a defect to fix, not a note to mention in the summary and move
 past. A finding that's only in the token-*definition* layer itself (the literal values a
 foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
@@ -400,8 +441,9 @@ above still applies in full. The correct sequence when the target is one self-co
 1. Build the screen as a real Vite + React project outside the artifact sandbox (a scratch
    directory, not the artifact's own file).
 2. Install every component from the real registry (`npx shadcn@latest add
-   https://cds-bbl.vercel.app/r/components/<slug>.json`, same for `mbds-bbl.vercel.app`) — this
-   pulls in the real foundation and the real component code, unmodified.
+   https://cds-bbl.vercel.app/r/components/<slug>.json`, same for `mbds-bbl.vercel.app` and
+   `webds-bbl.vercel.app`) — this pulls in the real foundation and the real component code,
+   unmodified.
 3. Inline the system's web font(s) as `data:` URIs in place of the `url(...)` references the
    foundation's font CSS ships with (BBL Sans is ~14 font files / ~620KB total as of this
    writing — check the actual foundation CSS for the current count before assuming that number
