@@ -73,6 +73,18 @@ it holds one real `<table>` with one row per skill: name (linked to its
 Page 2), what it does, output, latest version + updated date, and who
 triggered that log.
 
+**Scope boundary — this skill owns only the top of the page.** Below the
+registry table, the page also carries a `"Design Agent Skills — ขั้นตอน
+PO requirement → wireframe → UI hi-fi"` section and everything under it —
+that belongs to a *different* pipeline (the wireframe/UI Design Agent
+Skills, not skill-changelog logging) and is completely out of scope.
+Never read it for context, never rewrite it, never move or reorder it.
+When you `page_get` the page to merge, treat that section and everything
+after it as an opaque tail: carry it through byte-for-byte, unchanged, at
+the end of whatever `html_text` you `page_update` with. Only the content
+above it (`🔧 Asana-backed Skills` / `🆕 Skill changelogs`) is this
+skill's to manage.
+
 **Why a companion file, not `page_get`.** `page_update` replaces the whole
 body, so an upsert normally means "read, then merge, then write." But
 `page_get` can never return a table's actual cell content — so once Page 1
