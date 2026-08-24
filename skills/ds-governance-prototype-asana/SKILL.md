@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.17.0
+version: 1.18.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -101,6 +101,27 @@ metadata:
 > verify_code gate, its two unique caveats (patterns layer is consumer-measured, weaker claim than
 > a component — prefer a component when one fits; every component Figma key is served `null` —
 > place by name in the official library, never invent a key).
+>
+> **v1.18.0 — fixing a broken, not-owned artifact means rebuild-and-replace, not
+> patch (2026-08-24, US01 Wealth Dashboard rebuild).** The requester pointed at a
+> prototype that turned out to be shared with them, not owned by them — the
+> artifact tool cannot fetch its source or republish a fix to that URL in that
+> case. There was also no separate source file anywhere (the artifact was the
+> only copy), and the build predated v1.15.0's real-component-install rule, so
+> it likely carried the same defect that rule exists to prevent. The only real
+> fix was a full rebuild on the current skill version, published as a new
+> artifact, with the Requirement collections leaf's "Related prototype runs"
+> updated to add the new link and mark the old one superseded — never deleted,
+> so the history of what changed and why stays intact. Two more corrections
+> from the same rebuild: (1) a Core component reused to fill a gap on an
+> MBDS-governed screen needs its own local `.ds-cds` scope to render with real
+> CDS token values — folded into the token-collision section below; (2) a
+> branding color was previously guessed from a segment's general feel (gold
+> for a "premium" sub-brand) rather than read from the actual guide, which
+> documents gold as reserved for physical/printed materials only — the digital
+> treatment is a grey/white monochrome. Read the named branding guide's actual
+> color rules before applying one, never infer a color from what a brand
+> "seems like."
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -201,7 +222,12 @@ brand-new and may have little or nothing in them yet).
    page, and apply that guide's rules to any branding decision in the prototype. If the user
    didn't name one, ask — don't guess which row applies or blend several rows' rules together.
    If a named guide isn't on the page yet, say so in the final summary and don't assert
-   "on-brand" with nothing real to check it against.
+   "on-brand" with nothing real to check it against. **Read the guide's actual color rules before
+   applying a color — never infer one from what the brand "seems like."** A prior run guessed gold
+   for a premium sub-brand's action color; the guide it should have read documents gold as reserved
+   for physical/printed materials only, with a grey/white monochrome as the actual digital
+   treatment. The guide is the source of truth, not a vibe extrapolated from the brand's name or
+   segment.
 
 5. **โย's (Yo's) `cds-consumer` repo** — https://github.com/therealveldt/cds-consumer.git (real
    repo, confirmed 2026-08-20; private but this session's git credentials reach it). Clone it if
@@ -480,6 +506,16 @@ selector-only edit (never touch a token's value) and does not require editing an
 since CSS custom properties still cascade to descendants same as `:root` did. Do this before
 wiring up the compare toggle, not after noticing one system's colors bleeding into the other's.
 
+**The same scoping applies even when only one system renders at a time — not just an A/B
+compare.** When mode 2's Existing project DS doesn't cover something (no button, no tab, no
+alert, whatever), Core fills the gap — but that Core component still resolves its tokens via
+`.ds-cds`, and a screen that's otherwise entirely scoped to the other system's class has no
+`.ds-cds` ancestor for it to inherit from. Wrap just that leaf usage in a small
+`<div className="ds-cds" style={{ display: 'contents' }}>` — narrow enough to give the borrowed
+component real CDS values without pulling the other system's own components (rendered as its
+children elsewhere on the same screen) into CDS's scope too. Never wrap a container that hosts the
+other system's own components as children; wrap only the borrowed component itself.
+
 Never skip straight to writing CSS that merely *looks like* the DS because this pipeline is more
 work than the CSS trick — the CSS trick is exactly the defect Step 3 forbids, and looking like
 the DS is not the same as being built on it (wrong tokens under a real theme/density/shape mode
@@ -609,6 +645,29 @@ leave the panel untouched:
    this section's content (and the copy actually rendered on the screen) swaps with it. If no
    guide was named for this run, this section says so plainly instead of pretending copy was
    guideline-checked.
+
+## Fixing or replacing an existing prototype
+
+If the requester points at a previous run's prototype and asks for it to be fixed, check
+ownership before touching anything: the artifact tool can only read/republish an artifact this
+session owns. A prototype that comes back "shared, not owned" (or that has no separate source
+file anywhere — the artifact was the only copy) can't be patched in place, no matter how small the
+fix looks. In that case:
+
+1. Diagnose what's actually wrong first (screenshot it, check the console, don't guess from the
+   name alone) — the fix path changes depending on whether it's a live bug (broken rendering) vs.
+   simply out of date against this skill's current rules (e.g. it predates v1.15.0's
+   real-component-install requirement, so it may carry that defect too even if nothing looks
+   broken on screen).
+2. Confirm with the requester before spending the effort — a full rebuild is not a small fix, and
+   they may just want to know what's wrong rather than have it redone.
+3. Rebuild on this skill's current version using the same inputs (screens, DS composition mode,
+   branding/tone guides, compare toggles) the original run used — pull them from the Requirement
+   collections leaf's Status/Clarifications if the original request itself isn't available.
+4. Publish as a new artifact (never attempt to force-publish over one this session doesn't own),
+   then update the leaf's **Related prototype runs** list — append the new entry, and mark the old
+   one superseded with a one-line reason. Never delete the old entry; the run history is what lets
+   the next person see what changed and why.
 
 ## Final chat summary
 
