@@ -31,11 +31,18 @@ pages per skill family, linked in a chain:
    why. This part was already right — keep doing it the way it's been
    done (see template below).
 
-Asana Knowledge pages do not support real nested sub-pages or `<table>`
-HTML via the API (`page_create`/`page_update` only allow: strong, em, u, s,
-ul, ol, li, a, blockquote, code, pre, hr, img, h1, h2 — `<p>` and `<table>`
-are rejected). This skill reproduces the "click a row → see detail" feel
-with linked lists and separate flat pages instead of a real nested table.
+Asana Knowledge pages do not support real nested sub-pages via the API.
+`<table>` HTML *is* accepted by `page_create`/`page_update` (along with
+strong, em, u, s, ul, ol, li, a, blockquote, code, pre, hr, img, h1, h2 —
+`<p>` is still rejected) — but `page_get` can **never** read a table's
+content back, only a placeholder line. That blind spot is fine for Page 3
+(written once, never revisited) but dangerous for anything upserted across
+runs: a table on Page 1 is used as the real registry format (see below,
+with a companion state file to make the upsert safe); the Change log on
+Page 2 stays a plain `<ul>` on purpose, since prepending it each version
+still needs to read the previous entries back, which a table can't give
+us. This skill reproduces the "click a row → see detail" feel with linked
+lists and separate flat pages except where noted otherwise.
 
 ## Central registry page (Page 1)
 
@@ -44,23 +51,37 @@ Right now that's gid `1217561826992798`
 name has been renamed before ("Design system Governance " →
 "Operation Skills") and may be renamed again, so **always `page_get` it
 and use its live `name` field** for breadcrumb text — never hardcode a
-title string in a page you write. It holds one row per skill under a
-`"🆕 Skill changelogs"` list.
+title string in a page you write. Under a `"🆕 Skill changelogs"` heading
+it holds one real `<table>` with one row per skill: name (linked to its
+Page 2), what it does, output, latest version + updated date, and who
+triggered that log.
 
-Each skill gets one **block** (not a single `<li>` — see template below):
-a `🔹` heading line with the skill name linked to its Page 2, followed by
-a 4-item list: what it does, output, latest version + updated date, and
-who triggered that log.
+**Why a companion file, not `page_get`.** `page_update` replaces the whole
+body, so an upsert normally means "read, then merge, then write." But
+`page_get` can never return a table's actual cell content — so once Page 1
+is a table, Claude has no way to recover other skills' rows from Asana
+itself. The fix: `registry-state.json`, checked into this skill's own
+folder in the `collect-skills` repo, is the **real source of truth** for
+every row on Page 1 — never trust what's currently rendered on the Asana
+page as the input to a merge.
 
-This block is an **upsert**, done on every log, not just the first:
-- Read the central page's `html_text` first (`page_update` replaces the
-  whole body — never write without reading first).
-- If a block for this `skill_name` already exists (match on the `🔹`
-  heading text/link), replace that whole block in place (what/output/
-  version/date/who all refresh to the latest log) — don't touch other
-  skills' blocks.
-- If no block exists yet, append a new one.
-- `page_update` with the full merged body.
+Every run, in order:
+1. Fetch the current `registry-state.json` from GitHub raw (same pattern
+   as syncing `SKILL.md` in step 0) — not the local copy, which can be
+   stale if someone else logged a skill since you last synced.
+2. Upsert this run's row into the fetched JSON (match on `skill_name`;
+   replace in place if found, append if not).
+3. Render the table fresh from **every** row now in the JSON (not just
+   this one) and `page_update` Page 1 with the full table.
+4. Commit and push the updated `registry-state.json` back to `main`. This
+   step is not optional cleanup — skipping it means the next run (a
+   different session, maybe a different person) starts from a stale file
+   and will silently drop every row added in between.
+
+If you can't push to the repo (no access, offline, push rejected), **stop
+before writing Page 1** and tell the user — do not `page_update` a table
+built from a JSON copy you know might be stale, since that risks
+overwriting other skills' rows with no way to recover them afterward.
 
 If a different page should be the central registry, ask the user which —
 don't assume the hardcoded gid above is still current; confirm with
@@ -112,8 +133,15 @@ Then, before writing anything:
    ```
    mkdir -p ~/.claude/skills/asana-skill-changelog && curl -fsSL https://raw.githubusercontent.com/tichahong-bit/collect-skills/main/skills/asana-skill-changelog/SKILL.md -o ~/.claude/skills/asana-skill-changelog/SKILL.md
    ```
+   Also fetch the current `registry-state.json` the same way (see Central
+   registry page section below) — it's the live source of truth for
+   Page 1's table and it changes independently of `SKILL.md`:
+   ```
+   curl -fsSL https://raw.githubusercontent.com/tichahong-bit/collect-skills/main/skills/asana-skill-changelog/registry-state.json -o /tmp/registry-state.json
+   ```
    If GitHub is unreachable, say so and continue with the local copy —
-   don't block the log on it.
+   don't block the log on it, but do skip the Page 1 write (step 5) rather
+   than risk building its table from a copy you can't confirm is current.
 
 1. **Resolve workspace_gid.** If not already known this session, call
    `asana_whoami` (gives default workspace) or `asana_find` if the user
@@ -143,25 +171,32 @@ Then, before writing anything:
    `<ul>` in the Change log section (the last section), then `page_update`
    with the full merged body.
 
-5. **Upsert the row on Page 1** (central registry) as described above.
+5. **Upsert the row on Page 1** (central registry) via `registry-state.json`
+   as described above — fetch, upsert this row, render the full table from
+   every row, `page_update`, then commit+push the JSON.
 
 6. **Report back all three links** to the user: central registry, Page 2,
    and the new Page 3.
 
 ## Templates
 
-### Page 1 — registry block
+### Page 1 — registry table
+
+One `<table>` under the `"🆕 Skill changelogs"` heading, bold the header
+row's cells (no `thead`/`th` support). Keep it at 5 columns — a 6th risks
+overflow/clipping on the page.
 
 ```html
-🔹 <a href="<page2_permalink>"><skill_name></a>
+<strong>🆕 Skill changelogs</strong>
 
-<ul>
-<li>what: <what_it_does></li>
-<li>Output: <output></li>
-<li>latest Version: v<version> — Updated <date></li>
-<li>who: <author></li>
-</ul>
+<table>
+<tr><td><strong>Skill</strong></td><td><strong>What it does</strong></td><td><strong>Output</strong></td><td><strong>Latest version</strong></td><td><strong>Who</strong></td></tr>
+<tr><td><a href="<page2_permalink>"><skill_name></a></td><td><what_it_does></td><td><output></td><td>v<version> — <date></td><td><author></td></tr>
+</table>
 ```
+
+Render one `<tr>` per row currently in `registry-state.json` — this table
+is rebuilt in full every run, not edited in place.
 
 ### Page 2 — first creation
 
@@ -273,8 +308,13 @@ a full, standalone snapshot of the skill file at that point in time.
 
 - Never invent a version number, date, change description, or example
   prompt — ask the skill's owner.
-- Never overwrite existing rows/sections you didn't mean to touch —
-  always read-then-merge on all three pages.
+- Never overwrite existing rows/sections you didn't mean to touch — Page 2
+  and Page 3 read-then-merge via `page_get`; Page 1's table read-then-merge
+  goes through `registry-state.json` instead, since `page_get` can't see
+  table content (see Central registry page section).
+- Never `page_update` Page 1 from a `registry-state.json` you haven't just
+  freshly fetched from GitHub this run — and never skip pushing the
+  updated JSON back afterward.
 - One Page 2 per skill (not per team, not global).
 - If the user hasn't named a skill, ask which one and what changed before
   creating anything.

@@ -1,0 +1,14 @@
+{
+  "_comment": "Source of truth for the Page 1 central registry table in Asana Knowledge. Exists because Asana's page_get API can never read a <table>'s content back (only a placeholder line) — so the table's real rows must live here, not be reconstructed from Asana. Every asana-skill-changelog run must: 1) fetch the latest copy of this file from GitHub, 2) upsert this skill's row here, 3) render the FULL table from every row here and page_update Page 1 with it, 4) commit+push this file back to GitHub so the next run (possibly a different session) has the current full state. Never write a partial table to Page 1 from a stale copy of this file.",
+  "rows": [
+    {
+      "skill_name": "ds-governance-prototype-asana",
+      "page2_permalink": "https://app.asana.com/0/1217630220325191/",
+      "what_it_does": "แปลง requirement เป็น prototype พร้อม presentation mode — Asana-backed sibling ของ ds-governance-prototype-notion, Core DS เป็น base เสมอ, เลือก project-layer mode ได้ 3 แบบ (Core only / Existing project DS / Core + new composed layer), รองรับ compare toggle อิสระ 3 ตัว (Design System / Branding / Tone of Voice)",
+      "output": "Artifact (HTML prototype พร้อม presentation mode) + Asana Page 2/3 log",
+      "version": "1.18.0",
+      "date": "2026-08-24",
+      "author": "Ticha Hongsongkiat"
+    }
+  ]
+}
