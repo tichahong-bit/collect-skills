@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.18.0
+version: 1.19.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -13,22 +13,29 @@ description: >
   hold
   multiple named sources each — the user must name which specific guide to use from each (e.g.
   "MB Writing Style Guide V2" for copy) rather than the skill guessing or blending. Presentation
-  mode opens a draggable, collapsible chrome bar; its side panel always leads with a constant
-  Requirement summary, then four per-screen sections that change as the viewer clicks between
-  screens: Research Insight, Branding, Design System Evaluation, Copywriting (in that order —
-  Copywriting sits after the DS Evaluation, not before it). Up to three independent optional
-  compare toggles can appear in the chrome, each built only when its own specific trigger was
-  actually given — a Design System A/B toggle (two project-layer links), a Branding Theme toggle
-  (two named branding guides), and a Tone of Voice toggle (two named copywriting guides) — if
-  none were given, the requester gets an exact single build with nothing to compare, and the
-  chrome shows only the Presentation Mode toggle. When a Tone of Voice toggle is built, both
-  variants render in the **same language** — a language switch is not a tone comparison, it hides
-  the feeling difference the toggle exists to show. Every Research Insight card links back to the
-  specific Asana research report(s) it cites, the same way the constant Requirement summary card
-  links to its Requirement collections page — so a reader can always open the source, and a card
-  that draws on more than one report links all of them. Design System Evaluation uses exactly two
-  tags, `Reused` and `New component` — no `New variant`/`New token`/`Assumption`/`New content`/
-  `Adjustment` split. Also pulls (git clone/pull, always re-synced)
+  mode opens a draggable chrome bar collapsed by a single `›`/`‹` icon-button (not an on/off
+  toggle switch — the toggle switches are reserved for the live Branding/Tone/Design-System
+  dimension switchers, see below); its side panel always leads with a constant Requirement
+  summary, then per-screen sections that change as the viewer clicks between screens: Research
+  Insight, UX Rationale, Branding, Design System Evaluation, Copywriting (in that order). Every
+  Branding/Tone-of-Voice/Design-System dimension that has more than one real named option — even
+  just one named guide plus the DS/Core baseline — gets a **live switcher** in the chrome, not
+  gated behind an explicit "build me a compare" request the way earlier versions required; the
+  old strict two-names-given rule now only governs whether the *panel text* frames it as a
+  requested formal comparison versus an open exploration aid. Research Insight, Design System
+  Evaluation, and UX Rationale rows are clickable — clicking one highlights (and scrolls to) the
+  actual on-screen element it refers to, a **focus interaction**, not just a citation link. A new
+  **UX Rationale** section cites the Design Knowledge Asana tree for layout/interaction/AI-output
+  principles behind a screen's structural decisions, distinct from Research Insight (user-behavior
+  evidence) and Copywriting (tone/wording rules) — same click-to-source, click-to-highlight
+  discipline as the other cited sections, and the same honesty rule: say plainly when nothing in
+  Design Knowledge actually covers a decision rather than inventing generic rationale. Every
+  Research Insight card links back to the specific Asana research report(s) it cites, the same way
+  the constant Requirement summary card links to its Requirement collections page — so a reader
+  can always open the source, and a card that draws on more than one report links all of them.
+  Design System Evaluation uses exactly two tags, `Reused` and `New component` — no `New
+  variant`/`New token`/`Assumption`/`New content`/`Adjustment` split. Also pulls (git clone/pull,
+  always re-synced)
   from โย's `cds-consumer` repo for exact component specs and Drift rulings, and defers to กัน's
   `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
   color/token a theme needs that the DS doesn't have yet gets invented and tagged `New component`,
@@ -122,6 +129,29 @@ metadata:
 > treatment is a grey/white monochrome. Read the named branding guide's actual
 > color rules before applying one, never infer a color from what a brand
 > "seems like."
+>
+> **v1.19.0 — presentation mode becomes an exploration tool, not just a report
+> (2026-08-25, Staff portal for tablet run).** After reviewing a finished v1.18.0-era build, the
+> requester asked for four changes, all folded in above: (1) the chrome's Presentation Mode
+> control was an on/off toggle switch — replaced with a single `›`/`‹` collapse icon-button, since
+> a toggle implied a binary the requester never wanted (the panel collapsing to just the grip was
+> already the "off" state in spirit, the switch was redundant chrome); (2) Branding/Tone/Design
+> System were only ever switchable when the requester had explicitly asked for a formal two-name
+> compare at build time — the requester wanted to explore live even with only one named source
+> (or none) on record, so these are now standing switchers whenever more than one real state
+> exists to show (a single named branding guide vs. the CDS baseline already counts as two
+> states), and the old two-names rule now only decides whether the *panel prose* calls it a
+> requested comparison; (3) panel rows were citations only — clicking a Research Insight or DS
+> Evaluation card did nothing on the actual mockup, so a reviewer had to manually hunt for what a
+> card was talking about. Added a focus interaction: every clickable row now also highlights and
+> scrolls to its real on-screen target; (4) a new **UX Rationale** section, sourced from the
+> Design Knowledge Asana tree (gid `1217629510106645`) rather than the Research index — layout
+> grid rules, AI-output-trust caveats, and similar design-principle evidence are a different kind
+> of citation than a user-behavior research report or a copywriting rule, and didn't have a home
+> in the four sections v1.18.0 shipped. Same click-to-highlight discipline as Research Insight and
+> DS Evaluation, and the same refusal to invent rationale when Design Knowledge genuinely has
+> nothing on a decision (most of that tree was still empty placeholders when this version shipped
+> — say so per-screen rather than padding with generic UX platitudes).
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -149,31 +179,33 @@ Asana-backed path as the team migrates knowledge sources over.
   2 and 3 both involve "a project has its own thing" but mean opposite things about where that
   thing comes from (borrowed whole vs. built fresh this run).
 - **Compare request** (optional) — supplying **two** project-specific (or theme) links instead of
-  one means the requester wants to compare the same prototype under two variants side by side
-  (e.g. deciding between a current and a proposed pattern set) — build the A/B toggle described
-  in Step 4, not two separate prototypes. Don't assume a compare is wanted unless 2+ links are
-  actually given.
+  one means the requester has a specific side-by-side decision in mind (e.g. deciding between a
+  current and a proposed pattern set), and the panel's Design System Evaluation/Branding prose
+  should say so plainly ("built to compare X vs. Y") rather than reading as an open-ended
+  exploration aid. It does **not** gate whether the switcher control itself exists (see "Live
+  switchers, not gated compares" under Step 4) — that now appears whenever more than one real
+  named option exists, one link included. Don't blend multiple named options into one build
+  either way.
 - **Tone of voice guide(s)** (required whenever the screen has real copy to write — see Copy
   Writing Guideline below) — which specific guide(s) on that page to use, named. Naming **one**
-  (e.g. "MB Writing Style Guide V2") means write every copy decision to that guide, no toggle.
-  Naming **two** (e.g. "MB Writing Style Guide V2" vs "Trip Space") means the requester wants to
-  compare the same screens' copy under two tones side by side — build the Tone of Voice toggle
-  described in Step 4, not two separate prototypes. Ask if not given; never silently pick one,
-  blend multiple guides together, or assume a compare is wanted with only one guide named.
+  (e.g. "MB Writing Style Guide V2") still gets a switcher (against a plain/no-guide baseline) per
+  Step 4 — it just isn't framed as a requested comparison in the panel prose. Naming **two** (e.g.
+  "MB Writing Style Guide V2" vs "Trip Space") additionally means the requester has a specific
+  comparison in mind — the panel says so. Ask if none is named; never silently pick one or blend
+  multiple guides together.
 - **Branding guide(s)** (required whenever the screen has a real branding decision to make — see
-  Bradning Guidline below) — which specific guide(s) on that page to use, named. Naming **two**
-  (e.g. "Wealth Sub-brand Visual Identity" vs "Lynxeye x BBL — Digital Rebranding Workshop")
-  means the requester wants to compare the same prototype under two branding themes side by side
-  — build the Branding Theme toggle described in Step 4, not two separate prototypes. Ask if not
-  given; never silently pick one, blend multiple guides together, or assume a compare is wanted
-  with only one guide named.
+  Bradning Guidline below) — which specific guide(s) on that page to use, named. Same rule as Tone
+  above: naming **one** still gets a live switcher (against the CDS/no-guide baseline); naming
+  **two** additionally marks it as a requested comparison in the panel's own wording. Ask if none
+  is named; never silently pick one or blend multiple guides together.
 - **Priority note** (optional, defaults to on) — the requirement always wins over design-system
   completeness: a component missing from the DS is never a reason to stop, only a reason to
   placeholder-and-flag (Step 3).
-- **No compare wanted** — if the requester has one exact spec in mind and never gave a second
-  link/guide for any of the three inputs above (project-layer link, branding guide, tone-of-voice
-  guide), don't build any A/B toggle at all. The presentation chrome then shows only the
-  Presentation Mode toggle — never add a compare control speculatively "in case it's useful."
+- **No switcher possible** — a switcher only appears for a dimension that actually has more than
+  one real named state to show (a named guide vs. baseline, two DS systems, etc.) — if a
+  dimension genuinely has exactly one state (nothing named, nothing to fall back to), don't
+  fabricate a second option just to have something to switch; that dimension's switcher is simply
+  absent from the chrome for this build, same as before.
 
 ## Knowledge sources (all Asana + live sites — this skill does not read Notion)
 
@@ -296,6 +328,23 @@ brand-new and may have little or nothing in them yet).
    - Live sites are the freshest, most authoritative source of what's actually real in code right
      now — weight them over Asana/repo sources if the two disagree about whether something
      exists.
+
+8. **Design Knowledge** — root gid `1217629510106645`
+   (https://app.asana.com/1/1153565613997788/note/1217629510106645). A tree of layout/interaction/
+   platform design-principle references (Device Template → Tablet/Website/Mobile/Responsive
+   Layout Grid, UX Behaviour, AI Evaluation), captured via `asana-design-knowledge-capture` from
+   external sources (design-pattern docs, NN/g-style articles, platform guidelines) — this is
+   **design-principle evidence**, a different kind of citation than a Research report (which is
+   evidence about *this product's own users*) or a named Copy Writing/Bradning guide (which is a
+   *rule*, not evidence). Feeds Step 4's **UX Rationale** section. Walk the tree the same
+   read-don't-guess way as Research: `page_get` the root, follow every child link that's
+   plausibly relevant to a screen you're building (e.g. a tablet-frame spacing/grid decision →
+   Responsive Layout Grid; an AI-generated confidence/insight number shown to the user → the AI
+   Evaluation branch), and note explicitly when a branch is still an empty placeholder rather than
+   silently skipping it — several nodes in this tree may have no content yet. Never invent a
+   design principle and attribute it to this source; if nothing in the tree actually covers a
+   screen's decision, Step 4's UX Rationale section says so plainly, the same honesty rule as a
+   Research gap.
 
 ## Step 1 — establish the design-system composition
 
@@ -524,53 +573,58 @@ at all" finding this section exists to prevent). If the pipeline above is genuin
 a given request, say so plainly to the requester and ask before falling back to anything else —
 don't decide unilaterally that hand-authored CSS is an acceptable substitute.
 
-## Step 4 — presentation mode, per-screen dynamic panel, up to three optional compare toggles
+## Step 4 — presentation mode, per-screen dynamic panel, live dimension switchers, focus interaction
 
 Build a walkthrough view (or whatever presentation surface the tool you're running in supports)
-with a **presentation-mode toggle** (chrome control, off by default so the initial view is the
-clean product surface) that reveals the side panel. The chrome itself is a single draggable,
-collapsible control bar — a grip so the requester can move it out of the way of whatever screen
-area they're looking at, and a collapse button so it can be shrunk to just the grip when not
-needed — not a fixed strip pinned in one corner. The panel's content **changes per screen** —
-this is the specific fix this skill exists to make over the static single-panel pattern seen
-elsewhere. Concretely:
+with a **collapse control** — a single `›`/`‹` icon-button, not an on/off toggle switch — that
+shrinks the whole chrome down to just its drag grip when the reviewer wants the clean product
+surface, and expands it back to the full bar + panel on click. The chrome itself is a single
+draggable control bar — a grip so the requester can move it out of the way of whatever screen area
+they're looking at — not a fixed strip pinned in one corner. Collapsed is the default state on
+load (clean product surface first). The panel's content **changes per screen** — this is the
+specific fix this skill exists to make over the static single-panel pattern seen elsewhere.
 
-Up to three independent optional toggles can appear in the same chrome control, each only when
-its own compare request was actually made — never add one speculatively, and never skip one that
-was actually requested:
+### Live switchers, not gated compares
 
-- **Design System A/B toggle** — if the requester gave two project-layer/theme links (Expected
-  input above). Swaps the rendered screen's project-layer tokens (color, radius, type, whatever
-  each link actually defines) between the two, on top of the same Core base both times — same
-  screens, same content, same Core, different project layer. Build this as a real token swap
-  (e.g. a `data-ds` attribute driving a second CSS token block sourced from the second link's
-  actual values), not a second copy of the prototype.
-- **Branding Theme toggle** — if the requester named two branding guides (Expected input above),
-  e.g. comparing a Wealth sub-brand identity against another named identity. Swaps the same
-  screens' branding-driven visual identity (colors, imagery treatment, whatever that guide's
-  rules actually cover) between the two named guides — same screens, same content, same
-  Core/project DS, different branding theme. If a theme's guide calls for a color/token that
-  doesn't exist in the DS yet, invent it rather than blocking — but tag it `New component` in that
-  screen's Design System Evaluation (below), never let an invented brand color look like it came
-  from the DS.
-- **Tone of Voice toggle** — if the requester named two tone-of-voice guides (Expected input
-  above). Swaps every real copy decision on the current screen (labels, headings, error/empty
-  states, CTAs) between the wording each named guide produces — same screens, same layout, same
-  DS, different words. **Both variants must be written in the same language.** The toggle exists
-  to show a *feeling* difference (formal vs. casual, terse vs. warm) — if one variant is English
-  and the other is Thai, the comparison shows a language switch instead, and the actual tone
-  contrast is invisible. Pick whichever language the screen's copy is naturally in and write both
-  variants in it, even if a named guide's own examples lean toward one language (e.g. a Thai-heavy
-  quick guide like Trip Space still has to be matched by an equally-Thai formal variant, not by
-  falling back to English for the formal side just because the house style guide's own body text
-  is in English). Independent of the Branding Theme toggle: a tone compare can be requested
-  alone, a branding compare can be requested alone, or both together (they commonly pair — e.g. a
-  Wealth branding theme paired with a more formal guide, a second identity paired with a more
-  casual one — but the skill builds whichever toggles were actually requested, never assumes a
-  pairing that wasn't named).
+Where earlier versions of this skill only built a Branding/Tone-of-Voice/Design-System switch
+when the requester explicitly named **two** sources as an intentional comparison, that gate now
+governs the panel's *wording* only, not whether the *control* exists. Build a switcher for a
+dimension whenever it has more than one real named state to offer — and **one named guide plus
+the system's own baseline already counts as two states**:
 
-If none of the three were requested, the chrome shows **only** the Presentation Mode toggle — the
-requester gets one exact build with nothing to compare, per "No compare wanted" in Expected input.
+- **Design System switcher** — states are: Core alone, the named existing project DS (mode 2), or
+  Core + the newly composed layer (mode 3) — plus a second project-layer/theme link if the
+  requester gave one. Swaps the rendered screen's project-layer tokens between states on top of
+  the same Core base every time — same screens, same content, different project layer. Build this
+  as a real token swap (e.g. a `data-ds` attribute driving a second CSS token block sourced from
+  each state's actual values), not a second copy of the prototype.
+- **Branding switcher** — states are: no branding guide applied (CDS/Core baseline) plus every
+  branding guide the requester actually named (often just one). Swaps the screen's branding-driven
+  visual identity (colors, imagery treatment, whatever the active guide's rules cover) between
+  states. If a guide calls for a color/token the DS doesn't have yet, invent it rather than
+  blocking — tag it `New component` in that screen's Design System Evaluation, never let an
+  invented brand color look like it came from the DS.
+- **Tone of Voice switcher** — states are: plain/ungoverned copy plus every tone-of-voice guide
+  the requester actually named (often just one, sometimes two). Swaps every real copy decision on
+  the current screen between the wording each state produces. **Every state must be written in
+  the same language.** The switcher exists to show a *feeling* difference (formal vs. casual,
+  terse vs. warm) — if one state is English and another is Thai, the comparison shows a language
+  switch instead, and the actual tone contrast is invisible. Pick whichever language the screen's
+  copy is naturally in and write every state in it, even if a named guide's own examples lean
+  toward a different language (e.g. a Thai-heavy quick guide like Trip Space still has to be
+  matched by an equally-Thai formal state, not by falling back to English for the formal side just
+  because the house style guide's own body text is in English). A dedicated **Language** switcher
+  (e.g. Thai vs. English UI copy) is a separate, independent control from Tone — don't cross the
+  two into one combinatorial switcher unless the requester specifically asks for that; keep Tone
+  fixed to one language's worth of states and let Language, if built, sit alongside it.
+
+A dimension that genuinely has only one possible state (nothing named, no second thing to fall
+back to) simply has no switcher in the chrome for this build — don't fabricate a second state
+just to have something to switch, per "No switcher possible" in Expected input. When the
+requester *did* name two sources for a dimension as an explicit comparison (Expected input's
+"Compare request"), the panel's prose for that dimension should say so plainly ("built to compare
+X vs. Y") rather than reading as an open-ended exploration aid — that's the only thing the old
+two-names rule still decides.
 
 - Keep a per-screen data structure (screen id → that screen's own insight cards / DS rows), built
   from Steps 1–3's knowledge as it actually applies to *that* screen — not one global list reused
@@ -580,6 +634,21 @@ requester gets one exact build with nothing to compare, per "No compare wanted" 
 - An insight that genuinely applies to the whole flow (not one screen) goes in its own
   "Flow-wide" group so it isn't lost when switching screens, rather than being duplicated
   identically into every screen's section.
+
+### Focus interaction
+
+Every clickable panel row — Research Insight card, UX Rationale card, Design System Evaluation
+row — refers to something real on the actual rendered screen, not just to a citation. Clicking one
+must **highlight and scroll to that real on-screen element**, inside the device frame's own
+internal scroll (never scroll the whole page) — a temporary outline/glow pulse using a DS
+feedback/accent token, that fades after a couple of seconds or on the next click, is enough; don't
+build a persistent highlight that lingers and confuses the next interaction. This means Step 3's
+screen-building has to attach a stable identifier to each meaningful element as it's built (an id
+or data-attribute naming what it is), not bolt one on after the fact once Step 4 needs it — plan
+for this while writing each screen, the same way `data-cds-icon`/similar attributes already tag
+real DS output. A row with nothing sensible to point at (a Requirement-summary card, a
+"reviewed — not applicable" research card with no on-screen presence) simply isn't clickable —
+don't force a highlight target onto a row that has none.
 
 **Language:** write the panel's section headers, card titles, summaries, and rationale in
 **Thai by default** — this is the team's working language, and the panel is read by BU
@@ -594,10 +663,11 @@ Panel section order, top to bottom:
    describes the build as a whole, not one screen). One card: what's being built and why, in
    plain terms, paraphrased from Step 2's resolved requirement — link to the Requirement
    collections detail page this run wrote/updated. If the requirement was never formally logged
-   there, say so in the card rather than presenting an informal paraphrase as if it were.
+   there, say so in the card rather than presenting an informal paraphrase as if it were. Not
+   clickable-to-highlight — it describes the whole build, not one on-screen element.
 
-The remaining four sections are **per screen** — when the viewer clicks between screens in the
-prototype, re-render all four from that screen's own data, not just toggle screen visibility and
+The remaining sections are **per screen** — when the viewer clicks between screens in the
+prototype, re-render all of them from that screen's own data, not just toggle screen visibility and
 leave the panel untouched:
 
 2. **Research Insight** — cards with: title, summary, and an explicit *why this design does /
@@ -606,7 +676,8 @@ leave the panel untouched:
    was used. **Every card links back to the specific Asana research report(s) it draws on** —
    same pattern as the Requirement summary card's link to its Requirement collections page, not a
    citation you have to take on faith. A card built from more than one report links every one of
-   them; a "reviewed, not applicable" card still links the report it reviewed. An insight that
+   them; a "reviewed, not applicable" card still links the report it reviewed. Each card that maps
+   to a real on-screen element is also clickable per the focus interaction above. An insight that
    genuinely applies to the whole flow (not one screen) goes in its own "Flow-wide" group so it
    isn't lost when switching screens, rather than being duplicated identically into every screen's
    section.
@@ -622,13 +693,23 @@ leave the panel untouched:
    Requirement collections (see "Writing research gaps back to Requirement collections" below) —
    the panel flag alone isn't enough, the research team needs to find it from Requirement
    collections too, not just from inside a prototype they may never open.
-3. **Branding** (its own section, placed directly above Design System Evaluation) — for every
+3. **UX Rationale** — cards citing the **Design Knowledge** Asana tree (knowledge source 8 above),
+   not the Research index — this is design-principle/platform evidence (layout grids, interaction
+   conventions, AI-output-trust caveats), a different kind of citation than a user-behavior
+   research report or a named copywriting/branding rule. Each card: which structural/interaction
+   decision on this screen it justifies, the specific principle, and a link to the actual Design
+   Knowledge page it came from — same "cite the real source" discipline as Research Insight, and
+   clickable to highlight the related component/region per the focus interaction above. If nothing
+   in Design Knowledge actually covers a screen's decisions (a real possibility — much of that
+   tree can be empty placeholders), say so plainly in this section rather than inventing generic
+   UX platitudes and attributing them to a source that doesn't back them.
+4. **Branding** (its own section, placed directly above Design System Evaluation) — for every
    real branding decision on this screen, cite the specific rule from the *named* branding
    guide(s) (e.g. which one(s) the user pointed to on the Bradning Guidline page) that it follows
-   — never a vague "on-brand." If the Branding Theme toggle is active, this section's content
-   swaps with it. If no guide was named for this run, this section says so plainly instead of
-   asserting brand-compliance with nothing real behind it.
-4. **Design System Evaluation** — every element on this screen tagged one of exactly two values:
+   — never a vague "on-brand." If the Branding switcher is set to a named guide, this section's
+   content swaps with it. If no guide was named for this run, this section says so plainly instead
+   of asserting brand-compliance with nothing real behind it.
+5. **Design System Evaluation** — every element on this screen tagged one of exactly two values:
    `Reused` (a real DS component, in Core or the project layer) or `New component` (anything else
    — freehand-built because no DS component covers it, an invented token a branding theme called
    for, copy-only content, a one-off layout adjustment). Don't split `New component` further into
@@ -637,14 +718,15 @@ leave the panel untouched:
    (resolve the real node via the Figma tools' `search_design_system`/component lookup against the
    governing DS's own library file — don't just link the library file's root, link the specific
    component/node). `New component` rows have no Figma component to link to — leave them without a
-   link rather than linking something unrelated.
-5. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
+   link rather than linking something unrelated. Every row, `Reused` or `New component`, is also
+   clickable per the focus interaction above — it names a real element on the current screen.
+6. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
    decision on this screen (labels, headings, error/empty states, CTAs), state the wording chosen
    and cite the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide
-   V2") that it follows — never a vague "per guidelines." If the Tone of Voice toggle is active,
-   this section's content (and the copy actually rendered on the screen) swaps with it. If no
-   guide was named for this run, this section says so plainly instead of pretending copy was
-   guideline-checked.
+   V2") that it follows — never a vague "per guidelines." If the Tone of Voice switcher is set to a
+   named guide, this section's content (and the copy actually rendered on the screen) swaps with
+   it. If no guide was named for this run, this section says so plainly instead of pretending copy
+   was guideline-checked.
 
 ## Fixing or replacing an existing prototype
 
@@ -674,11 +756,18 @@ fix looks. In that case:
 - Which design-system composition mode this build used — Core only, an existing project DS
   reused (name it), or a new project layer composed fresh — and whether the mode had to be asked
   (Step 1) — plus which tone-of-voice guide(s) were used for copy and which branding guide(s)
-  were used for branding decisions (name both if a Tone of Voice or Branding Theme compare was
-  built), if either applied.
-- Which of the three optional compare toggles (Design System A/B, Branding Theme, Tone of Voice)
-  were built, if any — and confirm explicitly when none were, so it's clear the requester got one
-  exact build and not an accidentally-omitted compare.
+  were used for branding decisions, if either applied.
+- Which live switchers (Design System, Branding, Tone of Voice) actually appear in this build's
+  chrome, and each one's states — and confirm explicitly when a dimension has none, so it's clear
+  that's because it genuinely had only one state, not an oversight. Name which dimensions, if any,
+  were framed in the panel as a requested comparison (two names explicitly given) versus an open
+  exploration switcher (one name plus baseline).
+- Confirm the focus interaction is wired — Research Insight, UX Rationale, and Design System
+  Evaluation rows highlight their real on-screen target on click — and note any row that was
+  deliberately left non-clickable because it has no on-screen target.
+- Whether a UX Rationale section had real Design Knowledge content to cite per screen, or was
+  honest about finding nothing there — don't let this read as "done" if most cards just say "no
+  rationale found."
 - Requirement questions resolved, and how each was resolved — from existing knowledge (including
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
