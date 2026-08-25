@@ -4,9 +4,9 @@
     {
       "skill_name": "ds-governance-prototype-asana",
       "page2_permalink": "https://app.asana.com/0/1217630220325191/",
-      "what_it_does": "แปลง requirement เป็น prototype พร้อม presentation mode — Asana-backed sibling ของ ds-governance-prototype-notion, Core DS เป็น base เสมอ, เลือก project-layer mode ได้ 3 แบบ (Core only / Existing project DS / Core + new composed layer), รองรับ compare toggle อิสระ 3 ตัว (Design System / Branding / Tone of Voice)",
+      "what_it_does": "แปลง requirement เป็น prototype พร้อม presentation mode — Asana-backed sibling ของ ds-governance-prototype-notion, Core DS เป็น base เสมอ, เลือก project-layer mode ได้ 3 แบบ, Design System Evaluation เป็นตาราง component-level จริง (CDS/Figma link + Implementation Status), รองรับ Design Option switcher สำหรับ fresh layout exploration และ compare toggle อิสระ 3 ตัว (Design System / Branding / Tone of Voice)",
       "output": "Artifact (HTML prototype พร้อม presentation mode) + Asana Page 2/3 log",
-      "version": "1.19.0",
+      "version": "1.20.0",
       "date": "2026-08-25",
       "author": "Ticha Hongsongkiat"
     },
