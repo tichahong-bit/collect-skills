@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.19.0
+version: 1.20.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -33,13 +33,24 @@ description: >
   Research Insight card links back to the specific Asana research report(s) it cites, the same way
   the constant Requirement summary card links to its Requirement collections page — so a reader
   can always open the source, and a card that draws on more than one report links all of them.
-  Design System Evaluation uses exactly two tags, `Reused` and `New component` — no `New
-  variant`/`New token`/`Assumption`/`New content`/`Adjustment` split. Also pulls (git clone/pull,
-  always re-synced)
+  Design System Evaluation is a **flat, per-component table**, not a per-context-row list — one
+  row per real component actually used on the currently-selected design, each with the component
+  name, a link to its CDS docs page, a link to its real Figma node (sourced from the **Core
+  Design System Library (Inventory)** Asana project, never invented), and one of exactly four
+  Implementation Status values: `Shipped in Code`, `Figma Only / Not Yet Shipped`, `Design System
+  Gap`, or `To Be Verified` — a genuine gap (no Figma set and no code at all) is a different claim
+  than something drawn in Figma but not yet coded, which is different again from an Asana
+  inventory row that's gone stale against what the live CDS site actually ships; check the live
+  site/registry before trusting either source blindly, and mark `To Be Verified` rather than
+  guessing when neither source resolves cleanly. Optionally, when the requester asks for a fresh
+  layout exploration on a screen, build a genuinely different **Design Option 1** for that screen
+  (never a relayout of the same grid) alongside the original, and add a **Design Option switcher**
+  (Original ↔ Option 1) to the chrome, scoped to that screen — the Evaluation table then reflects
+  whichever design option is currently selected. Also pulls (git clone/pull, always re-synced)
   from โย's `cds-consumer` repo for exact component specs and Drift rulings, and defers to กัน's
   `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
-  color/token a theme needs that the DS doesn't have yet gets invented and tagged `New component`,
-  never presented as if it were already in the DS. Also writes back to Requirement collections
+  color/token a theme needs that the DS doesn't have yet gets invented and tagged `Design System
+  Gap`, never presented as if it were already in the DS. Also writes back to Requirement collections
   as it clarifies a requirement, so the next run benefits. Presentation-mode panel content
   (section headers, card text, rationale) defaults to Thai, since this is the team's working
   language — write in English only if the requester asks for it. When a screen's decision has
@@ -152,6 +163,24 @@ metadata:
 > DS Evaluation, and the same refusal to invent rationale when Design Knowledge genuinely has
 > nothing on a decision (most of that tree was still empty placeholders when this version shipped
 > — say so per-screen rather than padding with generic UX platitudes).
+>
+> **v1.20.0 — Design System Evaluation becomes a real component inventory, and layout
+> exploration gets a standing shape (2026-08-25, Staff portal for tablet run).** Two changes,
+> both from the same request: (1) the requester pointed out that describing a screen's DS
+> evaluation by its *context* ("my portfolio uses these tokens/patterns") is less useful than
+> listing the **actual CDS components used**, each traceable to its real docs page and its real
+> Figma node — Design System Evaluation is now that flat table, and the two-tag `Reused`/`New
+> component` vocabulary is retired in favor of four states that distinguish "not shipped yet" from
+> "doesn't exist in Figma either" from "the tracking source itself might be wrong," which the old
+> two tags couldn't say. The **Core Design System Library (Inventory)** Asana project (knowledge
+> source 9 below) is the real source for Figma links — never invented, and checked against the
+> live CDS site rather than trusted blindly, since several of its rows (Tab, Toggle Switch, List
+> Item, Popover, Dialog, Menu, confirmed this run) were stale against what CDS actually ships
+> today. (2) the requester asked for a genuinely fresh second layout for a screen — not a token
+> swap, an actual different information architecture — compared live against the original via a
+> new Design Option switcher, scoped to whichever screen it was built for. This is an *optional*
+> capability, requested per-screen, not a standing expectation every run builds a second layout
+> for.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -178,6 +207,14 @@ Asana-backed path as the team migrates knowledge sources over.
   three applies just because a project link was or wasn't mentioned — ask if unclear, since modes
   2 and 3 both involve "a project has its own thing" but mean opposite things about where that
   thing comes from (borrowed whole vs. built fresh this run).
+- **Design option exploration request** (optional) — if the requester asks for a fresh layout
+  direction on a specific screen (e.g. "explore a new design for X," "give me an alternative to
+  the reference screen's layout"), build a genuinely different **Design Option 1** for that
+  screen — a different information architecture, not the same grid with different colors — using
+  the reference screen only to understand its functional requirements/content/journey, never its
+  layout. Add a **Design Option switcher** (Original ↔ Option 1) to the chrome, scoped to that
+  screen (see "Live switchers" under Step 4). This is opt-in per screen, not something every run
+  builds unprompted — don't add a second layout speculatively.
 - **Compare request** (optional) — supplying **two** project-specific (or theme) links instead of
   one means the requester has a specific side-by-side decision in mind (e.g. deciding between a
   current and a proposed pattern set), and the panel's Design System Evaluation/Branding prose
@@ -323,8 +360,8 @@ brand-new and may have little or nothing in them yet).
      Library`, never by key, and never invent one to fill the Design System Evaluation panel's
      Figma-link requirement.
    - **Newly composed project layer (mode 3 only)**: no separate site to read — this run *creates*
-     the project-specific patterns during Step 3, informed by Core, and tags each one
-     `New component` in Step 4's Design System Evaluation since nothing pre-existing was reused.
+     the project-specific patterns during Step 3, informed by Core, and tags each one `Design
+     System Gap` in Step 4's Design System Evaluation table since nothing pre-existing was reused.
    - Live sites are the freshest, most authoritative source of what's actually real in code right
      now — weight them over Asana/repo sources if the two disagree about whether something
      exists.
@@ -346,6 +383,29 @@ brand-new and may have little or nothing in them yet).
    screen's decision, Step 4's UX Rationale section says so plainly, the same honesty rule as a
    Research gap.
 
+9. **Core Design System Library (Inventory)** — Asana project gid `1217578024173799`
+   (https://app.asana.com/1/1153565613997788/project/1217578024173799). One task per CDS
+   component (46 at last count), each carrying real custom fields: `Code Status` (`Shipped in
+   Code` / `Design Ahead of Dev`), `Governance Status` (`Publish` / `Need Discussion` /
+   `Updated`), `Design System Link` (a real Figma node URL — file `ON8Azjo7wIi3P2oxnxKiBb`,
+   per-component `node-id`, this is the authoritative Figma-link source Step 4's Design System
+   Evaluation table cites, never invent one), `Published Version`, `Projects Using`, `Last
+   Published Date`, `Code Last Checked`. Fetch with `mcp__claude_ai_Asana__get_tasks` (project =
+   this gid, `opt_fields=name,custom_fields,permalink_url`) — the response is large, page/grep
+   rather than reading it whole. **Cross-check `Code Status` against the live CDS site
+   (`search_components`/`get_component`) before trusting it — this inventory genuinely drifts.**
+   Confirmed stale as of 2026-08-25: Tab, Toggle Switch, List (Asana's row for what CDS calls
+   `list-item`), Popover, Dialog, and Menu are all real, installable, shipped registry items on
+   the live site today despite their Asana rows reading `Design Ahead of Dev`/`Need Discussion` —
+   don't propagate a stale status just because it's what the tracker says, and don't silently
+   trust code-reality over the tracker either without checking; note the discrepancy when you find
+   one. A component present here with a real `Design System Link` but absent from the live
+   registry (e.g. `Button Combo` — a real Figma set per โย's `cds-consumer` docs, not yet coded)
+   is `Figma Only / Not Yet Shipped`, a different claim than a full `Design System Gap` (nothing
+   in Figma *or* code — most bespoke chart/slider/tooltip needs this skill already flags fall
+   here, and won't have an Asana task at all, which is itself evidence for the gap rather than a
+   blocker to citing one).
+
 ## Step 1 — establish the design-system composition
 
 Core is always in play — no need to ask about it. What varies is which of the three composition
@@ -365,13 +425,13 @@ modes (Expected input above) this build uses; resolve it explicitly, don't guess
 3. **Core + new composed layer** — the requester wants a project-specific layer, but this project
    doesn't have one yet (or isn't reusing another project's) — this run is building it fresh,
    informed by Core. Step 3 checks Core first, and any pattern this build originates for the
-   project gets flagged `New component` (Design System Evaluation, Step 4) since it's being
-   created here, not pulled from an existing library.
+   project gets flagged `Design System Gap` (Design System Evaluation table, Step 4) since it's
+   being created here, not pulled from an existing library.
 
 If it's unclear which mode applies, ask — don't infer mode 2 vs. mode 3 from a project name alone
 ("Wealth" could mean "compose a new Wealth-specific layer" or "reuse the existing Wealth DS if one
-already exists"; these are opposite operations that produce different `Reused`/`New component`
-tagging in Step 4). This determines what Step 3 checks new/existing components against: Core
+already exists"; these are opposite operations that produce different `Shipped in Code`/`Design
+System Gap` tagging in Step 4). This determines what Step 3 checks new/existing components against: Core
 alone (mode 1), the named existing project DS (mode 2), or Core with everything project-specific
 tagged as newly composed (mode 3).
 
@@ -602,8 +662,19 @@ the system's own baseline already counts as two states**:
   branding guide the requester actually named (often just one). Swaps the screen's branding-driven
   visual identity (colors, imagery treatment, whatever the active guide's rules cover) between
   states. If a guide calls for a color/token the DS doesn't have yet, invent it rather than
-  blocking — tag it `New component` in that screen's Design System Evaluation, never let an
-  invented brand color look like it came from the DS.
+  blocking — tag it `Design System Gap` in that screen's Design System Evaluation (see the
+  four-state table under "Design System Evaluation" below), never let an invented brand color look
+  like it came from the DS.
+- **Design Option switcher** — only when Expected input's "Design option exploration request" was
+  actually made, scoped to the specific screen it was built for (absent on every other screen, and
+  absent everywhere if never requested — this one genuinely is gated, unlike the three above,
+  because building a second full layout is real design work, not a token swap). States: `Original`
+  (the reference screen's own layout, unchanged) and `Option 1` (a genuinely different information
+  architecture built for the same functional requirement — see Step 3's "gaps placeholdered, not
+  blocked" rule for how to handle anything Option 1 needs that Core doesn't ship). Swaps which
+  component tree renders for that screen; the screen's Design System Evaluation table (below)
+  reflects whichever option is currently selected, since the two options can use entirely
+  different real components for the same job.
 - **Tone of Voice switcher** — states are: plain/ungoverned copy plus every tone-of-voice guide
   the requester actually named (often just one, sometimes two). Swaps every real copy decision on
   the current screen between the wording each state produces. **Every state must be written in
@@ -685,7 +756,8 @@ leave the panel untouched:
    **Research gap flag — distinct from "reviewed, not applicable."** If a screen's decision has
    genuinely nothing in the Research index that speaks to it at all (not "something exists but
    doesn't apply here" — this specific kind of question has never been covered), don't quietly
-   tag it `New component` in the DS Evaluation and move on without surfacing the gap. Show a
+   fold it into a component's `Design System Gap` row in the DS Evaluation table and move on
+   without surfacing the gap. Show a
    visually distinct card in
    this section — different treatment from a normal insight card, e.g. a "🔬 ยังไม่มีข้อมูลวิจัยรองรับ"
    flag — naming the specific decision that's unsupported and recommending the research team
@@ -709,16 +781,30 @@ leave the panel untouched:
    — never a vague "on-brand." If the Branding switcher is set to a named guide, this section's
    content swaps with it. If no guide was named for this run, this section says so plainly instead
    of asserting brand-compliance with nothing real behind it.
-5. **Design System Evaluation** — every element on this screen tagged one of exactly two values:
-   `Reused` (a real DS component, in Core or the project layer) or `New component` (anything else
-   — freehand-built because no DS component covers it, an invented token a branding theme called
-   for, copy-only content, a one-off layout adjustment). Don't split `New component` further into
-   variant/token/assumption/content/adjustment sub-tags — two tags is the whole vocabulary. Per
-   screen, not one flow-wide list. **Every `Reused` row gets a Figma link** to the actual component
-   (resolve the real node via the Figma tools' `search_design_system`/component lookup against the
-   governing DS's own library file — don't just link the library file's root, link the specific
-   component/node). `New component` rows have no Figma component to link to — leave them without a
-   link rather than linking something unrelated. Every row, `Reused` or `New component`, is also
+5. **Design System Evaluation** — a **flat, per-component table**, not a list of screen-context
+   rows. One row per real component actually used on this screen (for whichever Design Option is
+   currently selected, if that switcher exists — see above), each carrying:
+   - **Component** — the real component name (e.g. "Button", "Chip", "List Item," "Card
+     Container," the bespoke piece's own descriptive name if it's a gap).
+   - **CDS docs link** — `https://cds-bbl.vercel.app/#/components/<slug>` (swap host for
+     `mbds-bbl.vercel.app`/`webds-bbl.vercel.app` under those modes). Gap rows have none.
+   - **Figma link** — the real per-component node, sourced from the **Core Design System Library
+     (Inventory)** Asana project (knowledge source 9 above) — never invented, never the library
+     file's bare root. A component this build needs but that has no Asana task and no live
+     registry entry (most bespoke chart/slider/tooltip needs) simply has no Figma link — that
+     absence is itself part of the gap evidence, not something to paper over with a guessed link.
+   - **Implementation Status** — exactly one of four values, no fifth invented:
+     - `Shipped in Code` — installed from the real registry and actually rendered here.
+     - `Figma Only / Not Yet Shipped` — has a real Figma component (per the Inventory project or
+       โย's `cds-consumer` docs) but nothing in the live registry yet.
+     - `Design System Gap` — nothing in Figma *or* code for this specific need (bespoke charts,
+       this codebase's recurring slider/tooltip gaps, an invented branding token/color, a one-off
+       layout adjustment — anything freehand-built because nothing DS-side covers it).
+     - `To Be Verified` — you genuinely couldn't resolve the status from either the Inventory
+       project or the live site — say so rather than forcing a guess into one of the other three.
+   Cross-check the Inventory project's `Code Status` against the live CDS site before trusting it
+   (see knowledge source 9 — it drifts); when you find and correct a stale row, say so in the
+   table rather than silently overriding it. Per screen, not one flow-wide list. Every row is
    clickable per the focus interaction above — it names a real element on the current screen.
 6. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
    decision on this screen (labels, headings, error/empty states, CTAs), state the wording chosen
@@ -757,10 +843,13 @@ fix looks. In that case:
   reused (name it), or a new project layer composed fresh — and whether the mode had to be asked
   (Step 1) — plus which tone-of-voice guide(s) were used for copy and which branding guide(s)
   were used for branding decisions, if either applied.
-- Which live switchers (Design System, Branding, Tone of Voice) actually appear in this build's
-  chrome, and each one's states — and confirm explicitly when a dimension has none, so it's clear
-  that's because it genuinely had only one state, not an oversight. Name which dimensions, if any,
-  were framed in the panel as a requested comparison (two names explicitly given) versus an open
+- Which live switchers (Design System, Branding, Tone of Voice, Design Option) actually appear in
+  this build's chrome, and each one's states — and confirm explicitly when a dimension has none,
+  so it's clear that's because it genuinely had only one state, not an oversight. If a Design
+  Option switcher was built, name the screen it's scoped to and summarize what's actually
+  different about Option 1's layout (not just "it's different" — say what changed structurally).
+  Name which dimensions, if any, were framed in the panel as a requested comparison (two names
+  explicitly given) versus an open
   exploration switcher (one name plus baseline).
 - Confirm the focus interaction is wired — Research Insight, UX Rationale, and Design System
   Evaluation rows highlight their real on-screen target on click — and note any row that was
@@ -772,6 +861,13 @@ fix looks. In that case:
   what Requirement collections already had) vs. asked the user (Step 2), plus confirmation that
   the resolution was written back to Requirement collections.
 - Screens built, and for each: real-DS component count vs. placeholder count.
+- If Design System Evaluation used the component-level table format (Component Name, CDS Link,
+  Figma Link, Implementation Status), list what it actually found per design option — component
+  names and their status (Shipped in Code / Figma Only-Not Yet Shipped / Design System Gap /
+  To Be Verified) — not just "table built." Flag any case where the CDS Component Library Asana
+  inventory's recorded status disagreed with this session's own live evidence (an install that
+  actually worked, a search_components result, a repo COMPONENTS.md entry) and say which status
+  won and why — don't silently trust a stale Asana row over live proof.
 - Any research gaps flagged (Step 4's Research Insight "gap flag") — which screen/decision, and
   confirmation each was written onto the requirement's User Story leaf under Research gaps
   flagged, so the research team can pick them up from Requirement collections.
