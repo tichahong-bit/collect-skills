@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.21.0
+version: 1.21.1
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -248,6 +248,16 @@ metadata:
 >    formula), not by trusting a screenshot or a fork's report. Also covers redirecting/stopping a
 >    fork mid-flight the moment direction changes, and never letting two forks touch the same files
 >    concurrently.
+>
+> **v1.21.1 — pull a component's full real context (guidance/gaps/color-context), not just enough
+> props to render it (2026-08-26, same run, immediate follow-up).** Two more real defects surfaced
+> right after v1.21.0's fixes shipped: a `Text Field` used with only the props needed to render
+> (missed its own declared "Has Start Icon" gap and its aria-label-only guidance path), and a `Tab`
+> used with `color="Neutral"` on a `#f5f5f5` surface where `Neutral`'s own selected-pill token is
+> that identical grey — the tab's own guidance already names the correct variant
+> (`On Neutral Secondary`) for that surface. Folded into Step 3 as a standing rule: call
+> `get_component` and actually read its guidance/gaps before finalizing usage, every time, not just
+> at first install.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -587,6 +597,26 @@ resolve to that system's own token/class. If the deliverable format makes a real
 physically impossible at runtime (see "When the deliverable is a single HTML file / Artifact"
 below) — that is a delivery-format constraint to solve, never a license to hand-author a look-alike
 component instead.
+
+**Installing a component is not the same as using it correctly — pull its full context, not just
+enough props to render something plausible.** Before finalizing how a component is used, call
+`get_component(slug)` and actually read its `guidance` (usage, when-to-use/when-not-to-use, any
+context-dependent variant choice — e.g. `Tab`'s own guidance names which `color` variant is correct
+for which surrounding surface colour) and its `gaps` list (declared-but-unimplemented Figma
+properties), not just enough of the props list to make something render. Two real, confirmed
+defects shipped from skipping this in one run: a `Text Field` was used with only the props needed
+to render (visible label, no icon) without checking its own declared "Has Start Icon" gap or its
+guidance's aria-label-only path; a `Tab` was used with `color="Neutral"` on a screen whose actual
+background is the same grey as `Neutral`'s own selected-pill token — the tab guidance's own
+"Color Context Choice" table already named the correct variant (`On Neutral Secondary`) for that
+exact surface, and the mismatch meant the selected tab had zero visible contrast, only found by
+resolving the actual token value, not by looking at a screenshot. The requester's own instruction
+after these were found: check a component's real context every time, standing from then on, not
+just at first install. When a real declared gap must be filled (a Figma property with no coded
+prop), fill it as a disclosed local completion of that project's own vendored copy of the component
+(a code comment citing the real gap this fills), never as an invented prop pretending to be
+upstream CDS, and reflect the fill honestly in the Design System Evaluation table's `note` field
+rather than either hiding it or downgrading the whole component to a full `Design System Gap`.
 
 For each screen/section the requirement implies:
 
