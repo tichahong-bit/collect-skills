@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.20.0
+version: 1.21.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -50,7 +50,25 @@ description: >
   from โย's `cds-consumer` repo for exact component specs and Drift rulings, and defers to กัน's
   `agent-design-kit` repo's real `requirement-intake` tool when a convergence sheet exists. Any
   color/token a theme needs that the DS doesn't have yet gets invented and tagged `Design System
-  Gap`, never presented as if it were already in the DS. Also writes back to Requirement collections
+  Gap`, never presented as if it were already in the DS. When a Design Option is requested for a
+  multi-screen flow (not a single isolated screen), ask whether it's **screen-scoped** or
+  **system-wide** before building — a system-wide direction needs exactly one switcher driving
+  every screen and every piece of chrome (nav, modals, top bar) together, never independent
+  per-screen toggles that could disagree with each other; see "Design Option scope" under Step 4.
+  When a requester hands over an external reference (another file, another tool's output) and asks
+  this build to match it, resolve explicitly whether they mean its **layout/structure** or only its
+  **functional shape** — matching layout while still sourcing every number, label, and color from
+  this build's own real data and real DS tokens is a normal, common request, not a violation of the
+  DS-first rule, so never assume "reference" means "content/journey only, redraw the layout" by
+  default; ask if it's not stated. Giving a Design Option its own visual identity should reach first
+  for a **real token-family swap** (e.g. CDS's own Blue accent vs. Purple accent, scoped via a
+  wrapper class that remaps only the semantic `action`/`accent` tokens) rather than a full light/dark
+  theme swap — a theme swap changes far more surface area at once and is easy to leave a real
+  contrast defect in (a background or text color resolving outside the theme's own scope); if a
+  theme swap is genuinely what's wanted, measure actual rendered contrast (real computed colors, WCAG
+  2.1 relative-luminance ratio, not a visual guess) before calling it done. When this build's own
+  agents run as background forks, treat every fork's self-report as a claim, not a fact — see
+  "Fork orchestration and independent verification" after Step 3b. Also writes back to Requirement collections
   as it clarifies a requirement, so the next run benefits. Presentation-mode panel content
   (section headers, card text, rationale) defaults to Thai, since this is the team's working
   language — write in English only if the requester asks for it. When a screen's decision has
@@ -181,6 +199,55 @@ metadata:
 > new Design Option switcher, scoped to whichever screen it was built for. This is an *optional*
 > capability, requested per-screen, not a standing expectation every run builds a second layout
 > for.
+>
+> **v1.21.0 — a Design Option can be system-wide, not just per-screen; adopting a reference's
+> layout is a normal request, not a rule violation; accent-swap over full-theme-swap; fork
+> self-reports are claims, not facts (2026-08-26, Staff portal for tablet run, several
+> iterations).** Five corrections from one long build, folded in above and into Steps 3–4:
+>
+> 1. **Design Option scope.** v1.20.0's Design Option switcher was written screen-scoped only. This
+>    run started that way (a separate switcher per screen) and the requester explicitly rejected
+>    it: *"Original vs Option A = คนละ Design Direction ของทั้ง System / End-to-End Flow ไม่ใช่
+>    Page-level variation"* — two independent screen-level toggles can disagree with each other
+>    (one screen showing the "old" direction while another shows the "new" one) and don't read as
+>    one coherent alternative product experience. Fixed by collapsing to one global state variable
+>    driving every screen **and every piece of chrome** — sidebar, top bar, and any modal shared
+>    across screens — together, in one action. **Now ask explicitly, before building, whether a
+>    requested Design Option is screen-scoped or system-wide** whenever the flow has more than one
+>    screen; don't default to screen-scoped just because that's what v1.20.0 shipped first.
+> 2. **A Design Option's own auth/interaction mechanism can genuinely diverge, not just its skin.**
+>    The requester asked for Option A's passcode entry to use real keyboard-typable digit boxes
+>    (matching a reference) while Original kept its original on-screen numpad — the same success/
+>    error/outcome, but a different *input mechanism* per variant, both declared unconditionally
+>    (React Hooks — or the equivalent in whatever framework — cannot branch which handlers exist,
+>    only which branch renders). Don't assume a Design Option only ever means a visual reskin of a
+>    shared mechanism; ask if a flow has an interaction (auth, entry, confirmation) where the two
+>    variants might genuinely want to work differently, not just look different.
+> 3. **Adopting an external reference's layout is a normal, explicit request — not something to
+>    silently narrow to "content/journey only."** The requester supplied an external HTML file and
+>    asked this build to match its exact tab structure/IA, while still sourcing every stat, label,
+>    and color from this build's own real data and real DS tokens (never the reference's own
+>    invented numbers or hand-picked colors). The Expected input section previously implied a
+>    reference screen is read only for its functional shape, never its layout — that's now
+>    corrected: resolve explicitly which the requester means (ask if unstated), since matching
+>    layout-while-resourcing-content-and-tokens-for-real is a completely normal, common ask.
+> 4. **Redesigning an interaction should reach for the codebase's own established richer patterns,
+>    not just the nearest simple primitive.** First pass at redesigning a Customer/Staff switcher
+>    used a plain on/off toggle — functionally correct, but the requester asked for something with
+>    a genuinely better experience, and a bare toggle only communicates "on/off," not "what." Fixed
+>    by reaching for a pattern already used elsewhere in the same build (Popover + Menu, showing
+>    both destinations with icons and descriptions) instead of inventing a new one — when a
+>    redesign request lands, check what richer pattern already exists in this codebase for a
+>    similar decision before defaulting to the simplest matching primitive.
+> 5. **Fork orchestration and independent verification is now a named, standing discipline** (its
+>    own section after Step 3b) — a background fork's own "done, verified, published" self-report
+>    is a claim to check, not a fact to relay to the requester; a real component-layout bug (a CDS
+>    `Tab` not stretching inside a `flex:1` wrapper) and a real WCAG contrast failure (a background
+>    color resolving outside its intended theme scope) were both found this run by measuring the
+>    live DOM directly (`getBoundingClientRect`, `getComputedStyle`, a real luminance-based contrast
+>    formula), not by trusting a screenshot or a fork's report. Also covers redirecting/stopping a
+>    fork mid-flight the moment direction changes, and never letting two forks touch the same files
+>    concurrently.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -208,13 +275,27 @@ Asana-backed path as the team migrates knowledge sources over.
   2 and 3 both involve "a project has its own thing" but mean opposite things about where that
   thing comes from (borrowed whole vs. built fresh this run).
 - **Design option exploration request** (optional) — if the requester asks for a fresh layout
-  direction on a specific screen (e.g. "explore a new design for X," "give me an alternative to
-  the reference screen's layout"), build a genuinely different **Design Option 1** for that
-  screen — a different information architecture, not the same grid with different colors — using
-  the reference screen only to understand its functional requirements/content/journey, never its
-  layout. Add a **Design Option switcher** (Original ↔ Option 1) to the chrome, scoped to that
-  screen (see "Live switchers" under Step 4). This is opt-in per screen, not something every run
-  builds unprompted — don't add a second layout speculatively.
+  direction (e.g. "explore a new design for X," "give me an alternative to the reference screen's
+  layout"), two things need resolving before building, not assuming:
+  1. **Scope — screen or system-wide.** If the flow has more than one screen, ask whether this is
+     a **screen-scoped** option (only that one screen gets a second layout) or a **system-wide**
+     design direction spanning every screen and shared chrome (nav, top bar, modals) together —
+     these produce very different builds (independent per-screen toggles vs. one global state
+     driving everything at once) and shouldn't be assumed from a single-screen-sounding request.
+     See "Design Option scope" under Step 4.
+  2. **What the reference is for.** When the request points at an external reference (another
+     screen, another tool's output, a supplied file), resolve explicitly whether the requester
+     wants this build to match its **layout/structure** (adopt the reference's information
+     architecture, but source every number/label/color from this build's own real data and real DS
+     tokens — never the reference's own invented content or hand-picked colors) or only its
+     **functional shape** (same underlying job, freely different layout). Both are normal,
+     legitimate requests — don't default to one without asking when it's not stated, and don't read
+     "match this reference" as "redraw its layout with placeholder content" either way.
+  Build the resulting option as a different information architecture, not the same grid with
+  different colors. Add a **Design Option switcher** (Original ↔ Option 1/A) to the chrome, scoped
+  per the resolved answer to (1) above (see "Live switchers" and "Design Option scope" under Step
+  4). This is opt-in, not something every run builds unprompted — don't add a second layout
+  speculatively.
 - **Compare request** (optional) — supplying **two** project-specific (or theme) links instead of
   one means the requester has a specific side-by-side decision in mind (e.g. deciding between a
   current and a proposed pattern set), and the panel's Design System Evaluation/Branding prose
@@ -565,6 +646,45 @@ past. A finding that's only in the token-*definition* layer itself (the literal 
 foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
 violations as blocking.
 
+## Fork orchestration and independent verification
+
+Whenever a build spawns a background agent/fork to do real implementation work (not just
+research), that fork's own final report — "done," "verified," "published," "no errors" — is a
+**claim to independently check, not a fact to relay to the requester**. This applies even when the
+fork was explicitly instructed to run `verify_code`/the audit script itself; re-run the check, or
+inspect the actual result, from the orchestrating session before telling the requester it's done.
+
+- **Verify against the real, running artifact — not the fork's description of it.** Load the
+  actual page (browser tooling) and confirm the claim directly: `getComputedStyle`/
+  `getBoundingClientRect` for a layout or color claim, a real simulated keystroke/click for an
+  interaction claim, `read_console_messages` for a "no errors" claim. Two real defects were only
+  found this way in one build, neither visible from a screenshot alone: a component that didn't
+  stretch to fill its flex wrapper (only visible by measuring its actual rendered width against its
+  wrapper's), and a WCAG contrast failure caused by a background color resolving outside its
+  intended theme scope (only visible by computing the actual rendered colors and applying the real
+  WCAG 2.1 relative-luminance contrast formula, not by eyeballing a screenshot — text can look
+  "readable enough" at a glance well under the 4.5:1 normal-text / 3:1 large-text minimums).
+- **The orchestrating session owns publishing, not the fork.** Tell every fork explicitly not to
+  publish the artifact itself; publish only after independently verifying its work. A fork that
+  publishes anyway before verification means an unverified state is now the one the requester sees
+  if anything interrupts the check.
+- **Redirect or stop a fork the moment the requester's direction changes mid-flight** — don't let
+  it keep working toward an outcome that's about to be discarded (e.g. a fork mid-way through
+  fixing a dark-theme contrast bug when the requester decides to drop dark theme entirely). Send
+  the stop/redirect instruction as soon as the change is known, and have it report back its partial
+  file-edit state rather than finishing or publishing work that's now moot.
+- **Never run two forks concurrently against the same files.** If two pieces of work would touch
+  the same file (e.g. the same shared chrome component two different fixes both need to edit),
+  sequence them — the second starts only after the first's result is verified and merged — rather
+  than risking one fork's edits silently clobbering the other's.
+- **When redesigning an existing interaction**, check what richer pattern this same codebase
+  already uses for a comparable decision before reaching for the simplest matching primitive (e.g.
+  a plain on/off toggle). A toggle communicates only "on/off," not "what" — if the codebase already
+  has an established pattern that shows more (a menu/popover pattern that names both destinations
+  with icons and descriptions, say), prefer reusing that pattern for consistency and for the richer
+  experience it gives the reviewer, and be ready to justify the choice with real UX reasoning if
+  the first redesign attempt gets sent back for more work.
+
 ## When the deliverable is a single HTML file / Artifact
 
 An Artifact page runs under a CSP that blocks every external host except Google Fonts — it
@@ -666,15 +786,34 @@ the system's own baseline already counts as two states**:
   four-state table under "Design System Evaluation" below), never let an invented brand color look
   like it came from the DS.
 - **Design Option switcher** — only when Expected input's "Design option exploration request" was
-  actually made, scoped to the specific screen it was built for (absent on every other screen, and
-  absent everywhere if never requested — this one genuinely is gated, unlike the three above,
-  because building a second full layout is real design work, not a token swap). States: `Original`
-  (the reference screen's own layout, unchanged) and `Option 1` (a genuinely different information
-  architecture built for the same functional requirement — see Step 3's "gaps placeholdered, not
-  blocked" rule for how to handle anything Option 1 needs that Core doesn't ship). Swaps which
-  component tree renders for that screen; the screen's Design System Evaluation table (below)
-  reflects whichever option is currently selected, since the two options can use entirely
+  actually made, absent everywhere if never requested (this one genuinely is gated, unlike the
+  three above, because building a second full layout is real design work, not a token swap).
+  States: `Original` (the existing layout, unchanged) and `Option 1`/`Option A` (a genuinely
+  different information architecture built for the same functional requirement — see Step 3's
+  "gaps placeholdered, not blocked" rule for how to handle anything the option needs that Core
+  doesn't ship). Swaps which component tree renders; the screen's Design System Evaluation table
+  (below) reflects whichever option is currently selected, since the two options can use entirely
   different real components for the same job.
+
+  **Design Option scope — screen or system-wide, resolved per Expected input before building.**
+  - *Screen-scoped*: the switcher lives on, and only affects, the one screen it was built for —
+    absent on every other screen.
+  - *System-wide*: **one** switcher state drives every screen and every piece of shared chrome
+    (sidebar/nav, top bar, modals) together, in a single action — never independent per-screen
+    toggles for a system-wide request, even if it would be less work to build that way. A prior
+    run built per-screen toggles for what turned out to be a system-wide request and had to be
+    consolidated after the fact; the requester's own framing was blunt about why: two screens
+    showing two different "current" directions at once isn't one coherent alternative experience,
+    it's an inconsistency. When a system-wide option is genuinely a different design direction (not
+    just a different color), give it its own real, distinct DS token identity — prefer swapping a
+    semantic token family (e.g. an accent color family) via a scoping wrapper class over switching
+    the whole color theme (light/dark); a full theme swap touches far more surface area and is
+    easy to leave with a real contrast defect (see "Fork orchestration and independent
+    verification" below for how one such defect was actually found). If a distinct interaction
+    mechanism (not just a skin) makes sense for the option — e.g. a different auth-entry pattern —
+    that's a legitimate part of a system-wide direction too, not scope creep; keep both mechanisms'
+    state/handlers un-conditionally declared in whatever the framework requires, with only the
+    render branch conditional on the active option.
 - **Tone of Voice switcher** — states are: plain/ungoverned copy plus every tone-of-voice guide
   the requester actually named (often just one, sometimes two). Swaps every real copy decision on
   the current screen between the wording each state produces. **Every state must be written in
@@ -846,11 +985,17 @@ fix looks. In that case:
 - Which live switchers (Design System, Branding, Tone of Voice, Design Option) actually appear in
   this build's chrome, and each one's states — and confirm explicitly when a dimension has none,
   so it's clear that's because it genuinely had only one state, not an oversight. If a Design
-  Option switcher was built, name the screen it's scoped to and summarize what's actually
-  different about Option 1's layout (not just "it's different" — say what changed structurally).
-  Name which dimensions, if any, were framed in the panel as a requested comparison (two names
-  explicitly given) versus an open
+  Option switcher was built, name its **scope** (screen-scoped vs. system-wide — see "Design
+  Option scope" under Step 4) and summarize what's actually different about the option's layout
+  (not just "it's different" — say what changed structurally), plus whether it also carries a
+  distinct real DS token identity (e.g. a different accent family) or a genuinely different
+  interaction mechanism, not just a different layout. Name which dimensions, if any, were framed in
+  the panel as a requested comparison (two names explicitly given) versus an open
   exploration switcher (one name plus baseline).
+- If any implementation work ran via a background fork, confirm its "done"/"verified" claims were
+  independently re-checked from the orchestrating session (real computed styles/DOM measurements,
+  simulated interaction, console check) before being relayed here — not just relayed from the
+  fork's own report — and name anything a fork claimed that verification actually contradicted.
 - Confirm the focus interaction is wired — Research Insight, UX Rationale, and Design System
   Evaluation rows highlight their real on-screen target on click — and note any row that was
   deliberately left non-clickable because it has no on-screen target.
