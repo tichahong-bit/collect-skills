@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.21.1
+version: 1.22.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -82,7 +82,7 @@ description: >
   behaves like the real device rather than a webpage with a phone graphic on it. Web/desktop
   targets get no device bezel at all.
 metadata:
-  status: proposal, untested — never run end to end
+  status: in active use — corrected across 9+ documented real runs, see version history below
   mode: mixed
   category: workflow-meta
   sibling_of: ds-governance-prototype-notion (Notion-backed, kept separate — not a replacement)
@@ -90,11 +90,13 @@ metadata:
 
 # Prototype Agent (Asana-backed)
 
-> **Status: proposal, not yet verified working end to end.** Composed from Asana-knowledge sources
+> **Status: in active use, corrected from real runs.** Composed from Asana-knowledge sources
 > that didn't exist as Asana pages until 2026-08-19, plus a Core + project-layer design-system
 > model this skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`,
-> and didn't distinguish Core from a project-specific layer). Report back anything that doesn't
-> behave as described here so this file keeps getting corrected from what actually happened.
+> and didn't distinguish Core from a project-specific layer). By v1.22.0 this has run end to end
+> across 9+ documented real builds (see the version history below) — every entry is a real defect
+> or a real requester correction, not a hypothetical. Report back anything that doesn't behave as
+> described here so this file keeps getting corrected from what actually happened.
 >
 > **Corrections from the first real run (2026-08-20, Wealth Dashboard US01):** the requester liked
 > the presentation format overall but flagged three things, now folded into Step 4 above — (1)
@@ -258,6 +260,75 @@ metadata:
 > (`On Neutral Secondary`) for that surface. Folded into Step 3 as a standing rule: call
 > `get_component` and actually read its guidance/gaps before finalizing usage, every time, not just
 > at first install.
+>
+> **v1.22.0 — Dark theme is a real, standing mode axis with its own class of token-pairing bugs;
+> Presentation chrome defaults to theme-independent; floating chrome must not silently eat clicks;
+> settings switchers default to the lightest correct treatment (2026-08-27, Staff portal for
+> tablet run, third build phase on the same project).** Five corrections, the first being the big
+> one — a whole category of dark-mode bug this skill had no guidance on at all:
+>
+> 1. **New standing section "Dark theme" (after Step 3b)** — CDS ships a real
+>    `[data-theme='dark']` token block, and dark mode is a real, requestable mode axis like density
+>    or shape, not a cosmetic afterthought. Two distinct real-bug classes found only by measuring
+>    actual computed contrast across every screen, not by eyeballing one: (a) a token whose name
+>    says "inverse" (e.g. `surface-neutral-primary-inverse`) can deliberately *flip which theme it
+>    reads as dark* — it's dark-navy in light mode and near-white in dark mode, by design, so an
+>    "always-dark chrome" component (a sidebar, a status bar) built on it needs paired text/border
+>    colors from that same token's own matching `-inverse` content/border family, never a hardcoded
+>    `rgba(255,255,255,X)` literal that quietly assumed the surface stays dark forever; (b) CDS's
+>    `surface-accent-*` and `surface-{positive,negative,warning}-primary` tokens stay a fixed light
+>    pastel across BOTH themes, while the plain `content-{success,danger,warning,brand,accent-*}`
+>    tokens they look naturally paired with actually flip lighter under dark theme (built for the
+>    app's own now-dark canvas, not for these always-light tinted cards) — CDS ships the correct
+>    non-flipping pair for exactly this (`content-{x}-on-{x}-primary`, `content-accent-on-accent-
+>    {color}`); use those for any text/icon sitting on a status-tinted or accent-tinted card,
+>    never the plain semantic content token. One real build had this exact bug recur independently
+>    in 8+ unrelated files (sidebar nav, dashboard schedule/checklist/churn/leaderboard cards, a
+>    passcode-error state, a stat-card row, a tone pill component) once actually swept — this is
+>    systemic, not a one-off, so a dark-mode build isn't done after fixing the first instance
+>    found. **Standing rule: after implementing/touching dark mode, run an actual computed-contrast
+>    sweep (WCAG relative-luminance ratio, real `getComputedStyle`, every screen/state) before
+>    calling it done — a component can pass on one screen and fail the identical token pairing on
+>    another because the two sit on differently-behaving surfaces.**
+> 2. **The Presentation-mode chrome defaults to one fixed theme, independent of the product
+>    screens' own theme toggle**, unless the requester asks otherwise. Real feedback this run:
+>    dark mode should apply to the product being reviewed, not to the reviewer tooling around it —
+>    a fixed light background reads easier for the panel regardless of what the screens underneath
+>    are doing. Implementation: pin `data-theme="light"` on the chrome's own root node so it
+>    re-resolves CDS's real light-token block regardless of the app-level theme state, rather than
+>    inheriting it. Ask if the requester wants the chrome to follow the app theme instead — don't
+>    assume it should by default.
+> 3. **A floating/draggable chrome must not silently intercept clicks over the product below it.**
+>    A `position:fixed` wrapper using column-flex + `alignItems:'flex-end'` to right-align children
+>    of different widths shrink-wraps its own hit-testable box to its WIDEST child — the empty
+>    space beside a narrower child still blocks pointer events to whatever's underneath, even
+>    though nothing paints there. This one was invisible from every screenshot; only found by
+>    `document.elementFromPoint` returning the chrome's own wrapper div instead of the sidebar
+>    button underneath it, after clicks silently did nothing for several turns. Standing fix:
+>    `pointerEvents:'none'` on the outer wrapper, `pointerEvents:'auto'` on each real visible child
+>    (the collapsed pill, the dimension bar, the panel) — never on the shared outer box.
+> 4. **A plain two-option settings row defaults to the lightest correct treatment** — a label plus
+>    a real `ToggleSwitch`, the active side in emphasized text, not a heavier paired-card affordance
+>    (e.g. CDS's `Card Container` with a separate "SELECTED" caption) unless the requester's own
+>    reference specifically shows cards. This run built the heavier card treatment first (a
+>    reasonable reading of a reference mockup), and the requester asked to simplify it once they
+>    saw it live — "มีแต่ text แล้วเลือก toggle เอา." Default to minimal for plain either/or choices;
+>    reach for a heavier component only when the content genuinely needs more than a label (a
+>    sublabel, an icon, a preview).
+> 5. **A single-file Artifact's real cold-load time can be 10–20+ seconds** for a build with a full
+>    component tree plus an inlined web font (~2MB is normal) — this is expected sandboxed-iframe
+>    load time, not a broken build. Repeated quick checks (a few seconds' wait, then a screenshot)
+>    mistook a still-loading page for a crash multiple times in a row this run. Give it real time
+>    before concluding a publish is broken, and when a render failure is still genuinely suspected,
+>    verify with a non-destructive on-page error overlay (`window.addEventListener('error', ...)` +
+>    a `try/catch` around the root render call, both writing any caught error directly into a
+>    visible DOM node) rather than relying on browser-extension console tools — those only capture
+>    the top-level wrapper page's console, not the artifact's own sandboxed content iframe, so a
+>    real crash inside the iframe can read as "zero console errors." Separately: republishing to an
+>    artifact URL this session hasn't freshly `read` in the current turn can be refused ("identical
+>    content already refused, resent unchanged") even when the new content is a real superset of
+>    changes — call `Artifact action:"read"` on the target URL once before retrying a publish that
+>    was just refused, don't just resend the same call.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -676,6 +747,88 @@ past. A finding that's only in the token-*definition* layer itself (the literal 
 foundation file states once, by necessity) is not a defect — only flag genuine consumer-code
 violations as blocking.
 
+## Dark theme (and other real DS mode axes with the same trap)
+
+Dark mode is a real, requestable mode axis in CDS/MBDS/webds — a genuine `[data-theme='dark']`
+token block generated from the DS's own Figma modes, not a cosmetic filter this skill improvises.
+Apply the `data-theme` attribute at the **true root** of the rendered tree (the outermost wrapper,
+not a nested subtree) — a narrower scope leaves anything outside it (a shared background, a status
+bar) resolving the wrong theme's tokens while everything inside looks right, a real WCAG failure
+found this way in an earlier run (white-on-near-white, 1.09:1).
+
+**The "-inverse" flip trap.** A token whose name includes "inverse" (e.g.
+`surface-neutral-primary-inverse`) can deliberately mean *the opposite of whichever theme is
+currently active* — dark navy in light mode, near-white in dark mode, by design, so a chrome
+element that reads as "the one permanently dark accent surface" in light mode keeps reading as a
+visually distinct accent surface once the whole app goes dark, just now light-on-dark instead of
+dark-on-light. This is correct CDS behavior, not a bug in the token — the bug is anywhere code
+built on that surface assumed it stays dark forever and hardcoded a matching text/border color
+(`rgba(255,255,255,0.5)` and similar) instead of reading the token's own paired `-inverse`
+content/border family (`content-neutral-primary-inverse`, `content-neutral-secondary-inverse`,
+`border-neutral-primary-inverse`, etc.), which flips in lockstep with the surface and stays
+correctly paired in both themes. Grep for hardcoded `rgba(255,255,255,` / `rgba(0,0,0,` literals
+anywhere near a `-inverse` surface token before calling a dark-mode build done — every one found
+this way in one real run was this exact bug.
+
+**The fixed-light-surface trap — a second, more common flip mismatch.** CDS's
+`surface-accent-{blue,green,purple,red,orange,yellow}` and
+`surface-{positive,negative,warning}-primary` tokens stay a fixed light pastel across **both**
+themes (barely move at all — dark mode usually just saturates them slightly). The plain
+`content-{success,danger,warning,brand}`/`content-accent-{color}` tokens that look like their
+natural pairing actually **flip lighter under dark theme**, because they're built to stay legible
+on the app's own dark canvas — not on these small always-light tinted cards, chips, and badges.
+Paired naively, dark mode turns "readable dark text on a pale card" into "pale text on a pale
+card," often well under 2:1. CDS ships the correct non-flipping pair for exactly this case — use
+it whenever text or an icon sits directly on one of these tinted surfaces, never the plain
+semantic content token:
+
+| Sits on this fixed-light surface | Use this content token (not the plain one) |
+|---|---|
+| `surface-accent-blue` | `content-accent-on-accent-blue` |
+| `surface-accent-green` | `content-accent-on-accent-green` |
+| `surface-accent-red` | `content-accent-on-accent-red` |
+| `surface-accent-purple` | `content-accent-on-accent-purple` |
+| `surface-accent-yellow` | `content-accent-on-accent-yellow` |
+| `surface-accent-orange` | `content-accent-on-accent-orange` |
+| `surface-positive-primary` | `content-positive-on-positive-primary` |
+| `surface-negative-primary` | `content-negative-on-negative-primary` |
+| `surface-warning-primary` | `content-warning-on-warning-primary` |
+
+This pattern is **systemic, not a one-off** — one real build had it recur independently in 8+
+unrelated files (a sidebar's nav items, a dashboard's "next appointment"/checklist/churn-risk/
+leaderboard cards, a passcode-entry error state, a stat-card row, and a shared tone-pill
+component) once actually swept for, after the first instance was fixed in isolation and reported
+as done. **Fixing the one instance you were told about is not the same as fixing the class of
+bug** — before calling a dark-mode build done, grep every file for `surface-accent-` and
+`surface-{positive,negative,warning}-primary`, and check what content token sits on each result.
+
+**A shared component's color variant can be correct in one place and wrong in another, simultaneously
+— check both states, on the actual surface each is used against.** A `Tab`'s "On Neutral Primary
+Inverse" color variant has a genuinely correct, non-flipping SELECTED pair (`#002850`
+surface/white label, both real dedicated component tokens) — but its UNSELECTED label reads from
+the generic flipping `content-neutral-primary-inverse`, which is only correct when the tab bar
+itself sits on a surface that flips with theme (like `bg.brandDark`/`surface-neutral-primary-
+inverse`). The same variant used on an *ordinary* dark surface (dark simply because the theme is
+dark, not because it's an inverse-flipping surface) gets the SELECTED state right and the
+UNSELECTED state wrong (invisible black-on-navy) — while the exact same fix applied blanket to
+every instance of that component breaks the FIRST, correct usage instead. If a shared component's
+color variant needs a targeted override, scope it precisely (a dedicated CSS class applied only at
+the call sites that need it), verify it doesn't regress a different, already-correct usage of the
+same component/variant elsewhere in the build, and don't fix by guessing — measure both states'
+actual computed contrast on their actual surface before and after.
+
+**Standing verification rule.** After implementing or touching dark mode, run a real computed-
+contrast sweep — inject a WCAG relative-luminance contrast checker (`getComputedStyle` on every
+visible text node, walk up to the actual effective background, compute the real ratio, flag
+anything under 4.5:1 for normal text / 3:1 for large text) across every screen and every dimension-
+switcher state (both Design Options, both CTA variants, every tab/view), not just the one screen
+that prompted the fix. A component can pass the identical token pairing on one screen and fail on
+another purely because the two sit on differently-behaving surfaces (a flipping one vs. a fixed
+one) — screenshots and a single spot-check both miss this reliably; only the actual computed style
+catches it. Treat SVG `<text>` elements specially in any such scanner — their visible color comes
+from the `fill` attribute/property, not CSS `color`, and a scanner reading `color` on an SVG text
+node will report a false positive off the browser's unrelated default.
+
 ## Fork orchestration and independent verification
 
 Whenever a build spawns a background agent/fork to do real implementation work (not just
@@ -753,6 +906,23 @@ above still applies in full. The correct sequence when the target is one self-co
    a clean runtime. Serve `dist/` with a plain local static server (e.g. `python3 -m http.server`)
    to preview it — `file://` URLs are blocked by browser automation tooling.
 
+**A real cold-load of the published Artifact can genuinely take 10–20+ seconds** for a build with
+a full component tree plus an inlined web font (~2MB total is normal) — this is expected
+sandboxed-iframe load time, not a broken build, and a quick "wait a couple seconds, screenshot,
+still blank" check can misread a still-loading page as a crash. Give a fresh load real time
+(10+ seconds) before concluding a publish is broken. If a render failure is still genuinely
+suspected after that, verify with a non-destructive **on-page error overlay** — wrap the root
+render call in `try/catch` and add a `window.addEventListener('error', ...)` /
+`'unhandledrejection'` handler, both writing any caught error as visible text into an appended DOM
+node (not replacing existing content) — rather than relying on browser-extension console tools:
+those capture only the top-level wrapper page's console, not the artifact's own sandboxed content
+iframe, so a real crash inside the iframe reads as "zero console errors" from the outside.
+Remove the overlay scaffolding again before the final publish. Separately: republishing to an
+artifact URL this session hasn't freshly `read` (via `Artifact action:"read"`) in the *current*
+turn can be refused ("identical content already refused, resent unchanged") even when the new
+content is a real, complete superset of the previous version's changes — call `read` once on the
+target URL before retrying a publish that was just refused, rather than resending the same call.
+
 **Two DS systems installed in the same project (a DS A/B compare build) will collide on token
 names unless scoped.** CDS and MBDS each publish their own `:root { --surface-neutral-primary: ...;
 ... }` block, and where both systems happen to use the same token name (they do, for several —
@@ -793,6 +963,31 @@ draggable control bar — a grip so the requester can move it out of the way of 
 they're looking at — not a fixed strip pinned in one corner. Collapsed is the default state on
 load (clean product surface first). The panel's content **changes per screen** — this is the
 specific fix this skill exists to make over the static single-panel pattern seen elsewhere.
+
+**The chrome stays theme-independent by default.** If the product screens have a dark-mode
+switcher (see "Dark theme" above), pin the reviewer chrome's own root to `data-theme="light"`
+regardless of the product's current theme state, so it re-resolves CDS's real light-token block
+every time — a fixed light background reads easier for reviewer tooling than one that dark-
+switches along with the screens it's reviewing. Only make the chrome follow the app theme if the
+requester specifically asks for that.
+
+**A `position:fixed` chrome must not silently block clicks on the product below it.** A wrapper
+using column-flex with `alignItems:'flex-end'` to right-align children of different widths
+shrink-wraps its own hit-testable box to its WIDEST child — the empty space beside a *narrower*
+child still intercepts pointer events for whatever's underneath, even though nothing paints
+there, and this is invisible from a screenshot (only `document.elementFromPoint` at the dead
+click's coordinates reveals it — the chrome's own wrapper div comes back instead of the real
+product element). Set `pointerEvents:'none'` on that shared outer wrapper and `pointerEvents:
+'auto'` explicitly on each real, visibly-painted child (the collapsed pill, the dimension bar,
+the panel) — never leave the outer box with the default `auto`.
+
+**A plain either/or setting defaults to the lightest correct treatment.** For a dimension switcher
+that's just "pick one of two named things" (see "Live switchers" below), a label plus a real
+`ToggleSwitch` — active side in emphasized text — is the default; reach for a heavier
+paired-card affordance (e.g. a `Card Container` pair with its own "selected" caption) only when
+the requester's own reference specifically shows cards, or the content genuinely needs more than
+a label (a sublabel, an icon, a preview image). A card-per-option treatment for a plain text
+choice reads as heavier than the decision warrants.
 
 ### Live switchers, not gated compares
 
@@ -1029,6 +1224,9 @@ fix looks. In that case:
 - Confirm the focus interaction is wired — Research Insight, UX Rationale, and Design System
   Evaluation rows highlight their real on-screen target on click — and note any row that was
   deliberately left non-clickable because it has no on-screen target.
+- If the build has a dark-mode switcher, confirm a real computed-contrast sweep actually ran
+  (see "Dark theme" above) — which screens/states were checked, and any real defect it found and
+  fixed, not just "dark mode added."
 - Whether a UX Rationale section had real Design Knowledge content to cite per screen, or was
   honest about finding nothing there — don't let this read as "done" if most cards just say "no
   rationale found."
@@ -1049,9 +1247,9 @@ fix looks. In that case:
 - Any knowledge source that was missing/empty, unreachable, or the user hadn't linked yet — say
   so plainly, don't paper over a gap. Include whether `cds-consumer`/`agent-design-kit` synced
   successfully and whether the real `requirement-intake` tool ran or the manual fallback was used.
-- Explicitly say this run is feeding a proposal-status skill and invite a correction if any step
-  didn't behave as described — same transparency standard as the Notion-backed sibling's own
-  "proposal, not yet verified working" banner.
+- Explicitly invite a correction if any step didn't behave as described — this skill is corrected
+  from real runs (see the version history at the top), and every future defect found is what keeps
+  it accurate for the next person who picks it up.
 
 ## Out of scope for this skill
 
