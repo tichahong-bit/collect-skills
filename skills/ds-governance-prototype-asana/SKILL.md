@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.22.0
+version: 1.23.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -94,7 +94,7 @@ metadata:
 > that didn't exist as Asana pages until 2026-08-19, plus a Core + project-layer design-system
 > model this skill's Notion-backed sibling only partially covered (it only knew about `cds-bbl`,
 > and didn't distinguish Core from a project-specific layer). By v1.22.0 this has run end to end
-> across 9+ documented real builds (see the version history below) — every entry is a real defect
+> across 10+ documented real builds (see the version history below) — every entry is a real defect
 > or a real requester correction, not a hypothetical. Report back anything that doesn't behave as
 > described here so this file keeps getting corrected from what actually happened.
 >
@@ -329,6 +329,58 @@ metadata:
 >    content already refused, resent unchanged") even when the new content is a real superset of
 >    changes — call `Artifact action:"read"` on the target URL once before retrying a publish that
 >    was just refused, don't just resend the same call.
+
+> **v1.23.0 — knowledge sections must trace to what a fresh traversal actually finds, an
+> explicit single-theme instruction beats the default switcher heuristic, and Copywriting must
+> cite a source link and match the literal rendered string (2026-08-28, Staff portal for tablet
+> run, fourth build phase on the same project).** The requester's own audit this run found the
+> panel's Research Insight and Branding sections showing effectively nothing real, and asked "why
+> isn't Presentation Mode showing the knowledge that should have informed this design" — the root
+> causes were three distinct things, not one bug:
+>
+> 1. **A "no evidence for this decision" gap-flag list is not the same field as the real Research
+>    Insight list, and must never be the only thing a screen's Research Insight section renders.**
+>    A prior run's per-screen data had exactly one `research` array per screen, populated only
+>    with decisions *lacking* research backing (correctly labeled "🔬 ยังไม่มีข้อมูลวิจัยรองรับ") — so
+>    even though the real Research index had genuine, on-topic reports the whole time, the section
+>    never had a field to put a real finding in, and looked "broken" despite the gap-flag rule
+>    itself working exactly as designed. Fix: keep two separate arrays per screen — real
+>    `researchInsights` (Insight / Applied to Design / Source, only ever populated from a report
+>    actually read this run) and the gap-flag list (decisions with no backing) — and render both,
+>    never let one stand in for the other.
+> 2. **Before concluding a knowledge section is "broken," re-fetch the source fresh and check
+>    whether it's actually empty upstream.** This run's UX Rationale section was genuinely correct
+>    to show almost nothing — knowledge source 8 (Design Knowledge)'s own "UX Behaviour" branch was
+>    a real empty untitled stub page at the time, not a retrieval failure; the one populated branch
+>    (AI Evaluation) was already being cited correctly. Don't assume a sparse section means the
+>    code is broken — `page_get` the source live and confirm before rewriting anything, and say so
+>    plainly ("source page itself is empty, not a build defect") rather than inventing content to
+>    make the section look fuller. (When the requester subsequently populated that branch with 8
+>    real UX reports mid-project, the fix was purely re-running the same fresh-traversal read and
+>    mapping each report to the screens it actually supports — no code change needed at all.)
+> 3. **An explicit "there is exactly ONE Branding Theme for this prototype, don't show other
+>    choices" instruction overrides the default live-switcher heuristic** ("Live switchers, not
+>    gated compares" above still applies when nothing says otherwise) — when a requester states
+>    this, remove the switcher entirely: its state variable, its UI control, and any CSS/token
+>    scope built for the retired second option — not just default-select the named guide and leave
+>    the control wired but pointed one way. Left-over switcher UI is itself a second "choice" the
+>    requester explicitly said not to show. Separately: a source guide can be honest about its own
+>    incompleteness (this run's named deck literally marked several of its own sections "Under
+>    development" as of its authoring date) — reflect that boundary in the Branding section rather
+>    than presenting an unfinished pillar as a settled visual spec.
+> 4. **Copywriting needs the same link-to-source discipline Research Insight and UX Rationale
+>    already had, and its example text must be the literal string the live component renders, not
+>    a hand-authored parallel example.** Two real bugs found by checking the actual rendered app,
+>    not just the panel: a Copywriting card's "Guideline" line named the tone-of-voice guide but
+>    had no link to its Asana page (unlike every other cited section) — fixed by requiring one; and
+>    a component's copy that the panel described as tone-differentiated turned out, on reading the
+>    actual component source, to branch only on language, never on tone — the two "different"
+>    example strings shown in the panel had never actually been reachable from the running app.
+>    **Standing rule: before citing a screen's copy as an example of a guide's rule, grep the real
+>    component source for the string and confirm it actually varies with the switcher state being
+>    described** — if it doesn't yet, either make it actually vary (if the requester's tone rule
+>    calls for it) or say plainly "this string reads identically under both guides" rather than
+>    showing two examples the code can't produce.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -1010,6 +1062,14 @@ the system's own baseline already counts as two states**:
   blocking — tag it `Design System Gap` in that screen's Design System Evaluation (see the
   four-state table under "Design System Evaluation" below), never let an invented brand color look
   like it came from the DS.
+
+  **Exception — an explicit single-theme instruction overrides this default (v1.23.0).** If the
+  requester states there is exactly **one** Branding Theme for this prototype and no other choices
+  should be shown, don't build this switcher at all — not even defaulted to the named guide with
+  the control left in place. Remove its state variable, its UI control, and any CSS/token scope
+  built for a retired second option entirely. A switcher UI pointed permanently at one side is
+  still a second "choice" visible in the chrome, which is exactly what that kind of instruction is
+  ruling out.
 - **Design Option switcher** — only when Expected input's "Design option exploration request" was
   actually made, absent everywhere if never requested (this one genuinely is gated, unlike the
   three above, because building a second full layout is real design work, not a token swap).
@@ -1129,6 +1189,15 @@ leave the panel untouched:
    Requirement collections (see "Writing research gaps back to Requirement collections" below) —
    the panel flag alone isn't enough, the research team needs to find it from Requirement
    collections too, not just from inside a prototype they may never open.
+
+   **Keep this as a genuinely separate array from the real insight cards above it (v1.23.0).** A
+   screen's data needs two distinct lists — real `researchInsights` (only ever populated from a
+   report actually read this run: Insight / Applied to Design / Source) and this gap-flag list
+   (decisions with no backing found) — and the section renders both. Never let the gap-flag list
+   be the *only* field that exists, and never let it stand in for a real insight — a prior run did
+   exactly this (one array, meant only for gaps, was the entire Research Insight section), which
+   made a screen with real, on-topic research reports available render as if nothing had been
+   read at all.
 3. **UX Rationale** — cards citing the **Design Knowledge** Asana tree (knowledge source 8 above),
    not the Research index — this is design-principle/platform evidence (layout grids, interaction
    conventions, AI-output-trust caveats), a different kind of citation than a user-behavior
@@ -1145,6 +1214,14 @@ leave the panel untouched:
    — never a vague "on-brand." If the Branding switcher is set to a named guide, this section's
    content swaps with it. If no guide was named for this run, this section says so plainly instead
    of asserting brand-compliance with nothing real behind it.
+
+   **A source guide can be honest about its own gaps — reflect that, don't paper over it
+   (v1.23.0).** A workshop deck or vendor file is sometimes a project-status snapshot, not a
+   finished spec, and may say so itself (e.g. a section explicitly marked "Under development" as
+   of the deck's own authoring date). When that's true, say so in this section for whatever pillar
+   it affects (e.g. "this guide doesn't yet specify typography — type comes from the DS's own
+   scale, not from this guide") rather than presenting an unfinished pillar as if it were a settled
+   visual direction the build is now following.
 5. **Design System Evaluation** — a **flat, per-component table**, not a list of screen-context
    rows. One row per real component actually used on this screen (for whichever Design Option is
    currently selected, if that switcher exists — see above), each carrying:
@@ -1176,7 +1253,20 @@ leave the panel untouched:
    V2") that it follows — never a vague "per guidelines." If the Tone of Voice switcher is set to a
    named guide, this section's content (and the copy actually rendered on the screen) swaps with
    it. If no guide was named for this run, this section says so plainly instead of pretending copy
-   was guideline-checked.
+   was guideline-checked. **Link to the named guide's actual Asana detail page** — same discipline
+   as Research Insight and UX Rationale above; a guide name with no link is a citation you have to
+   take on faith, which this skill doesn't allow anywhere else in the panel.
+
+   **The example text shown must be the literal string the live component renders, not a
+   hand-authored parallel example (v1.23.0).** Before citing a screen's copy as evidence of a
+   guide's rule — especially when claiming it differs between two tone/language states — grep the
+   actual component source for that string and confirm it really is reachable from the running
+   app under the state being described. A prior run's panel showed two genuinely different English
+   example strings for a card whose real component only ever branched on language, never on tone —
+   neither example was actually producible by the app the panel claimed to describe. If a string
+   doesn't yet vary the way the panel wants to show, either make the component actually vary it
+   (when the named guide's own rule calls for that) or say plainly "this string reads identically
+   under both guides" — never show two examples the code can't produce.
 
 ## Fixing or replacing an existing prototype
 
@@ -1227,6 +1317,15 @@ fix looks. In that case:
 - If the build has a dark-mode switcher, confirm a real computed-contrast sweep actually ran
   (see "Dark theme" above) — which screens/states were checked, and any real defect it found and
   fixed, not just "dark mode added."
+- Confirm each screen's Research Insight section renders real insight cards (not just the
+  gap-flag list standing in for them), each with a source link — and for any section that's
+  genuinely sparse (Research, UX Rationale, or Branding), confirm the underlying Asana source was
+  freshly re-read this run and is actually sparse upstream, rather than assuming the panel code is
+  broken (v1.23.0).
+- If a Branding/Tone-of-Voice dimension has an explicit single-theme instruction, confirm no
+  switcher control exists for it in the chrome at all — and if a screen's Copywriting card claims
+  a tone/language difference, confirm the cited example string is the literal text the live
+  component renders under that state, not a hand-authored parallel example (v1.23.0).
 - Whether a UX Rationale section had real Design Knowledge content to cite per screen, or was
   honest about finding nothing there — don't let this read as "done" if most cards just say "no
   rationale found."
