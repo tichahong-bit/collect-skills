@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.23.0
+version: 1.24.0
 description: >
   Turns a written requirement into a DS-aware prototype with a presentation mode —
   Asana-backed sibling of ds-governance-prototype-notion (same job, knowledge sources moved
@@ -381,6 +381,54 @@ metadata:
 >    described** — if it doesn't yet, either make it actually vary (if the requester's tone rule
 >    calls for it) or say plainly "this string reads identically under both guides" rather than
 >    showing two examples the code can't produce.
+
+> **v1.24.0 — Design System Evaluation gets a per-screen Code Readiness summary, the Figma-link
+> requirement needs a checkable proof-of-query, and "flow-wide" stays Research-Insight-only
+> (2026-08-29, Staff portal for tablet run, fifth build phase — first full rebuild of an existing
+> prototype that had never touched CDS at all).** The requester pointed this skill at an already-
+> published artifact ("Orbis Private RM Console") built entirely with hand-authored CSS and zero
+> CDS tokens/components, confirmed it wanted the full real-registry rebuild (not a reskin), and
+> then reviewed the result closely enough to catch three real gaps, none of them hypothetical:
+>
+> 1. **A Design System Evaluation table can structurally exist — right column, right four-state
+>    vocabulary — while its Figma Link cell is blank on every single row, because knowledge source
+>    9 (Core Design System Library Inventory) was simply never queried this run.** The existing
+>    wording ("sourced from the Inventory project... never invented") describes what a *populated*
+>    link must look like, but doesn't force a check that the source was actually read at all — a
+>    build can satisfy every other rule and still ship a table that looks complete but has silently
+>    skipped this one lookup. Fixed by adding a standing self-check: before presenting the table as
+>    done, confirm you actually called `get_tasks` against gid `1217578024173799` this run and can
+>    point to at least one row where its result produced a real link — a screen where literally
+>    every row happens to be a genuine `Design System Gap` (nothing in Figma either) is the only
+>    case where zero real Figma links is not itself evidence the query was skipped.
+> 2. **"Per screen, not one flow-wide list" (Design System Evaluation) and "an insight that
+>    genuinely applies to the whole flow goes in its own Flow-wide group" (Research Insight,
+>    directly above it) are two different rules for two different sections — a real run blended
+>    them**, adding an inline "Flow-wide (shared chrome)" Design System Evaluation section to avoid
+>    repeating Button/Tab/Dialog rows across eight near-identical per-screen tables. Reasonable
+>    motive, wrong section to bend: the per-screen table is what the focus-interaction and Code
+>    Readiness line (below) both depend on being real and complete for *that* screen, and a
+>    flow-wide substitute silently thins it out. The requester's own fix, now the standing pattern:
+>    keep every screen's table strictly to that screen's own rows (shared-chrome components appear
+>    redundantly in every screen that uses them — that redundancy is correct, not a smell), and if
+>    the repetition is genuinely worth collapsing for a reviewer, add an **opt-in** "ดู DS Report
+>    ทั้งหมด" link/button next to the section header that opens the shared-chrome rollup as its own
+>    separate report view (a modal was used here; an expand-in-place would also fit a different
+>    chrome layout) — never inline, never replacing the per-screen table by default.
+> 3. **New standing requirement: a Code Readiness summary line under the Design System Evaluation
+>    title, computed per screen from that screen's own rows** (the Flow-wide report view above gets
+>    its own separate readiness line the same way, scoped to its own rows):
+>    ```
+>    Code Readiness: XX%
+>    พร้อมใช้ซ้ำ X · ต้องปรับแก้ X · ยังไม่มีใน Design System X (จากทั้งหมด X component)
+>    ```
+>    Bucket mapping from the same four Implementation Status values, no fifth bucket invented:
+>    `พร้อมใช้ซ้ำ` = `Shipped in Code` row count; `ต้องปรับแก้` = `Figma Only / Not Yet Shipped` +
+>    `To Be Verified` row counts combined; `ยังไม่มีใน Design System` = `Design System Gap` row
+>    count; `Code Readiness %` = พร้อมใช้ซ้ำ ÷ total rows on that screen, rounded to a whole number;
+>    "จากทั้งหมด X component" = that screen's total row count. Derive this from the real per-screen
+>    row data every time — never hand-type the numbers, since they must stay correct if a screen's
+>    rows change on a later revision.
 
 ## Why a separate skill, not an edit to ds-governance-prototype-notion
 
@@ -1245,8 +1293,40 @@ leave the panel untouched:
        project or the live site — say so rather than forcing a guess into one of the other three.
    Cross-check the Inventory project's `Code Status` against the live CDS site before trusting it
    (see knowledge source 9 — it drifts); when you find and correct a stale row, say so in the
-   table rather than silently overriding it. Per screen, not one flow-wide list. Every row is
-   clickable per the focus interaction above — it names a real element on the current screen.
+   table rather than silently overriding it. Per screen, not one flow-wide list — see "Flow-wide
+   report is opt-in, never inline" below for the one sanctioned exception. Every row is clickable
+   per the focus interaction above — it names a real element on the current screen.
+
+   **Prove the Figma-link source was actually queried, not just that the column exists (v1.24.0).**
+   Before presenting this table as done, confirm you called `get_tasks` against the Inventory
+   project (gid `1217578024173799`) this run and can point to at least one row where it produced a
+   real link. A table where every single row's Figma Link is blank is only correct when every row
+   is a genuine `Design System Gap` (nothing in Figma either) — if any row is `Shipped in Code` or
+   `Figma Only / Not Yet Shipped` and still has no Figma link, the Inventory query was skipped, not
+   genuinely empty.
+
+   **Code Readiness summary line (v1.24.0)** — directly under this section's own title (per screen,
+   and again under the Flow-wide report's own title if that view exists — see below), a line
+   derived from this screen's real row data, never hand-typed:
+   ```
+   Code Readiness: XX%
+   พร้อมใช้ซ้ำ X · ต้องปรับแก้ X · ยังไม่มีใน Design System X (จากทั้งหมด X component)
+   ```
+   `พร้อมใช้ซ้ำ` = `Shipped in Code` count; `ต้องปรับแก้` = `Figma Only / Not Yet Shipped` +
+   `To Be Verified` counts combined; `ยังไม่มีใน Design System` = `Design System Gap` count;
+   `Code Readiness %` = พร้อมใช้ซ้ำ ÷ total rows on that screen, rounded to a whole number;
+   "จากทั้งหมด X component" = that screen's total row count.
+
+   **Flow-wide report is opt-in, never inline (v1.24.0).** "Per screen, not one flow-wide list"
+   above is absolute for the default, always-visible table — don't blend it with Research Insight's
+   separate "genuinely flow-wide insights get their own group" rule just because several screens
+   share the same chrome components (nav, top bar, shared dialogs) and repeating their rows in
+   every screen's table feels redundant. That repetition is correct, not a smell — the per-screen
+   table is what the focus interaction and this screen's own Code Readiness line both depend on
+   being complete. If the repetition is genuinely worth collapsing for a reviewer, add a small
+   opt-in control next to the section header (a "ดู DS Report ทั้งหมด" link/button; a modal or an
+   expand-in-place, whichever fits the existing chrome) that opens the shared-chrome rollup as its
+   own separate report view — never shown by default, never replacing any screen's own table.
 6. **Copywriting** (its own section, placed after Design System Evaluation) — for every real copy
    decision on this screen (labels, headings, error/empty states, CTAs), state the wording chosen
    and cite the specific rule from the *named* tone-of-voice guide (e.g. "MB Writing Style Guide
@@ -1339,7 +1419,14 @@ fix looks. In that case:
   To Be Verified) — not just "table built." Flag any case where the CDS Component Library Asana
   inventory's recorded status disagreed with this session's own live evidence (an install that
   actually worked, a search_components result, a repo COMPONENTS.md entry) and say which status
-  won and why — don't silently trust a stale Asana row over live proof.
+  won and why — don't silently trust a stale Asana row over live proof. Confirm the Inventory
+  project (source 9) was actually queried for Figma links this run — cite at least one row where
+  it produced a real link, or confirm every row is a genuine Design System Gap if none did
+  (v1.24.0) — and state each screen's Code Readiness % alongside its table, not just the table
+  itself.
+- Confirm no "Flow-wide" Design System Evaluation section is shown inline by default — only ever
+  behind an opt-in report control, if built at all (v1.24.0); Research Insight's own Flow-wide
+  grouping is unaffected by this and still applies as before.
 - Any research gaps flagged (Step 4's Research Insight "gap flag") — which screen/decision, and
   confirmation each was written onto the requirement's User Story leaf under Research gaps
   flagged, so the research team can pick them up from Requirement collections.
