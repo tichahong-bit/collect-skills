@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.2.0
+version: 0.3.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -108,6 +108,72 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 > before calling anything finished — two separate false "done" reports this run were caught only
 > by an actual screenshot, not by re-reading the node tree).
 
+> **v0.3.0 — a "done" screenshot can itself be showing a zombie duplicate, hierarchy must mirror
+> the real source tree not just look similar, and even a correctly-reasoned freehand composition
+> still has to bind real variables (2026-08-29, same Orbis extraction, requester's own close
+> re-review of "Investment — Overview" against the live artifact and the real source).** The
+> requester asked "why doesn't this match the artifact" three times over one screen, each time
+> finding something this skill's own v0.2.0 verification rules had not caught:
+>
+> 1. **v0.2.0's "screenshot before reporting done" rule has a real gap: the screenshot itself can
+>    be showing a leftover zombie instance, not the fix.** A Heading Text Block instance was fixed
+>    correctly (confirmed by reading its own text nodes directly) and screenshotted correctly in
+>    isolation — but the FRAME screenshot, and even a freshly-cloned copy of that frame under a
+>    brand-new node id, kept showing the old placeholder content. Root cause: an earlier script
+>    call in this same run had reported a 25–30s timeout, and per the already-documented "a
+>    timeout is not a stop" trap, it had kept running in the background and completed *after* the
+>    session moved on, silently inserting its own duplicate Heading Text Block instance into the
+>    same parent — sitting alongside the correctly-fixed one and rendering on top of it. **Standing
+>    rule: whenever a screenshot doesn't show an expected fix, and any earlier call in the session
+>    timed out, search the whole page for duplicate content (by name or by characters) before
+>    concluding the tool/cache is broken** — `figma.root` → walk every page/node for text matching
+>    the stale content, not just re-screenshotting the same node harder.
+> 2. **`instance.setProperties()` called directly in a raw script silently no-ops on TEXT-kind
+>    properties**, even though it visibly changes BOOLEAN properties on the same instance in the
+>    same call (a Has Eyebrow toggle took effect; Title/Description text did not, and the call
+>    still reported success). This is exactly what `figma_set_instance_properties`'s own tool
+>    description already warns about ("direct text editing may fail silently") — the lesson is to
+>    actually obey that warning inside a raw `figma_execute` script too, not only when reaching for
+>    a separate tool. **Standing rule: never call `instance.setProperties()` raw for a TEXT
+>    property — use the dedicated instance-properties tool/call every time, then read the actual
+>    child text node's `.characters` back to confirm.**
+> 3. **Matching individual pieces without checking the real JSX nesting order produces a
+>    structurally wrong screen that can still look right at a glance.** The prototype's real root
+>    layout is `flex-col = [Topbar(full width), flex-row = [Sidebar, Content]]` — Topbar spans the
+>    *entire* screen width, above both the sidebar and the content. This run had instead built
+>    `[Sidebar | Main[Topbar, Content]]` — Topbar nested inside the content column, only as wide as
+>    the content area, sidebar beside it rather than below it. Both pieces existed and were
+>    individually well-built, but the assembled result put a full-width element in a
+>    partial-width slot. **Standing rule: before assembling a multi-region screen (chrome +
+>    content), read the real root layout structure from the source (the outermost JSX return, not
+>    a single component file) and match its actual nesting/ordering, not just which pieces exist.**
+> 4. **A correctly-reasoned freehand composition (a real, documented Design System Gap) still has
+>    to bind every color to the real CDS variable — visually matching a token's current RGB value
+>    is not the same as binding it.** The topbar/sidebar shell was rightly built freehand (Step 1's
+>    "check `get_rules` before treating this as a mistake" rule, v0.2.0) — but its colors were
+>    typed as literal RGB copies of what the real tokens currently resolve to, with
+>    `boundVariables: {}` on every fill/stroke checked. This passes a casual look (the numbers
+>    match) but fails CDS's own binding rule and will silently drift the moment a token's value
+>    changes (theme, rebrand). Fix: `figma.variables.importVariableByKeyAsync(key)` (via
+>    `resolve_token`'s `figmaVariableKey`, never guessed) +
+>    `figma.variables.setBoundVariableForPaint(paint, 'color', variable)` on the actual fills/
+>    strokes array — for every color in a freehand composition, not only for real component
+>    instances.
+> 5. **A data-driven color mapping (category → token) must be read from the real source data file,
+>    never assumed via a fixed rotation.** A donut chart's 5 category colors were assigned in
+>    rotation order (blue, green, purple, orange, yellow) instead of the real per-category mapping
+>    in the source's own data file (`thai:blue, global:orange, fixed:green, alt:yellow,
+>    cash:purple`) — visually plausible (5 real accent colors, right count) but 4 of 5 categories
+>    had the wrong color. Verify by reading the actual source data structure, not by picking colors
+>    that merely look reasonable for the number of categories.
+> 6. **Sizing must mirror the real source's CSS grid/flex ratios, not whatever a piece happened to
+>    measure at creation time.** Four KPI cards meant to be equal `1fr` columns
+>    (`grid-template-columns: repeat(4,1fr)` in the source) had instead been left at four different
+>    `FIXED` pixel widths (176/161/180/139) — each one individually a plausible card width, but
+>    visibly uneven as a row. Compute the real equal/proportional widths from the row's actual
+>    width and gap (matching the source's `fr` ratios) and set them explicitly, rather than
+>    leaving whatever a text-driven auto-size produced.
+
 ## Expected input
 
 - **Prototype source** (required) — a link to, or file for, the prototype to extract (typically
@@ -150,13 +216,23 @@ memory of what the prototype contains; re-check the specific screen you're build
 real current source every time. A prototype can change between when it was last discussed and
 when this skill actually runs.
 
-Translate the **full screen**, not just the active tab/content area: `root → [Sidebar | Main →
-Topbar + Content]` is the real shape of a typical app-shell prototype — persistent chrome (side
+Translate the **full screen**, not just the active tab/content area — persistent chrome (side
 nav, top bar) is a distinct structural layer, built once and included in every frame, separate
 from whichever tab/content is currently showing. Run `figma-generate-design` against the
 Prototype source, targeting the Target Figma file, for this full structure. This is a structural
 translation only at this stage — layout, hierarchy, content — not a DS-binding pass yet (that's
 Step 2, deliberately separate so a failure in one doesn't silently corrupt the other).
+
+**Read the real nesting order from the source's outermost layout, don't assume a shape (v0.3.0).**
+`root → [Sidebar | Main → Topbar + Content]` is NOT a safe default to assume — it was wrong for a
+real prototype whose actual root was `flex-col = [Topbar (full width), flex-row = [Sidebar,
+Content]]`, Topbar spanning the *entire* screen above both the sidebar and the content, not nested
+inside the content column. Building each piece correctly in the wrong nesting order still produces
+a structurally wrong screen that can look right at a glance. Find and read the actual outermost
+JSX return (the App-level component, not a single screen/shell file) to get the real
+parent→child→sibling order before assembling auto-layout frames, and mirror it exactly — which
+element is full-width vs. constrained, and which sits above vs. beside which, is structural
+information the individual component files don't carry on their own.
 
 **Before treating any unbound layer as something to fix, check whether the prototype's own source
 already explains it.** A layer with no real DS component behind it may carry its own comment
@@ -207,6 +283,45 @@ see Prerequisites). This intentionally does **not** create a Notion row — that
 `ds-governance-audit-notion`'s job later in the chain (Step 6, Design System Gap), once wireframe
 and binding are both actually done. Writing a row here would be premature and would double-count
 against what the later real audit finds.
+
+**"Composed from real tokens" means bound, not just visually matching (v0.3.0).** A freehand piece
+that types a literal RGB copy of a token's current value passes a casual look — the numbers match
+— but leaves `boundVariables: {}` on the fill/stroke, which is not what "real tokens" means and
+will silently drift the moment the token's value changes (theme switch, rebrand). For every color
+in a composed/freehand piece: resolve the real token via `resolve_token` (never guess), take its
+`figmaVariableKey`, `figma.variables.importVariableByKeyAsync(key)`, then
+`figma.variables.setBoundVariableForPaint(paint, 'color', variable)` on the actual fill/stroke —
+same standard as a real component instance, not a lesser one just because nothing to bind an
+*instance* to exists here. This applies to an entire freehand structural layer (e.g. a shell
+composed per Step 1's get_rules exception) just as much as to a single composed chart.
+
+**A data-driven color/value mapping must be read from the real source data, never assumed by
+rotation.** A chart or legend with N categories is not "close enough" once it has N real accent
+colors in some order — read the actual source data file's real per-category assignment (e.g. a
+`{category: {token: ...}}` map) and match it exactly; a plausible-looking rotation can get most
+categories' colors wrong while still having the right count and palette.
+
+**Sizing must mirror the source's real CSS grid/flex ratios, not whatever a piece happened to
+measure at creation.** Equal `1fr` columns in the source (e.g. a 4-card KPI row) means equal
+widths in Figma — compute them from the row's real width and gap, don't leave four cards at four
+different `FIXED` pixel widths just because that's what each one auto-sized to from its own text
+content. A proportional split (`1.3fr 1fr`) means the two widths keep that ratio, not whatever two
+arbitrary numbers happened to look plausible.
+
+**Setting TEXT-kind instance properties via a raw `instance.setProperties()` script call can
+silently no-op even when the same call's BOOLEAN properties on the same instance visibly work and
+the call reports success.** Always use the dedicated instance-properties tool/call for TEXT
+properties, and read the real child text node's `.characters` back afterward to confirm the write
+actually landed — don't trust a successful API return as proof, per the standing screenshot rule
+below extended to property writes.
+
+**A screenshot that doesn't show an expected fix can be showing a zombie duplicate, not a stale
+cache — check for one before assuming the tool is broken.** If any earlier call in the session
+timed out, a script can keep running server-side past that timeout and complete later, silently
+inserting a duplicate of whatever it was building alongside an already-correct fix. When a
+screenshot (even of a freshly-cloned node with a brand-new id) doesn't match a confirmed-correct
+node read, search the whole document for other nodes with the same stale name/characters before
+concluding the screenshot pipeline itself is at fault.
 
 ## Final chat summary
 
