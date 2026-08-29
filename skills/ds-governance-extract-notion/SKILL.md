@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.5.0
+version: 0.6.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -244,6 +244,32 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 >    on paper) before accepting it. Don't "fix" a correctly-reasoned proportional `FIXED` split into
 >    an incorrect equal `FILL` split just because `FILL` sounds more responsive — note in the
 >    summary which axis is a deliberate `FIXED`-ratio exception and why.
+
+> **v0.6.0 — a freshly-placed component's own library-default size can overflow its real
+> container, and a data token's exact family (not just its hue name) has to match the source
+> (2026-08-29, same Orbis extraction, requester's continued review).**
+>
+> 1. **A component instance keeps the library's own default/measured size until something resizes
+>    it — that default can be wider than the real space it's going into.** The `List Item` rows
+>    fixed onto the sidebar in v0.4.0 (correctly, as real components) were left at `366px` wide —
+>    the component set's own default — inside a `230px` sidebar column, overflowing by well over
+>    half. This is invisible in a components-exist/properties-correct check; it only shows up as
+>    literal overflow in a screenshot or a direct `layoutSizingHorizontal`/`width` read. **Standing
+>    rule: after placing any instance into a real layout region, check its resolved width/height
+>    against that region's real available space — set `layoutSizingHorizontal`/`Vertical` to `FILL`
+>    (matching the sizing-audit rules above) rather than trusting whatever size the library ships
+>    the component at by default.**
+> 2. **Two token families can share a hue name and still be visually very different — bind the
+>    exact family the source names, not a same-hue substitute.** The donut's 5 slice colors were
+>    bound to real, correctly-ordered variables (`surface-accent-blue/orange/green/yellow/purple`)
+>    — but the source's own data file (`data.ts`) names `--content-accent-blue` etc. for this exact
+>    purpose, a different token family that resolves to a much more saturated/vivid color (e.g.
+>    `content-accent-blue` `#0048b7` vs. `surface-accent-blue` `#d9e8ff` — a dark, readable blue vs.
+>    a pale tint meant for backgrounds). Both are real, correctly-bound CDS variables; only one is
+>    the one the source actually specifies for this role. **Standing rule: when a data-driven
+>    mapping names a specific CSS variable, bind that exact variable — never substitute a
+>    same-hue/same-number token from a different family (`surface-*` vs `content-*` vs `border-*`)
+>    just because it produces a plausible-looking palette.**
 
 ## Expected input
 
