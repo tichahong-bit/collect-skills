@@ -1441,7 +1441,7 @@ fix looks. In that case:
 
 - Extracting the prototype into real Figma frames — a later step in the Requirement → Applied
   chain, out of scope here (whatever the Asana-backed equivalent of
-  `ds-governance-extract-notion` turns out to be, once/if it exists).
+  `ds-extract-prototype-to-figma-canvas` turns out to be, once/if it exists).
 - Auditing the resulting screens against the DS — that's `ds-governance-audit-asana`, much later
   in the chain, after wireframing and binding are both done.
 - Migrating `Copy Writing Guideline`, `Requirement collections`, or `Bradning Guidline` content

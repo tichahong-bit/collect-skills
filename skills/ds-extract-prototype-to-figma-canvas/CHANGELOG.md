@@ -1,4 +1,4 @@
-# Changelog — ds-governance-extract-notion
+# Changelog — ds-extract-prototype-to-figma-canvas
 
 Full version history with the real defect, the evidence, and the reasoning behind each fix.
 `SKILL.md` states only the current, standing rules — read this file when you want the "why" or

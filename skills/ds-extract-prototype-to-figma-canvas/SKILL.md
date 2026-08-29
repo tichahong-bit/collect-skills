@@ -1,5 +1,5 @@
 ---
-name: ds-governance-extract-notion
+name: ds-extract-prototype-to-figma-canvas
 version: 0.10.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Run end-to-end and corrected 9 times as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
