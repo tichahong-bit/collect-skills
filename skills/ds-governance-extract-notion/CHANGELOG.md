@@ -256,3 +256,36 @@ Resolve against the DS → Verify sizing → Verify token/font/color binding →
 → Verify before reporting done) so each standing rule sits under the step it actually governs,
 without the narrative that produced it. Every rule from v0.2.0–v0.8.0 is preserved in `SKILL.md` in
 its current, standing form — this file is the historical record of how each one was found.
+
+## v0.10.0 — cross-pollinated from a sibling skill's own error log
+
+Reviewed กัน's (Kan's) `agent-design-kit` repo, specifically its `figma-error-recovery-playbook`
+skill (a general Figma Plugin API error-recovery reference, independent of this skill's own
+extraction-specific rules). Cross-checked its entries against everything already in this skill and
+folded in the genuinely new, applicable ones (marked ⟂ in `SKILL.md`'s Reference section) rather
+than duplicating overlapping ones:
+
+- A raw `setProperties()` call passing a wrapped object instead of a plain primitive doesn't just
+  fail that one line — Figma scripts run as one atomic transaction, so the throw rolls back every
+  node the script already created earlier in the same call. A second, independent reason (beyond
+  the batching/zombie-thread trap) to keep each script call small and scoped.
+- `findChild` (direct children only) silently returns `null` for a node sitting inside a Section —
+  not an error, just nothing found — which can make a binding pass report "0 errors" while never
+  having run at all. Default to `findOne` (recursive) for any page-level search.
+- `importComponentByKeyAsync` has a second, independent failure mode beyond the `COMPONENT_SET`
+  vs. `COMPONENT` type mismatch this skill already knew: it also fails for a same-file component
+  (only works across external library files) — same error message, different real cause and fix.
+- `layoutSizingHorizontal`/`Vertical` use `'HUG'` while the parent-level
+  `primaryAxisSizingMode`/`counterAxisSizingMode` use `'AUTO'` for the same concept — easy to
+  cross the two enums by mistake.
+- Sizing-mode order of operations: `FILL` child-sizing must be set after `appendChild` and after
+  the parent's `layoutMode`; locking a frame to `FIXED` should happen before `appendChild`; setting
+  `AUTO`/hug behavior should happen last, after any `resize()` call, or the resize silently wins.
+- An `-inverse`-suffixed token's real direction is a per-system convention (can mean "always dark
+  surface," not "opposite of whichever theme is active") — verify the actual bound RGB rather than
+  trusting the name, a technique worth generalizing to any ambiguously-named token.
+- A Figma URL's `node-id` uses `-` as separator; the Plugin API wants `:` — and a node-id can
+  resolve to a PAGE (no `x`/`y`, throws on coordinate access) rather than a Frame.
+
+No behavior change to the extraction pipeline itself — these are additional Plugin-API traps to
+watch for, organized into the Reference section's existing categories.

@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.9.0
+version: 0.10.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Run end-to-end and corrected 9 times as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
@@ -211,17 +211,30 @@ back to confirm.
 
 ## Reference: real Figma Plugin API traps
 
-Confirmed real behaviors, not documented anywhere else as of this skill's last run. Full
-discovery context in `CHANGELOG.md` v0.2.0 §B.
+Confirmed real behaviors, not documented anywhere else as of this skill's last run. Grouped by
+where in the pipeline each one bites. Full discovery context in `CHANGELOG.md` v0.2.0 §B; the
+`figma-error-recovery-playbook`-sourced entries (marked ⟂) come from a sibling skill's own error
+log, cross-checked and folded in at v0.10.0.
+
+### Component import & instantiation
 
 - **CDS keys are `COMPONENT_SET` keys.** `importComponentByKeyAsync` fails with a misleading "not
   found" error (reads like a bad key; it's a type mismatch) — use `importComponentSetByKeyAsync`
   for a set, or resolve the specific variant's own key (e.g. via a `get_figma_instance`-style
   lookup) and `importComponentByKeyAsync` that.
+- ⟂ **`importComponentByKeyAsync` also fails for a same-file component** — it only works for
+  components published in *external* library files; a same-file component fails even with the
+  correct key. For same-file: `figma.getNodeByIdAsync(nodeId).createInstance()` instead. Two
+  distinct root causes can produce the identical "Component with key ... not found" message —
+  check which one applies (cross-file `COMPONENT_SET` vs. same-file component) before assuming
+  either fix.
 - **Never batch cross-file async calls** (imports, font loads) in one script call — one stuck call
   wedges the plugin's single JS thread, and every later call queues behind it and times out too,
   even trivial reads. `figma_reload_plugin` does not clear this (only reloads the UI iframe) — a
   full close+reopen of the Desktop Bridge plugin does. One resource resolution per call.
+
+### Filling slots & setting content
+
 - **Fill a SLOT with `figma_append_to_slot`**, never `instance.appendChild()` (throws "Cannot move
   node..."). Pass `clone:false` to move an existing node in, `clearExisting:true` to replace
   default slot content first.
@@ -235,10 +248,67 @@ discovery context in `CHANGELOG.md` v0.2.0 §B.
 - **Use `figma_set_instance_properties` for every instance property write, always** — never raw
   `instance.setProperties()` in a script (silently no-ops on TEXT properties specifically). Read
   the real child text node's `.characters` back afterward regardless.
+- ⟂ **A raw `setProperties()` call can also throw outright — and take the whole script down with
+  it.** Passing a wrapped object (`{type:'TEXT', value:'...'}`) instead of a plain primitive throws
+  `Expected string/boolean/number, received object`. Figma scripts run as one atomic transaction:
+  when a call partway through a script throws, **every node the script already created earlier in
+  that same call is rolled back, not just the failing line.** This is a second, independent reason
+  (beyond the batching/zombie-thread trap above) to keep each `figma_execute` call small and
+  scoped — a large combined build script risks losing everything it built if one property write
+  near the end throws.
+
+### Node lookup & traversal
+
 - **`.mainComponent` (sync) throws under `documentAccess: dynamic-page`** — use
   `await instance.getMainComponentAsync()`.
+- ⟂ **Use `findOne` (recursive), never `findChild` (direct children only), when searching a page
+  for a node by predicate.** A `ComponentSet`/instance sitting inside a Section is not a *direct*
+  child of the page — `findChild` silently returns `null` there with no error, which can make a
+  whole binding pass report "0 errors" while never actually running (it found nothing to bind
+  because the search never reached the real node). Default to `findOne` for any page-level search;
+  reserve `findChild` only when the exact parent is already known.
+- ⟂ **A Figma URL's `node-id` uses `-` as the id separator; the Plugin API uses `:`.** Convert
+  `2020-2181` → `2020:2181` before calling `getNodeByIdAsync`.
+- ⟂ **A node-id from a URL can resolve to a PAGE, not a Frame** — a PAGE has no `x`/`y` and throws
+  on any coordinate access. If `get_metadata`-equivalent output shows the node as the outermost
+  `<canvas>` element, it's the page — walk to a known child Frame/instance for coordinates instead,
+  and separately walk up (`while (n.type !== 'PAGE') n = n.parent`) when you need the page itself.
+
+### Sizing & layout
+
 - **`vectorPaths` wants space-separated coordinates** (`M0 100 L50 50`), not comma-separated
   standard SVG syntax.
 - **A circular FILL/HUG sizing chain silently under-sizes with no error** — a `FILL` child against
   a parent that itself `HUG`s based on that child's resolved size collapses well under real
   content width. Use `HUG`/`FIXED` on the outer chain when the parent's size depends on that child.
+- ⟂ **`layoutSizingHorizontal`/`Vertical` (child-level sizing) use the enum value `'HUG'` — not
+  `'AUTO'`.** `primaryAxisSizingMode`/`counterAxisSizingMode` (parent-level, the frame's own
+  auto-layout behavior) use `'AUTO'` for the same concept. Same idea, two different enums by
+  level — using the wrong one throws `Invalid enum value`.
+- ⟂ **Sizing-mode order of operations matters and gets it silently wrong both ways:**
+  - Set `layoutSizingHorizontal`/`Vertical` **after** `appendChild` and after the parent's
+    `layoutMode` is set — `FILL` throws ("must be an auto-layout frame or a child of one") if the
+    parent isn't already auto-layout when you try to set it.
+  - When locking a frame to a specific size via auto-layout, set `primaryAxisSizingMode='FIXED'`
+    (or resize) **before** `appendChild` — appending first can hug-shrink the frame to its content,
+    and a `resize()` call afterward doesn't always undo that.
+  - Conversely, if the goal is content-driven auto-sizing, set `primaryAxisSizingMode='AUTO'` as
+    the **last** step, after any `resize()` call — `resize()` before it re-locks the frame to that
+    literal size, silently defeating the auto behavior you just asked for.
+  In short: decide FIXED vs. AUTO/HUG first, then order `resize`/`appendChild`/the sizing-mode
+  assignment so the last thing set is the one you actually want to win.
+
+### Token & variable binding
+
+- ⟂ **An `-inverse`-suffixed semantic token's actual direction is a per-system convention, not a
+  safe assumption** — it can mean "always the dark-mode surface" rather than "the literal opposite
+  of whatever's currently active." Verify the real bound RGB before trusting the name:
+  ```js
+  const test = figma.createFrame();
+  test.fills = [figma.variables.setBoundVariableForPaint(
+    {type:'SOLID', color:{r:1,g:1,b:1}}, 'color', importedVar
+  )];
+  return test.fills[0].color; // r≈g≈b≈1 → resolves light; ≈0 → resolves dark
+  ```
+  Applies beyond `-inverse` names generally: when a token's semantic direction is ambiguous from
+  its name alone, resolve it live rather than guessing from the label.
