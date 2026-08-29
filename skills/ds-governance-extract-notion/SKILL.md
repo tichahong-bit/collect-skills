@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.6.0
+version: 0.7.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -271,6 +271,46 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 >    same-hue/same-number token from a different family (`surface-*` vs `content-*` vs `border-*`)
 >    just because it produces a plausible-looking palette.**
 
+> **v0.7.0 — annotation content should read as plain Thai prose (not a bullet template), a
+> real project's own file names a second category for pure binding violations, and a
+> programmatic full-frame sweep finds what spot-checking a "few likely spots" misses
+> (2026-08-29, same Orbis extraction, requester shared a real reference file).**
+>
+> 1. **Annotation content: one clear Thai sentence, not a bold-title + bullet-list template.**
+>    The requester pointed at a real annotation from another project file
+>    (`POC-AI-agent`, node `792:13179`) and asked for this skill's own tone to match it. Reading it
+>    directly showed a single flowing Thai sentence, no markdown bullets, no `**Label:** value`
+>    structure — e.g. *"ไม่มี gradient/pattern token ใน Core Design Library — Visual Panel ใช้
+>    linear-gradient สีน้ำเงินที่ hardcode ค่าไว้ (ไม่มีตัวแปรสีแบบ gradient ในระบบให้ผูก)"*. **Standing
+>    rule: write annotation content as plain, easy-to-read Thai prose — what's missing, why, and
+>    what it means for the designer, in one or two natural sentences — not the bold-title/bullet
+>    convention this file previously borrowed wholesale from `ds-governance-audit-notion`.** Keep
+>    borrowing the CATEGORY system (which color/label a Figma annotation carries), not the content
+>    formatting.
+> 2. **That same reference file uses a second, distinct annotation category — "Unbound" (red) —
+>    for a pure token/color-binding violation, separate from "Log Note" (yellow) for a
+>    missing-component/composed-content gap.** These are different findings: "Log Note" means *no
+>    component exists for this*; "Unbound" means *a component or value exists and should be tied to
+>    a real token, but isn't*. Create both categories on the target file (check-then-create each,
+>    same pattern as v0.2.0's Log Note step) and use whichever actually matches the finding — don't
+>    fold a binding violation into a Log Note just because one category already exists.
+> 3. **A full programmatic sweep of every fill/stroke/text-style on the whole frame finds real
+>    violations that checking "the pieces you remember to check" misses.** Earlier passes this run
+>    had already fixed the shell's most visible colors (logo, pill, topbar background/border) and
+>    called the binding work done — a real sweep of every `fills`/`strokes` array on the entire
+>    frame (`boundVariables.color` present or not) found **50 more unbound literal colors**
+>    untouched: every KPI stat card's label/value/delta text, every chart month label and legend
+>    swatch, every donut legend row, the sidebar section header, even the frame's own background —
+>    all typed as literal RGB that happened to match a real token's current value. **Standing rule:
+>    before calling a screen's token binding done, run one script that walks every node in the
+>    frame and checks every `fills`/`strokes` entry for `boundVariables.color`, and every `TEXT`
+>    node for a real `textStyleId` — fix (or annotate `Unbound`, if a real reason to stay literal
+>    exists) everything the sweep finds, don't rely on remembering which pieces still needed it.**
+>    Map found literal colors to a real token by RGB fingerprint against `resolve_token` output
+>    (near-black → `content-neutral-primary`, mid-gray → `content-neutral-secondary`/`-tertiary`,
+>    green → `content-positive-primary`, the action blue → `content-action-primary`, etc.) rather
+>    than leaving any of them as an accepted "close enough."
+
 ## Expected input
 
 - **Prototype source** (required) — a link to, or file for, the prototype to extract (typically
@@ -292,17 +332,17 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
   any build/edit/token-binding work, and covers the real Plugin-API traps in section B above.
 - `git pull` โย's `cds-consumer` repo before building, so `COMPONENTS.md`/`REGISTRY.md`/
   `DRIFT.md` and the `.skill` files themselves are current.
-- Read `ds-governance-audit-notion`'s Step 9 annotation format (category **"Log Note"**,
-  yellow, **bold *descriptive* title + `**Label:** value` bullets — see the real example in
-  Step 3 below**, not the literal string "Log Note" as content) before Step 3 — the annotation
-  this skill writes for a missing/composed piece must match that convention exactly, not invent
-  a new one. Two different annotation styles in the same file is the single biggest way this
-  could go wrong in practice — don't let it happen.
-- Check the target file has a **"Log Note"** annotation category; create it
-  (`figma.annotations.addAnnotationCategoryAsync({label:'Log Note', color:'yellow'})`) if it
-  doesn't — don't assume every target file already has it just because `ds-governance-audit-notion`
-  runs assume so (those run against files with prior audit history; a fresh extraction target may
-  not).
+- Annotation content is **plain, easy-to-read Thai prose — one or two natural sentences, no
+  bold-title/bullet template** (v0.7.0, matching a real reference annotation the requester
+  pointed to). Borrow only the CATEGORY system from `ds-governance-audit-notion`/the reference
+  file, never its bold-title + `**Label:** value` bullet formatting — see Step 3 below for the
+  real style and both categories in use.
+- Check the target file has both a **"Log Note"** (yellow) and an **"Unbound"** (red) annotation
+  category; create whichever is missing
+  (`figma.annotations.addAnnotationCategoryAsync({label:'Log Note', color:'yellow'})` /
+  `{label:'Unbound', color:'red'}`) — don't assume either already exists just because
+  `ds-governance-audit-notion` runs assume so (those run against files with prior audit history;
+  a fresh extraction target may not have either).
 
 ## Step 1 — Translate the prototype into real Figma frames
 
@@ -401,18 +441,13 @@ the screen, not a hole in it. Never leave a "[Placeholder] X" blank frame; that'
 it's a TODO note pretending to be a screen.
 
 For every such composed piece (and for a whole structural layer like a shell, per Step 1's
-get_rules check above), write a real Figma annotation using `ds-governance-audit-notion`'s own
-Step 9 **content** convention — bold *descriptive* title + bullet list, each line
-`**Label:** value` (not the literal string "Log Note" as the title — that's the category, set
-separately):
+get_rules check above), write a real Figma annotation as **plain, easy-to-read Thai prose — one
+or two natural sentences, no bold title, no bullet list (v0.7.0)**. Say what's missing, why, and
+what it means for whoever picks this up next — the same tone as a real annotation a designer would
+actually leave, not a structured template. For example (translate the specifics, not the style):
 
-```markdown
-**Composed for This Screen**
-- **Component:** {what this piece represents, e.g. "Portfolio Performance line chart"}
-- **Problem:** not available in the Design System yet
-- **Note:** composed from real DS tokens/primitives as a stand-in — designer should know this is
-  new, not an existing DS component, before treating it as final
-```
+> ยังไม่มี component กราฟใน Core Design Library สำหรับส่วนนี้ จึงประกอบขึ้นเองจากสี token จริงของระบบ
+> นักออกแบบควรรู้ว่านี่เป็นของใหม่ ไม่ใช่ component จริงจากระบบ
 
 Category **"Log Note"** (yellow) — same category `ds-governance-audit-notion` uses for an
 Existing DS Issue, not a new category (create it on the target file first if it doesn't exist —
@@ -420,6 +455,15 @@ see Prerequisites). This intentionally does **not** create a Notion row — that
 `ds-governance-audit-notion`'s job later in the chain (Step 6, Design System Gap), once wireframe
 and binding are both actually done. Writing a row here would be premature and would double-count
 against what the later real audit finds.
+
+**"Unbound" (red) is a different category for a different finding — use it when something has a
+real token to bind to but doesn't, not when nothing exists to bind to at all.** "Log Note" means
+*no component/pattern exists for this*; "Unbound" means *a real value exists in the DS and this
+should be tied to it, but is still a literal number*. Prefer actually fixing an unbound value over
+annotating it (see the binding rule below) — reach for "Unbound" only when a literal genuinely has
+to stay literal for a real, statable reason (e.g. a gradient with no token in the library at all,
+per the reference example this convention came from), and say that reason in the same plain-Thai
+style.
 
 **"Composed from real tokens" means bound, not just visually matching (v0.3.0).** A freehand piece
 that types a literal RGB copy of a token's current value passes a casual look — the numbers match
@@ -431,6 +475,17 @@ in a composed/freehand piece: resolve the real token via `resolve_token` (never 
 same standard as a real component instance, not a lesser one just because nothing to bind an
 *instance* to exists here. This applies to an entire freehand structural layer (e.g. a shell
 composed per Step 1's get_rules exception) just as much as to a single composed chart.
+
+**Before calling a screen's binding done, run one programmatic sweep of the whole frame — don't
+rely on remembering which pieces still needed it (v0.7.0).** Checking "the obvious pieces" (a
+logo, a pill, a topbar) and calling binding done left 50 literal colors untouched on one real
+screen — every KPI card's text, every chart label, every legend row. Walk every node in the frame,
+check every `fills`/`strokes` entry for `boundVariables.color` and every `TEXT` node for a real
+`textStyleId`, and fix (or, only when a real reason exists, annotate `Unbound` for) everything the
+sweep finds. Match a found literal color to its real token by RGB fingerprint against
+`resolve_token` output (near-black → `content-neutral-primary`, mid-gray →
+`content-neutral-secondary`/`-tertiary`, a semantic color already in use elsewhere on the screen →
+its matching `content-*` token) rather than accepting a "close enough."
 
 **A data-driven color/value mapping must be read from the real source data, never assumed by
 rotation.** A chart or legend with N categories is not "close enough" once it has N real accent
