@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.3.0
+version: 0.4.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -174,6 +174,45 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 >    width and gap (matching the source's `fr` ratios) and set them explicitly, rather than
 >    leaving whatever a text-driven auto-size produced.
 
+> **v0.4.0 — v0.2.0's own shell-gap correction was itself incomplete: a container having no
+> published component doesn't mean its individual rows don't; and sizing mode must be audited
+> against the source's real responsive CSS, not left at whatever a build happened to measure
+> (2026-08-29, same Orbis extraction, requester's continued review of "Investment — Overview").**
+>
+> 1. **Reversing part of v0.2.0's correction #3.** That correction was right that the prototype's
+>    shell *container* (fixed-width column, sticky positioning, section header) has no published
+>    CDS component and was correctly built freehand per the source's own `get_rules`-checked
+>    comment. But it over-corrected by also reverting the individual nav *rows* inside that shell
+>    back to freehand — `List Item`'s own guidance (`get_component`'s `guidance.usage`) explicitly
+>    documents a **"Selected navigation row"** example
+>    (`<CdsListItem title="Dashboard" leadingSlot={<HomeIcon/>} selected onSelect={...}/>`), which
+>    is exactly this use case. **Standing rule: a container/shell having no published component
+>    does not mean everything inside it is freehand too — check each interior piece's own
+>    candidate component's `guidance.usage` for a matching documented example before accepting a
+>    source file's freehand comment as the final word on every layer inside it.** Fixed by
+>    rebuilding the 6 sidebar rows as real `List Item` instances (`Is Selected=Yes` for the active
+>    item, `Is Disabled=Yes` for the rest, `Has Description=false`, title set via the nested
+>    `✍️ Text List` sub-instance's real `Title` property — same technique already documented under
+>    "Setting TEXT-kind instance properties" above) — only the outer column/section-header stays
+>    freehand+annotated as the genuine remaining gap.
+> 2. **New standing step: audit `layoutSizingHorizontal`/`layoutSizingVertical` against the
+>    source's real CSS behavior for every major region, not just its width/height at build time.**
+>    Three real mismatches found by checking, not by eye: a full-width topbar had
+>    `layoutSizingVertical: FIXED` (should be `HUG` — its height is padding+content-driven, no
+>    literal height in the source); a fixed-width sidebar (`width:230, flex:none` in source — that
+>    part was already correctly `FIXED`) had `layoutSizingVertical: FIXED` (should be `FILL` — a
+>    flex row's default `align-items:stretch` makes it match the row's height, not an independently
+>    fixed number); a `flex:1` content column had `layoutSizingHorizontal: HUG` (should be `FILL` —
+>    it's meant to grow into whatever space the fixed sidebar doesn't take, not shrink-wrap its own
+>    content). Map each CSS behavior to the Figma equivalent explicitly: `flex:1` / `width:100%` →
+>    `FILL`; a literal fixed px width with no flex-grow → `FIXED`; content-driven with no explicit
+>    size → `HUG`. For equal `1fr` grid columns specifically, prefer real `FILL` sizing on each
+>    child (with `constraints.horizontal = 'STRETCH'` on any non-auto-layout descendant that needs
+>    to follow the resize) over manually computing and hardcoding an equal-share pixel number —
+>    both render identically today, but `FILL` is what actually stays correct if the frame is
+>    resized later, which is the entire point of getting sizing mode right instead of just getting
+>    today's pixel value right.
+
 ## Expected input
 
 - **Prototype source** (required) — a link to, or file for, the prototype to extract (typically
@@ -240,6 +279,28 @@ already explains it.** A layer with no real DS component behind it may carry its
 and reasoned to be a genuine gap — that reasoning wins over a component-search hit that merely
 looks similar, unless you independently re-verify against `get_rules` yourself. Don't "fix" a
 correctly-reasoned gap into a wrong real-component substitution.
+
+**But that reasoning covers only what it actually says — a gap ruling on a container/shell does
+not automatically extend to every layer inside it (v0.4.0).** A source comment saying "CDS does
+not publish this shell" is a ruling about the shell/container itself (positioning, fixed-width
+column, sticky behavior) — it is not evidence that a candidate component for something *inside*
+that shell (a nav row, a list row) was ever actually checked. Before accepting freehand for an
+interior piece, search for and read a real candidate component's own `guidance.usage` for a
+documented example matching this exact use case (e.g. `List Item`'s guidance names a "selected
+navigation row" example verbatim) — a documented match there wins over an unrelated shell-level
+gap comment. Split the ruling accordingly: the outer shell/container can still be freehand+
+annotated while its interior interactive rows are real component instances.
+
+**Audit sizing mode (HUG/FILL/FIXED) against the source's real CSS behavior for every major
+region — don't leave it at whatever a piece happened to measure at build time (v0.4.0).** Map each
+region's real CSS to the Figma equivalent explicitly: `flex:1` / `width:100%` / no fixed dimension
+with a grow factor → `FILL`; a literal fixed px width with no flex-grow (e.g. a fixed-width
+sidebar) → `FIXED`; content-driven with no explicit size in either axis → `HUG`. Do this for the
+outer chrome regions (topbar full-width vs. content-driven height, sidebar fixed-width vs.
+row-stretched height, content column filling remaining width) as well as for equal-`fr` grid
+children (prefer real `FILL` sizing with `constraints.horizontal='STRETCH'` on any non-auto-layout
+descendant, over hand-computing and hardcoding an equal-share pixel number that only happens to
+look right today).
 
 ## Step 2 — Bind to the Design System (โย's skills)
 
