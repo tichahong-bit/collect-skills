@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.4.0
+version: 0.5.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -213,6 +213,38 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 >    resized later, which is the entire point of getting sizing mode right instead of just getting
 >    today's pixel value right.
 
+> **v0.5.0 — v0.4.0's sizing audit was itself incomplete: a row-level container needs FILL too,
+> not just its children, and there's a real limit to what Figma's FILL can express for
+> non-equal ratios (2026-08-29, same Orbis extraction, requester's continued sizing review).**
+>
+> 1. **Auditing each child's sizing isn't enough if the row/container they sit in is still `HUG`.**
+>    The 4-card KPI row and the chart+donut row were both left at `HUG` (sized to exactly the sum
+>    of their children — 704px and 906px respectively) instead of `FILL` against their own parent
+>    (`ScreenContent`). Each individual card had already been set to `FILL` correctly (v0.4.0), but
+>    a `FILL` child inside a `HUG` parent just fills that parent's already-shrink-wrapped size — it
+>    doesn't reach the page's real available width. **Standing rule: audit sizing top-down, not just
+>    at the leaf level — a row/grid container that should span the full available width in the
+>    source needs `layoutSizingHorizontal: FILL` against ITS OWN parent, independently of whatever
+>    sizing its children get.**
+> 2. **A SLOT-workaround wrapper (`layoutMode: NONE`, per the Card Container SLOT limitation
+>    documented under v0.2.0/Step 3) can still take `FILL` sizing as a child of a real auto-layout
+>    parent, even though `HUG` is not a valid option for it.** `HUG` only exists for a frame whose
+>    OWN children are arranged by auto-layout — a `NONE`-layout frame can never compute a size from
+>    its (absolutely-positioned) children, so `FIXED` and `FILL` are its only two real options as a
+>    child. Where the source's real CSS Grid behavior implies stretch (unset explicit height, no
+>    `align-items` override — CSS Grid's real default is `stretch`), prefer `FILL` over guessing a
+>    `FIXED` height from whatever the content currently measures.
+> 3. **Real limitation, not a defect: Figma's auto-layout `FILL` only ever splits remaining space
+>    EQUALLY among `FILL` siblings — there is no per-child ratio/weight (no Figma equivalent of
+>    CSS's `1.3fr 1fr`).** For a source grid column split that is NOT equal, setting both children
+>    to `FILL` produces a wrong 50/50 result — worse than doing nothing. The correct static
+>    encoding is `FIXED` widths computed to match the real ratio (e.g. `1.3fr 1fr` over the row's
+>    real available width → the two widths in that proportion) — verify the computed split is
+>    genuinely close to the source's real rendered proportion (a live measurement, not just fr-math
+>    on paper) before accepting it. Don't "fix" a correctly-reasoned proportional `FIXED` split into
+>    an incorrect equal `FILL` split just because `FILL` sounds more responsive — note in the
+>    summary which axis is a deliberate `FIXED`-ratio exception and why.
+
 ## Expected input
 
 - **Prototype source** (required) — a link to, or file for, the prototype to extract (typically
@@ -291,16 +323,34 @@ navigation row" example verbatim) — a documented match there wins over an unre
 gap comment. Split the ruling accordingly: the outer shell/container can still be freehand+
 annotated while its interior interactive rows are real component instances.
 
-**Audit sizing mode (HUG/FILL/FIXED) against the source's real CSS behavior for every major
-region — don't leave it at whatever a piece happened to measure at build time (v0.4.0).** Map each
-region's real CSS to the Figma equivalent explicitly: `flex:1` / `width:100%` / no fixed dimension
-with a grow factor → `FILL`; a literal fixed px width with no flex-grow (e.g. a fixed-width
-sidebar) → `FIXED`; content-driven with no explicit size in either axis → `HUG`. Do this for the
-outer chrome regions (topbar full-width vs. content-driven height, sidebar fixed-width vs.
-row-stretched height, content column filling remaining width) as well as for equal-`fr` grid
-children (prefer real `FILL` sizing with `constraints.horizontal='STRETCH'` on any non-auto-layout
-descendant, over hand-computing and hardcoding an equal-share pixel number that only happens to
-look right today).
+**Audit sizing mode (HUG/FILL/FIXED) against the source's real CSS behavior, top-down — every
+container level, not just the leaves (v0.4.0, corrected v0.5.0).** Map each region's real CSS to
+the Figma equivalent explicitly: `flex:1` / `width:100%` / no fixed dimension with a grow factor →
+`FILL`; a literal fixed px width with no flex-grow (e.g. a fixed-width sidebar) → `FIXED`;
+content-driven with no explicit size in either axis → `HUG`. Do this for the outer chrome regions
+(topbar full-width vs. content-driven height, sidebar fixed-width vs. row-stretched height,
+content column filling remaining width) — **and separately for every row/grid container itself**,
+not only the cards/cells inside it: a grid row meant to span full width needs its own
+`layoutSizingHorizontal: FILL` against ITS parent, independent of whatever sizing its children
+get — a `FILL` child inside a `HUG` row just fills that row's already-shrink-wrapped size, it
+never reaches the page's real available width.
+
+For equal-`fr` grid children (e.g. 4 equal KPI cards), prefer real `FILL` sizing on each child
+(with `constraints.horizontal='STRETCH'` on any non-auto-layout descendant, e.g. a Card Container
+sitting in a `NONE`-layout SLOT-workaround wrapper — `HUG` is not a valid option for that wrapper
+itself, only `FIXED`/`FILL` are, since `HUG` requires the frame's own children to be auto-layout
+arranged) — over hand-computing and hardcoding an equal-share pixel number that only happens to
+look right today. Where CSS Grid's real default (`align-items: stretch`, unset explicit height)
+implies two side-by-side cards should match height, prefer `FILL` vertical sizing over a guessed
+`FIXED` height too.
+
+**But for a NON-equal ratio (e.g. `1.3fr 1fr`), `FILL` is the wrong tool — Figma's auto-layout
+`FILL` only ever splits remaining space EQUALLY among `FILL` siblings, with no per-child ratio/
+weight.** Setting both to `FILL` there produces a 50/50 split, which is a worse mismatch than
+doing nothing. The correct static encoding is `FIXED` widths computed to match the real ratio —
+verify the computed split against a live measurement of the actual rendered proportion (not just
+fr-math on paper) — and say so explicitly in the summary as a deliberate exception, not an
+oversight.
 
 ## Step 2 — Bind to the Design System (โย's skills)
 
