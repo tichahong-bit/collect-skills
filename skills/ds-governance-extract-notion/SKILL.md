@@ -1,6 +1,6 @@
 ---
 name: ds-governance-extract-notion
-version: 0.7.0
+version: 0.8.0
 description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames on the target file, binding each screen to the Design System as it's built and composing/annotating anything the DS doesn't cover yet. Composes the generic figma-generate-design skill with โย's (Yo's) ui-designer/figma-ds-consumer/figma-build .skill files and borrows ds-governance-audit-notion's own annotation format for the "missing" case. Second step of the wider Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. First run end-to-end 2026-08-29 — several real defects found and fixed (see version history); still carries real, disclosed limitations (see "Known open limitation" below).
 ---
 
@@ -311,6 +311,54 @@ description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-
 >    green → `content-positive-primary`, the action blue → `content-action-primary`, etc.) rather
 >    than leaving any of them as an accepted "close enough."
 
+> **v0.8.0 — the biggest correction of this run: `cds`'s own `search_components`/`get_rules`
+> can be genuinely incomplete, and treating it as the final word on "no component exists" was
+> wrong for this entire screen's shell (2026-08-29, same Orbis extraction, requester pointed
+> directly at real components in โย's own file that this skill had missed all along).**
+>
+> Every prior version of this file (v0.2.0 through v0.7.0) treated the sidebar/topbar shell as a
+> genuine Design System Gap because the `cds` MCP server's `search_components`/`get_rules` never
+> surfaced anything for it. **This was wrong.** `cds-consumer`'s own `context/COMPONENTS.md` (Yo's
+> real, hand-maintained spec — knowledge source 5/6 in the Prerequisites) documents three real,
+> already-audited, ready-to-use components this skill never found because it only searched
+> `cds`'s own index:
+>
+> - **`Sidebar`** — component, key `db499c6e7b31473a7d44aa74b2e2be31e8490923`. Real slots (`Has
+>   Top Content`/`Has Bottom Content`, `🧩 Edit Top Content`/`🧩 Edit List Items`/`🧩 Edit Bottom
+>   Content`), real fill/stroke/padding tokens, a real default width (`328px` — the DS's own
+>   intended sidebar width, not this skill's earlier guessed `230px`).
+> - **`Top Navigation Bar`** — component, key `0cd3b6b165a82dacf984dc663905c07d3c20f284`. Real
+>   `🧩 Start/Middle/End Container` slots, a `Show Browser Search Bar` property (leave `false`
+>   unless a literal browser-chrome mockup is wanted — when `true` it binds private,
+>   consumer-unrebindable `_OS Native Color` variables per Yo's own documented, accepted defect
+>   D20; when `false` that whole subtree is simply hidden (`visible:false`), not deleted, so its
+>   internal unbound colors are correctly invisible and not a real finding).
+> - **`Sidebar List Item`** — set, key `e455557edb0ad714088253df0b63c6e2bb6e7483`. NOT the generic
+>   `List Item` this skill used in v0.4.0/v0.6.0 — a distinct, purpose-built nav-row component with
+>   its own real exposed `List Item` TEXT property directly on the root instance (no nested
+>   Text-List sub-instance to hunt for), `Has Start/End Content` booleans, and a documented "no
+>   content slot by owner ruling — customise by swapping the exposed icon" rule (D41). Confirmed
+>   fully audited with **zero open findings** as of 2026-08-24 (`context/DRIFT.md`'s audit table).
+>
+> **Standing rule: `cds`'s (or any design-system MCP server's) `search_components` is not
+> guaranteed complete — always additionally check `cds-consumer`'s (or the equivalent real
+> maintainer's) own `COMPONENTS.md`/`REGISTRY.md` by name/keyword before concluding a shell,
+> pattern, or building-block genuinely has no component.** The two sources can disagree, and when
+> they do, `cds-consumer`'s hand-maintained spec is the more complete one for exactly this kind of
+> "does a component exist for X at all" question — the MCP server's index missing something is not
+> evidence the design system doesn't have it. This reverses part of every prior version's Step 1
+> "check `get_rules` before treating this as a mistake" framing: `get_rules`/`search_components`
+> alone is not suffient grounds to conclude "no component publishes this" — cross-check
+> `cds-consumer`'s docs too, specifically, before writing that conclusion into an annotation.
+>
+> Practically: rebuilt the sidebar container as a real `Sidebar` instance (Top Content slot holding
+> the section-header label, List Items slot holding 6 real `Sidebar List Item` rows, Bottom Content
+> off), the topbar as a real `Top Navigation Bar` instance (logo + brand text moved into Start
+> Container, the view-mode pill into Middle Container, the primary action button into End
+> Container, browser-chrome mock left off), removed the now-inaccurate "composed, no component
+> exists" annotation entirely, and widened the frame to the real `328px` sidebar width plus the
+> content column's real needed width (was silently clipping content at the old guessed width).
+
 ## Expected input
 
 - **Prototype source** (required) — a link to, or file for, the prototype to extract (typically
@@ -375,8 +423,19 @@ information the individual component files don't carry on their own.
 already explains it.** A layer with no real DS component behind it may carry its own comment
 (e.g. "DESIGN SYSTEM GAP — per CDS `get_rules` #1...") documenting that this was already checked
 and reasoned to be a genuine gap — that reasoning wins over a component-search hit that merely
-looks similar, unless you independently re-verify against `get_rules` yourself. Don't "fix" a
-correctly-reasoned gap into a wrong real-component substitution.
+looks similar, unless you independently re-verify yourself. Don't "fix" a correctly-reasoned gap
+into a wrong real-component substitution.
+
+**But "independently re-verify" means checking `cds-consumer`'s own `COMPONENTS.md`/`REGISTRY.md`
+by name/keyword too, not just re-running `get_rules`/`search_components` again (v0.8.0).** The
+`cds` MCP server's own index is not guaranteed complete — an entire shell (`Sidebar`, `Top
+Navigation Bar`, plus the purpose-built `Sidebar List Item` nav-row component, all real, already
+audited with zero open findings) was missed for this whole extraction because `search_components`
+never surfaced any of them, while `cds-consumer`'s hand-maintained `COMPONENTS.md` documented all
+three in full (real keys, real slots, real properties) the whole time. A source comment citing
+`get_rules` and an MCP server's search both coming up empty is still not sufficient grounds to
+write "no component exists" into an annotation — grep `cds-consumer`'s `COMPONENTS.md` for the
+layer's likely name/category (e.g. "sidebar", "nav", "top bar") before concluding that.
 
 **But that reasoning covers only what it actually says — a gap ruling on a container/shell does
 not automatically extend to every layer inside it (v0.4.0).** A source comment saying "CDS does
