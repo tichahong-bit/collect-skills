@@ -186,3 +186,22 @@ caught three real gaps on review:
 3. New standing requirement: a Code Readiness summary line under the Design System Evaluation
    title, computed per screen from that screen's own rows (see `SKILL.md` for the exact bucket
    mapping and format) — the Flow-wide report view gets its own separate line the same way.
+
+## v1.26.0 — chrome mechanics pinned to literal labels, not just behavior (2026-08-30)
+
+Requester pointed at a specific published prototype (staff portal) and asked why the presentation
+chrome's own wording/structure was never nailed down as a standing rule — before this, "Chrome
+mechanics" only specified *behavior* (collapsible, draggable), leaving exact button text and
+whether the switchers and the per-screen content share one panel or two up to whatever a given run
+happened to generate, so two builds could behave identically but look/read differently to a
+reviewer. Measured the real running artifact's source directly (not a screenshot) and found:
+1. Three distinct chrome states, not two — a collapsed `🎭` pill with a 6-dot drag grip
+   (`aria-label="Drag chrome"`), an expanded header reading `🎭 Presentation Mode`, and a separate
+   **"Exit Presentation"** button that removes the chrome entirely. Collapsing back to the pill and
+   exiting presentation mode are different actions and were at risk of being merged into one
+   control by a future run.
+2. The switchers and the per-screen content are **two separately-collapsible named panels**, not
+   one — **"Prototype Settings"** (every live switcher) and **"Design Review"** (the per-screen
+   sections), each with its own chevron-up/down collapse toggle. `SKILL.md`'s "Chrome mechanics"
+   now pins these exact labels as standing, so any build using this skill produces the same
+   chrome a reviewer already recognizes from a prior build.
