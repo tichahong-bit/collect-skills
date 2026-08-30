@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.28.0
+version: 1.29.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -218,7 +218,8 @@ foundation styling is itself a tell something was hand-drawn.
 **Standing rule, not a per-run judgment call:** every run pulls color/font/token/component exactly
 from the real registry/live site, never an approximation, regardless of delivery target (dev
 server, single-file Artifact, anything else). The target changes *how* real values reach the
-output (see "Single-file Artifact" below); never *whether* they're real.
+output (see `references/single-file-artifact-pipeline.md`, mandatory reading when the target is an
+Artifact); never *whether* they're real.
 
 Before writing any UI for a screen, call that DS's `search_components` (`list_templates` for
 MBDS's whole-screen templates; `get_pattern` for webds's screen-region patterns — weaker claim
@@ -278,149 +279,29 @@ necessity), which isn't a defect.
 
 ## Dark theme (and other real DS mode axes with the same trap)
 
-Dark mode is a real, requestable mode axis in CDS/MBDS/webds — a genuine `[data-theme='dark']`
-token block from the DS's own Figma modes, not a cosmetic filter. Apply `data-theme` at the
-**true root** of the rendered tree — a narrower scope leaves anything outside it (shared
-background, status bar) resolving the wrong theme while everything inside looks right (a real
-WCAG failure found this way: white-on-near-white, 1.09:1).
-
-**The "-inverse" flip trap.** A token named with "inverse" (e.g.
-`surface-neutral-primary-inverse`) can deliberately mean *the opposite of whichever theme is
-active* — dark navy in light mode, near-white in dark mode, by design. Correct CDS behavior — the
-bug is code assuming that surface stays dark forever and hardcoding a matching
-`rgba(255,255,255,X)` text/border color instead of reading the token's own paired `-inverse`
-content/border family (`content-neutral-primary-inverse`, etc.), which flips in lockstep and stays
-correctly paired in both themes. Grep for hardcoded `rgba(255,255,255,`/`rgba(0,0,0,` near any
-`-inverse` surface token before calling dark mode done.
-
-**The fixed-light-surface trap — more common.** CDS's `surface-accent-*` and
-`surface-{positive,negative,warning}-primary` tokens stay a fixed light pastel in **both** themes.
-The `content-{success,danger,warning,brand,accent-*}` tokens that look like their natural pairing
-actually **flip lighter** under dark theme (built for the app's own dark canvas, not these
-always-light tinted cards) — naive pairing turns "readable dark text on pale card" into "pale on
-pale," often under 2:1. Use the correct non-flipping pair instead:
-
-| Fixed-light surface | Use this content token |
-|---|---|
-| `surface-accent-blue` | `content-accent-on-accent-blue` |
-| `surface-accent-green` | `content-accent-on-accent-green` |
-| `surface-accent-red` | `content-accent-on-accent-red` |
-| `surface-accent-purple` | `content-accent-on-accent-purple` |
-| `surface-accent-yellow` | `content-accent-on-accent-yellow` |
-| `surface-accent-orange` | `content-accent-on-accent-orange` |
-| `surface-positive-primary` | `content-positive-on-positive-primary` |
-| `surface-negative-primary` | `content-negative-on-negative-primary` |
-| `surface-warning-primary` | `content-warning-on-warning-primary` |
-
-**Systemic, not a one-off** — one build had this recur in 8+ unrelated files (sidebar nav,
-dashboard cards, a passcode-error state, a stat-card row, a tone-pill component) once actually
-swept for, after the first instance was fixed in isolation and reported done. Fixing the one
-instance you were told about ≠ fixing the class of bug — before calling dark mode done, grep every
-file for `surface-accent-`/`surface-{positive,negative,warning}-primary` and check the paired
-content token on each result.
-
-**A shared component's color variant can be correct in one usage and wrong in another,
-simultaneously.** A `Tab`'s "On Neutral Primary Inverse" variant has a correct, non-flipping
-SELECTED pair — but its UNSELECTED label reads from the generic flipping
-`content-neutral-primary-inverse`, correct only when the tab bar sits on a surface that itself
-flips with theme. The same variant on an *ordinary* dark surface (dark because the theme is dark,
-not because it's inverse-flipping) gets SELECTED right and UNSELECTED wrong — while a blanket fix
-applied everywhere breaks the first, correct usage. Scope a targeted override precisely (a
-dedicated class at only the call sites that need it), verify it doesn't regress an
-already-correct usage elsewhere, and measure both states' actual computed contrast before/after —
-never fix by guessing.
-
-**Standing verification.** After touching dark mode, run a real computed-contrast sweep — inject a
-WCAG relative-luminance checker (`getComputedStyle` on every visible text node, walk to the actual
-effective background, compute the real ratio, flag under 4.5:1 normal / 3:1 large text) across
-every screen and every dimension-switcher state, not just the screen that prompted the fix — a
-component can pass on one screen and fail the identical pairing on another because the two sit on
-differently-behaving surfaces. Treat SVG `<text>` specially — its color comes from `fill`, not CSS
-`color`; a scanner reading `color` on SVG text reports a false positive.
+**If this build has (or gets asked for) a dark-mode switcher, read
+`references/dark-theme-mode-axis.md` in full before touching it** — the `-inverse` flip trap, the
+fixed-light-surface trap (with the token-pairing table), and the standing computed-contrast
+verification are all there. Skipping this reference is how the fixed-light-surface bug recurred
+independently in 8+ unrelated files in one real build after being "fixed" once in isolation.
 
 ## Fork orchestration and independent verification
 
-Whenever a build spawns a background agent/fork for real implementation work, its final report —
-"done," "verified," "published," "no errors" — is a **claim to independently check, not a fact to
-relay**, even when it was told to run `verify_code`/the audit script itself; re-run the check from
-the orchestrating session before telling the requester it's done.
-
-- **Verify against the real, running artifact**, not the fork's description — `getComputedStyle`/
-  `getBoundingClientRect` for a layout/color claim, a real simulated interaction for a behavior
-  claim, `read_console_messages` for a "no errors" claim. Two real defects were only found this
-  way, neither visible from a screenshot: a component not stretching to fill its flex wrapper, and
-  a WCAG contrast failure from a background color resolving outside its intended theme scope.
-- **The orchestrating session owns publishing, not the fork** — tell every fork not to publish;
-  publish only after independently verifying. A fork that publishes anyway risks the requester
-  seeing an unverified state if the check gets interrupted.
-- **Redirect or stop a fork the moment direction changes mid-flight** — don't let it keep working
-  toward an outcome about to be discarded; have it report partial state rather than finish/publish
-  moot work.
-- **Never run two forks concurrently against the same files** — sequence them, second starts only
-  after the first's result is verified and merged.
-- **When redesigning an interaction**, check what richer pattern the codebase already uses for a
-  comparable decision before reaching for the simplest primitive (a plain toggle communicates only
-  "on/off," not "what") — reuse an existing richer pattern for consistency when one exists.
+**Before spawning any background agent/fork for real implementation work, read
+`references/fork-orchestration.md` in full** — a fork's "done/verified/published" self-report is a
+claim to independently check from the orchestrating session, never a fact to relay; the reference
+covers exactly how to verify, who owns publishing, and why never to run two forks concurrently
+against the same files.
 
 ## When the deliverable is a single HTML file / Artifact
 
-An Artifact's CSP blocks every external host except Google Fonts — no runtime fetch of CSS/fonts/
-a shadcn registry, no build step inside it. **A delivery-format constraint, not a license to
-fall back to hand-authored look-alike CSS** — Step 3 still applies in full. Correct sequence:
-
-1. Build the screen as a real Vite+React project **outside** the artifact sandbox (a scratch
-   directory).
-2. Install every component from the real registry (same `npx shadcn@latest add ...` as Step 3) —
-   pulls in the real foundation and component code, unmodified.
-3. Inline the system's web font(s) as `data:` URIs in place of the foundation's `url(...)`
-   references (BBL Sans is ~14 files/~620KB as of writing — check the current foundation CSS,
-   don't assume that count still holds).
-4. Inline whatever components fetch at runtime rather than importing statically (e.g. CDS's `Icon`
-   fetches an SVG sprite per size) — shim `window.fetch` to answer with the inlined sprite so the
-   fetch resolves inside the sandbox instead of silently failing.
-5. Build with `vite-plugin-singlefile` (or equivalent) so markup/styles/fonts/icons collapse into
-   one file with no external references.
-6. **Verify before publishing — the plugin doesn't catch everything.** It inlines built JS/CSS but
-   nothing a component fetches by a *runtime* string path (icon sprite fetch, an icon mask-image
-   pointing at `public/`) — invisible to it since they're computed in-browser, not imported in
-   source. Grep the built HTML for the DS's font/asset hostnames and the icon base path; inline
-   anything still there (a small generated data-URI map keyed only to names this build actually
-   uses). `<script type="module">` doesn't need stripping — confirmed fine in-sandbox by actually
-   loading the built file and checking `read_console_messages`, not by assuming a clean build log.
-   Serve `dist/` with a plain local static server to preview — `file://` is blocked by browser
-   automation tooling.
-
-**A real cold-load can genuinely take 10–20+ seconds** for a full component tree plus an inlined
-web font (~2MB total is normal) — expected sandboxed-iframe load, not a broken build; a quick
-"wait a couple seconds, still blank" check can misread a still-loading page as a crash. Give a
-fresh load real time before concluding a publish is broken. If a render failure is still
-suspected, verify with a non-destructive **on-page error overlay** (`try/catch` around the root
-render call + `window.addEventListener('error'/'unhandledrejection')`, writing any caught error as
-visible DOM text) — browser-extension console tools only capture the top-level wrapper page's
-console, not the artifact's own sandboxed iframe, so a real crash inside can read as "zero console
-errors." Remove the overlay before final publish. Republishing to an artifact URL not freshly
-`read` this turn can be refused ("identical content, resent unchanged") even with real new
-changes — call `read` once on the target before retrying a just-refused publish.
-
-**Two DS systems in the same project (a compare build) collide on token names unless scoped.** CDS
-and MBDS each publish their own `:root {...}` block; where both use the same token name (several
-do, apparently by convention not coordination) the textually-later one in the merged stylesheet
-silently wins for *both* systems, since custom properties cascade regardless of which file
-declared them. Fix by re-targeting each system's `:root` (and `.dark`) to a scoping class —
-`.ds-cds`/`.ds-mbds` — and mounting each system's subtree inside a wrapper carrying that class.
-Selector-only edit, never touch a token's value, do this before wiring the compare toggle.
-
-**Same scoping applies even with only one system rendering** — when mode 2's project DS doesn't
-cover something, Core fills the gap, but that Core component still resolves via `.ds-cds`; a
-screen otherwise entirely scoped to the other system has no `.ds-cds` ancestor for it to inherit
-from. Wrap just that leaf usage: `<div className="ds-cds" style={{display:'contents'}}>` — narrow
-enough to give the borrowed component real CDS values without pulling the other system's own
-components (rendered as children elsewhere on the same screen) into CDS's scope too.
-
-Never skip to CSS that merely *looks like* the DS because the real pipeline is more work — that's
-exactly the defect Step 3 forbids (wrong tokens under a mode switch, missing type-scale classes,
-wrong font loaded). If the pipeline is genuinely infeasible for a request, say so and ask before
-falling back to anything else — don't decide unilaterally that hand-authored CSS is acceptable.
+**If the target is an Artifact, read `references/single-file-artifact-pipeline.md` in full before
+building** — the CSP blocks every external host except Google Fonts, so Step 3's real-registry
+rule still applies but needs a specific build sequence (real Vite+React project outside the
+sandbox → install from the real registry → inline fonts/runtime-fetched assets → single-file
+bundle → verify what the bundler plugin can't see) to reach the sandbox at all. Skipping straight
+to hand-authored look-alike CSS because the real pipeline is more work is exactly the defect Step 3
+forbids — say so and ask if the pipeline is genuinely infeasible, don't decide unilaterally.
 
 ## Step 4 — presentation mode
 

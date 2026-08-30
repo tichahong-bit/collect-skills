@@ -246,3 +246,23 @@ extra copy, it was re-deriving each render call site's exact AST scope after the
 already-built single-file bundle (short variable names reused across unrelated closures made blind
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
+
+## v1.29.0 — split conditional-use sections into reference files (2026-08-30)
+
+Requester asked for the skill to be reorganized for an agent to retrieve/use more efficiently and
+with less unnecessary token cost per run — `SKILL.md` had grown to 730+ lines, but three whole
+sections only ever matter under a specific condition that most runs don't hit: dark-mode handling
+(only if a dark-mode switcher exists), fork orchestration (only if a background fork is spawned),
+and the single-file Artifact build pipeline (only if the delivery target is an Artifact). Every
+run was paying to read all three regardless.
+
+Moved each verbatim (no summarizing — every rule below was earned from a real measured defect, see
+their own history in this file) into `references/dark-theme-mode-axis.md`,
+`references/fork-orchestration.md`, and `references/single-file-artifact-pipeline.md`. `SKILL.md`
+now carries a short pointer at each section's old location, phrased as a mandatory read *when that
+condition applies* — same pattern this skill's own knowledge sources already use for
+`cds-consumer`'s `context/*.md` files, and the pattern sibling meta-skills (`figma-use`, etc.) use
+for "MANDATORY prerequisite" sub-skill loads. Reduces `SKILL.md` itself by ~9KB (~16%); a run with
+no dark mode, no forks, and no Artifact target now reads none of the moved ~11KB at all. Content is
+unchanged, not condensed — a run that does hit one of the three conditions still gets the full
+original rule text, just from a separate file.
