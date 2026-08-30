@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.26.0
+version: 1.27.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -68,6 +68,18 @@ the Asana-backed path as the team migrates knowledge sources over.
   no switcher for this build — don't fabricate a second option.
 
 ## Knowledge sources (Asana + live sites — this skill does not read Notion)
+
+**`page_get`/`page_list` below require the `asana-admin-mcp` plugin — not the standard Asana
+connector.** These 9 sources are Asana **Knowledge → Pages** (API resource name `note`, an
+undocumented Asana endpoint), which the standard/default Asana MCP connection (task- and
+project-oriented) cannot resolve at all — every gid below comes back `Not a recognized ID` through
+it, even with correct workspace access, because it's querying the wrong resource type entirely, not
+because of a permissions gap. If `page_get`/`page_list` aren't available as tools, install the
+plugin first (`/plugin marketplace add plakorp/asana-admin-mcp` then
+`/plugin install asana-admin@asana-admin-mcp` — needs a personal Asana token, see the plugin's
+`GET-TOKEN.md`) rather than falling back to the standard connector's task/project tools, which will
+silently search the wrong thing (real project/task names, not these Knowledge pages) and can look
+like "nothing found" instead of "wrong tool."
 
 Read in order, hold in context for Steps 2–4. Don't block on any source being empty — note the gap
 in the final summary (several pages are brand-new and may have little in them yet).
