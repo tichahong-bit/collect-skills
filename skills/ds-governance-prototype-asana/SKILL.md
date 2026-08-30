@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.27.0
+version: 1.28.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -478,13 +478,34 @@ comparison, not whether the control exists.
 |---|---|---|
 | **Design System** | Core alone / named existing project DS (mode 2) / Core + composed layer (mode 3), plus a second project-layer link if given | Real token swap (e.g. `data-ds` attribute driving a second CSS token block) on top of the same Core base — same screens/content, different project layer. Never a second copy of the prototype. |
 | **Branding** | No guide (CDS/Core baseline) + every named guide (often one) | Swaps branding-driven visual identity per the active guide's rules. A needed color/token the DS doesn't have yet gets invented and tagged `Design System Gap` — never presented as if from the DS. **Exception:** an explicit "exactly ONE Branding Theme, no other choices" instruction removes the switcher entirely (state, control, and any CSS/token scope for the retired option) — a control pointed permanently one way is still a visible second "choice." |
-| **Tone of Voice** | Plain/ungoverned copy + every named guide | Swaps every real copy decision on the current screen. **Every state must be in the same language** — the switcher shows a *feeling* difference (formal/casual); mixing languages shows a language switch instead. Pick the screen's natural language and write every state in it, even if a named guide's own examples lean toward a different language. A dedicated **Language** switcher (Thai/English UI copy) is separate and independent — don't cross the two into one combinatorial control unless specifically asked. |
+| **Tone of Voice** | Plain/ungoverned copy + every named guide | Swaps **every real piece of on-screen language**, comprehensively (see "Tone of Voice coverage" below) — not just long-form prose. **Every state must be in the same language** — the switcher shows a *feeling* difference (formal/casual); mixing languages shows a language switch instead. Pick the screen's natural language and write every state in it, even if a named guide's own examples lean toward a different language. A dedicated **Language** switcher (Thai/English UI copy) is separate and independent — don't cross the two into one combinatorial control unless specifically asked. |
 | **Design Option** | `Original` + `Option 1`/`Option A` — a genuinely different information architecture, never a relayout of the same grid | **Only when explicitly requested** — genuinely gated, unlike the three above, since a second full layout is real design work. Swaps which component tree renders; the DS Evaluation table reflects whichever option is selected. See "Design Option scope" below. |
 
 A dimension with genuinely one state (nothing named, nothing to fall back to) simply has no
 switcher for this build — don't fabricate a second state. When two sources were explicitly named
 as a comparison (Expected input's "Compare request"), the panel's prose for that dimension says so
 plainly rather than reading as open-ended exploration — the only thing that rule still decides.
+
+**Tone of Voice coverage — default to comprehensive, not just prose.** The point of this switcher
+is for a reviewer to toggle it and *see* the two guides read differently, everywhere, immediately —
+not to hunt for the two or three sentences long enough to carry a worked example. Default scope is
+**every real piece of language on the screen**: nav/sidebar labels, page/section titles and
+subtitles, stat/KPI card **titles and labels** (not their numeric values), table column headers that
+are real words, tooltips, button/CTA labels, empty-state and error/success text, toast/status text —
+all of it, on every screen, both Design Option variants if that switcher exists. Only skip something
+that genuinely **isn't language**: raw numbers/dates/currency values, a DS component's variant name,
+a proper noun (brand name, staff name, product tier name), or a control that's provably dead/
+unreachable code (confirm unreachable before excluding on this basis — don't use it as an excuse).
+A short label still gets a real register difference (MB: formal noun-phrase/sentence-case baseline;
+the named tone guide's own general principles — e.g. Uplifting/Helpful/Engaged — apply to
+label-length text the same way they apply to its worked CTA/description examples, even without a
+literal one-line worked example for "nav label" specifically) — never leave a label pair
+near-identical on the theory that short text "isn't real copy." Keep the underlying fact/destination
+identical (a nav item still points to the same screen); only the wording register changes.
+**Wire it as you build each screen in Step 3, not retrofitted after Step 4** — bolting tone-coverage
+onto an already-built screen means re-deriving each render call site's exact scope after the fact
+(real risk in a single-file Artifact's minified bundle: trace exact AST scope before any string
+edit, since short variable names get reused across unrelated closures).
 
 **Design Option scope — resolve before building, per Expected input:**
 - **Screen-scoped**: switcher lives on, and only affects, the one screen it was built for.
@@ -615,10 +636,14 @@ The rest are **per screen** — re-render fully from that screen's own data on e
    header (e.g. "ดู DS Report ทั้งหมด" — a modal or expand-in-place) that opens the shared-chrome
    rollup as its own separate view — never shown by default, never replacing any screen's table.
 
-6. **Copywriting** (after Design System Evaluation) — for every real copy decision, state the
-   wording chosen and cite the specific rule from the *named* tone-of-voice guide — never a vague
-   "per guidelines." Swaps with the Tone switcher; no guide named → say so plainly. **Link to the
-   named guide's actual Asana detail page** — same discipline as Research Insight/UX Rationale.
+6. **Copywriting** (after Design System Evaluation) — one row per tone-wired string on this screen
+   (see "Tone of Voice coverage" above for what counts — nav labels and stat/KPI card titles belong
+   here too, not just long-form prose), stating the wording chosen and citing the specific rule from
+   the *named* tone-of-voice guide — never a vague "per guidelines." A screen with only 1-2 rows here
+   despite having many labeled nav items/stat cards is a sign coverage was left too narrow, not that
+   the screen "didn't have much copy." Swaps with the Tone switcher; no guide named → say so plainly.
+   **Link to the named guide's actual Asana detail page** — same discipline as Research Insight/UX
+   Rationale.
 
    **The example text shown must be the literal string the live component renders, not a
    hand-authored parallel example.** Before citing a screen's copy as evidence of a guide's rule —
