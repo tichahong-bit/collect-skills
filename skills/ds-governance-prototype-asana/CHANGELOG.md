@@ -218,3 +218,31 @@ separate `asana-admin-mcp` plugin's `page_get`/`page_list`. New standing note at
 "Knowledge sources" naming the plugin explicitly and its install command, so a future run recognizes
 `Not a recognized ID` on one of these 9 gids as "wrong tool," not "no access, ask the human to paste
 it instead."
+
+## v1.28.0 — Tone of Voice coverage defaults to comprehensive, not just prose (2026-08-30)
+
+A staff-portal POC build wired ~10 prose strings (modals, banners) to the Tone of Voice switcher,
+called it done, and the requester correctly pushed back — three separate times — before the actual
+default matched what a POC needs: *"อยากให้มันทำให้ต่างกันทุกคำ เพราะว่าอันนี้เป็น POC ฉันอยากให้คน
+เข้ามาดู เห็นว่า tone ที่ต่างกันจริงๆ เป็นยังไงตอน toggle"* (I want every word to differ, because
+this is a POC — people need to see what the two tones really look like when they toggle). Each
+round found more coverage the old default had waved off as "not real prose, don't force it": nav/
+sidebar labels, page headers, then stat/KPI card titles across every screen — 60+ strings in total
+by the last round, all genuinely tone-differentiable once actually attempted.
+
+**The old default was wrong, not just incomplete for this one build.** "Swaps every real copy
+decision" was being read as "the two or three sentences long enough to carry a worked example from
+the guide" — too narrow for a switcher whose whole purpose is visible, immediate contrast. New
+standing rule in "Live switchers": Tone of Voice covers **every real piece of on-screen language**
+by default — nav labels, stat/KPI titles, tooltips, table headers, buttons, empty/error states, not
+just prose — excluding only genuine non-language (numbers/dates/currency, DS variant names, proper
+nouns, confirmed-dead code). A short label still gets a real register difference; a guide's general
+principles (Uplifting/Helpful/Engaged, formal baseline) apply to label-length text the same way they
+apply to its own worked CTA/description examples, even with no literal one-line example for "nav
+label" specifically.
+
+**Wire it during Step 3, not retrofitted after Step 4** — this build's real cost wasn't writing the
+extra copy, it was re-deriving each render call site's exact AST scope after the fact in an
+already-built single-file bundle (short variable names reused across unrelated closures made blind
+edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
+Building tone coverage in from the start avoids that entirely.
