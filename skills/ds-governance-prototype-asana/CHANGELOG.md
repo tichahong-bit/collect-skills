@@ -205,3 +205,16 @@ reviewer. Measured the real running artifact's source directly (not a screenshot
    sections), each with its own chevron-up/down collapse toggle. `SKILL.md`'s "Chrome mechanics"
    now pins these exact labels as standing, so any build using this skill produces the same
    chrome a reviewer already recognizes from a prior build.
+
+## v1.27.0 — name the real Asana tool for Knowledge pages, not just the gids (2026-08-30)
+
+A run trying to pull the Copy Writing Guideline's actual guide content hit every one of the 9
+Knowledge-source gids as `Not a recognized ID` through the standard/default Asana MCP connector —
+looked identical to a permissions problem, wasted a full round of "ask the user to paste the guide
+content instead" before the real cause surfaced: Asana Knowledge → Pages is a completely different,
+undocumented API resource (`note`, `/note/{gid}` permalinks) that the standard connector's
+task/project-oriented tools cannot reach *at all*, regardless of workspace access — it needs the
+separate `asana-admin-mcp` plugin's `page_get`/`page_list`. New standing note at the top of
+"Knowledge sources" naming the plugin explicitly and its install command, so a future run recognizes
+`Not a recognized ID` on one of these 9 gids as "wrong tool," not "no access, ask the human to paste
+it instead."
