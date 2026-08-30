@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.25.0
+version: 1.26.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -415,12 +415,31 @@ falling back to anything else — don't decide unilaterally that hand-authored C
 A walkthrough view (or whatever presentation surface the tool supports) with per-screen dynamic
 content, live dimension switchers, and click-to-highlight rows.
 
-### Chrome mechanics
+### Chrome mechanics — literal spec, same on every build
 
-- **Collapse control**: a single `›`/`‹` icon-button, not an on/off toggle — shrinks to just the
-  drag grip for a clean product view, expands back on click. Collapsed is the default on load.
-- **Draggable**: one control bar with a grip, not fixed in one corner — the requester moves it out
-  of the way of whatever they're looking at.
+Measured off a real published prototype (staff portal, 2026-08-30) — these are the **standing
+literal labels/structure**, not this one build's styling choice. Every build uses these same
+words and the same two-panel split so a reviewer who has seen one build recognizes the next:
+
+- **Collapsed state (default on load)**: a small pill — `🎭` emoji + a 6-dot drag grip
+  (`aria-label="Drag chrome"`), `cursor:grab`. Click anywhere on the pill (that isn't a grip drag)
+  to expand.
+- **Expanded header**: shows `🎭` + the label **"Presentation Mode"**.
+- **Exiting is a separate action from collapsing.** Inside the expanded chrome, a button reading
+  **"Exit Presentation"** (`🎭` + text) removes the chrome entirely and returns to the plain
+  product view — collapsing (back to the pill) is a minimize, not an exit; don't conflate the two
+  or invent different wording for either.
+- **Two independently collapsible panels**, each its own docked column with its own header row
+  (label in `type-label-lg-emphasized` style + a `chevron-up`/`chevron-down` icon-button toggle,
+  `aria-label="Collapse panel"`/`"Expand panel"`):
+  - **"Prototype Settings"** — every live switcher this build has (see "Live switchers, not gated
+    compares" below). Header toggles the whole panel; individual switchers inside don't collapse.
+  - **"Design Review"** — the per-screen sectioned content (see "Panel section order" below).
+    Each section inside is *also* independently collapsible (its own title + open/toggle state),
+    nested one level under the panel's own collapse toggle.
+- **Draggable**: the drag grip lives on the collapsed pill itself, not a separate bar — the
+  requester drags the pill (and everything expands from wherever it was last dropped) out of the
+  way of whatever they're looking at.
 - **Theme-independent by default**: if the product has a dark-mode switcher, pin the chrome's own
   root to `data-theme="light"` regardless of the product's current theme, so it re-resolves CDS's
   real light-token block — a fixed light background reads easier for reviewer tooling than one
