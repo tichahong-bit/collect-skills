@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.13.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 12 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.14.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 14 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -17,6 +17,18 @@ the full story behind every rule here — read it when you want the "why," not t
 - **Target Figma file** (required) — the Figma file screens should be placed into.
 - **Design system project** (optional, but ask if missing) — link to the Core or Project DS
   library to bind against. Without this, Step 2 has nothing to bind to.
+
+**If more than one named option exists, stop and ask which one before building anything.** A
+prototype bundle can carry multiple competing options side by side under the same screen — a
+design option, a tone-of-voice option, a branding option, a design-system option, an A/B variant —
+each fully coded and each a legitimate candidate for "the" screen. Building whichever one the
+grep/search happens to land on first, or whichever looks more complete, is a silent, unrequested
+choice on the caller's behalf. Detect this before Step 1 finishes (source naming a screen/component
+with an explicit suffix like `OptionA`/`OptionB`, a variant switch/flag in the source, more than one
+plausible match for the same UI role) and ask the caller which option to build — do not guess, and
+do not build more than one without being asked. This applies every time multiple options are found,
+not only on the first screen of a run.
+
 - **Scope** (optional) — **defaults to the whole screen**: every element the caller can see or
   reach on that screen — persistent chrome (top nav, sidebar) plus every section/card, and every
   tab/state the screen exposes (see Step 0). A caller naming a specific section (e.g. "Risk level,
@@ -111,6 +123,23 @@ Before treating any screen as fully understood:
    equivalent) — and in that second case, the correct outcome is often a genuine gap (CDS has no
    piggy-bank, package, or robot/AI icon; confirmed by search returning nothing close), not a
    force-fitted "close enough" substitute presented as if it were the real one.
+6. **A keyword match in the bundled source is not proof that code is what actually renders.** A
+   bundled prototype accumulates old drafts over its edit history — a real run found a component
+   whose props, labels, and structure all matched the screen being extracted (right ids, right
+   translation keys), extracted its copy faithfully, and shipped Figma text that didn't match the
+   live prototype at all. The grepped function was a real, syntactically valid, completely dead
+   leftover from an earlier design pass; a *different* function — using shorter labels and a
+   different component entirely for the same UI role — was the one actually mounted and rendered.
+   Static grep cannot tell live code from dead code; it can only tell you a string exists somewhere
+   in the bundle. Before trusting any grepped copy/behavior for something the caller can also see
+   rendered live (open the actual prototype, not a cached/earlier-fetched copy of its source), spot
+   check the exact visible text or a distinctive prop value against what's on screen. If more than
+   one function in the bundle plausibly implements the same UI role (same screen id, overlapping
+   name, same translation-key namespace), treat that as a signal to verify which one is live before
+   building from either — never assume the first or most complete-looking match is the real one.
+   The same caution applies to a locally cached copy of prototype source fetched earlier in a long
+   session: re-fetch fresh before trusting it, the same standard Step 1 already states for using a
+   fresh read over an earlier round's summary.
 
 ## Prerequisites
 

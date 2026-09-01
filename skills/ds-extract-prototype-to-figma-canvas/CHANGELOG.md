@@ -402,3 +402,48 @@ for the sidebar, not again for its sibling.
 **Fixed:** Step 0 extended — grepping source for any one piece of chrome on a screen now requires
 grepping it for every other piece of chrome on that same screen too, including pieces already built
 and already screenshotted, before any of them count as finished.
+
+---
+
+## v0.14.0 — grepped the right-looking function, wrong function: dead code in the bundle, and no one asked which option to build
+
+Two separate defects found by the requester in the same follow-up session, after the extraction
+itself was already reported done.
+
+**A. Dead code with the right keywords.** The requester asked, separately from the Figma work, to
+change a customer/staff workspace switcher in the *live prototype's own code* (not Figma) to use a
+real CDS field component. Grepping the prototype's bundled source for the switcher's translation
+keys (`switchWorkspace`, `staffViewLabel`, `customerViewLabel`) found a function that looked exactly
+right — correct screen id nearby, correct labels, a real Popover+Menu+ListItem dropdown already
+built from real components. It was patched cleanly (valid syntax, verified with `node --check`
+before and after) and published. Opening the live prototype afterward to confirm: the patch had no
+visible effect. A second, completely different function elsewhere in the same bundle — using
+shorter labels (`Staff`/`Customer` instead of `staffViewLabel`/`customerViewLabel`) and a real CDS
+`Tab` component in `Fill - Pill` style instead of a dropdown — was the one actually mounted and
+rendered. The first function was a syntactically valid, fully-formed leftover from an earlier design
+pass, still sitting in the bundle, never deleted, matched by grep purely because it happened to
+reuse recognizable naming.
+
+**Root cause:** a bundled prototype accumulates draft history. Grep can confirm a string exists in
+the bundle; it cannot tell live code from dead code. Nothing in this skill's process checked the
+grepped match against what the prototype actually renders before building/patching from it — a gap
+compounded by working from a copy of the prototype's source cached earlier in a long session,
+without re-fetching to confirm it still reflected the currently-live version (the artifact had moved
+through several unrelated published versions in the meantime).
+
+**Fixed:** new Step 0 point — before trusting a grepped match for anything the caller can also see
+rendered live, spot-check the exact visible text or a distinctive prop against the actual on-screen
+render, and re-fetch cached source rather than trusting an earlier fetch from the same session. If
+more than one function plausibly implements the same UI role, that plurality itself is the signal to
+verify before building from either.
+
+**B. No one asked which option.** The same investigation surfaced that the bundle's screen ids and
+component names were explicitly suffixed `OptionA` throughout, implying at least one sibling
+`OptionB` was expected to exist (it didn't, in this case — but the naming convention itself signals
+a prototype built to compare options, and nothing in this skill's process would have stopped it from
+silently picking one had two existed side by side). The requester separately, explicitly asked that
+whenever a prototype or request carries more than one named option — design, tone of voice,
+branding, design system — the skill must ask which one to build, not choose silently.
+
+**Fixed:** new rule under "Expected input" — detect multiple named options before Step 1 finishes
+and stop to ask the caller which to build, every time, not only on a run's first screen.
