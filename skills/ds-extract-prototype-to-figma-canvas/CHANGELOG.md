@@ -289,3 +289,91 @@ than duplicating overlapping ones:
 
 No behavior change to the extraction pipeline itself — these are additional Plugin-API traps to
 watch for, organized into the Reference section's existing categories.
+
+---
+
+## v0.11.0 — default scope widened to whole screen; chrome needs the same source-grep discipline as content; a corrective pass propagated its own bug
+
+Real run: "Investment Overview" screen, `[StaffPortal_ABC] Dashboard`, requested first as two named
+sections, then as the whole screen, then as two specific tab states, surfacing four more real
+defects.
+
+1. **Scope defaulted too narrow.** Given a section name as scope, the skill built only that
+   section — correct behavior for an explicit narrowing, but the same narrow-by-default read
+   also applied when the caller's intent was actually "the whole screen," requiring a full redo.
+   **Fixed:** scope now defaults to the whole screen (persistent chrome + every section/tab) unless
+   the caller names a narrower one; see `SKILL.md`'s Expected input.
+2. **An entire tab-navigation layer was invisible to a browsing pass and had to be found by
+   grepping the prototype's own bundled source.** The rendered default view showed no tab bar at
+   all; the actual source defined four tabs (`overview`/`rebalancing`/`risk`/`funds`) behind a
+   `useState` initialized to one of them. One tab's real content (`funds`) turned out to be a CDS
+   `Table`, not the card-list shape a same-named section on a different (already-seen) screen had
+   suggested. **Fixed:** new Step 0, run before Step 1 — grep source for tab/state arrays before
+   treating any screen as understood; build every tab/state scope reaches, each as its own full
+   screen; read each tab's content from source rather than pattern-matching a similarly-named
+   section seen elsewhere.
+3. **The persistent chrome (sidebar) was built from a remembered screenshot, not from source —
+   and shipped three defects invisible in a static render.** (a) The source's own nav-item array
+   marks 5 of 6 items `enabled:false`; only one is real. A screenshot cannot reveal a disabled flag
+   unless you already know to look for a subtle color difference, and this one didn't render
+   distinctly enough to catch by eye. (b) Two icons were `iconKind:'glyph'` — a local custom asset
+   with no CDS equivalent (confirmed: `find_icon` genuinely returns nothing for piggy-bank/package/
+   robot) — while a third was `iconKind:'cds', icon:'booking'`, an explicit, authoritative name
+   that was never checked; a semantic `find_icon` search ran instead and happened to return a
+   different, merely-plausible slug for a different item. (c) A segmented pill toggle that looked
+   like a one-off custom widget was hand-composed from frames — it was the same real `Tab`
+   component (`Style=Fill - Pill`) already correctly identified and used for the tab bar elsewhere
+   in the very same extraction, just never searched for at the point the toggle was built.
+   **Fixed:** Step 0 extended — chrome gets the same source-grep discipline as tab content; explicit
+   `iconKind:'cds', icon:'X'` in source is ground truth, checked before any semantic icon search;
+   any custom-looking repeated control (toggle, segmented switch) gets a component search
+   (`tab`, `chip`, `toggle`) before being hand-built.
+4. **Fixing defect 3(a) introduced its own bug, and a follow-up corrective pass propagated it
+   instead of catching it.** The first fix used a wrong node-matching selector (matched a wrapper
+   FRAME named "Title" instead of the TEXT child of the same name), so every item's label read as
+   `null` — including the one item meant to stay in its original enabled/selected state, which then
+   also got swapped to the disabled variant along with the other five. A follow-up pass fixed the
+   selector, correctly read labels this time, found the one item already "looking handled" (its
+   label was now readable, and it was already *some* variant), and moved on without checking that
+   variant was the *right* one. The mis-swap sat live through a full token sweep and a "looks
+   correct" screenshot review, because the sweep checked token binding, not variant identity — it
+   was only caught when the requester independently compared the render against the real source.
+   **Fixed:** a corrective pass must verify **every** item in the batch the original bug could have
+   touched against its actual intended end-state, not just the items its own new logic positively
+   re-identifies — added to Step 6 as a named case (`SKILL.md` §"A corrective pass must diff
+   against the last known-good state").
+5. **A zombie duplicate from an already-recovered timeout can still land after the final
+   screenshot.** A table-building call timed out, was checked for zombies immediately (found none,
+   correctly — nothing had landed *yet*), was rebuilt manually, screenshotted clean, and reported
+   done. The original call's straggler then completed server-side sometime after that screenshot,
+   inserting a second copy of the section. It went out reported-clean and was only caught when the
+   requester noticed the doubled section directly in Figma. **Fixed:** re-run the duplicate-name
+   sweep immediately before the final report every time, not only right after a timeout — the gap
+   between "timeout recovered" and "reported done" is exactly the window a straggler completes in.
+6. **Added a default minimum screen size by device class** (desktop 1440×1024, tablet 1280×800,
+   phone 375×812 — width fixed, height free to grow) so screen dimensions stop being reinvented per
+   run; see `SKILL.md`'s "Screen dimensions" section.
+
+---
+
+## v0.12.0 — a rule everyone already knew got skipped for an entire run anyway: annotations
+
+A full three-screen build finished, was screenshotted, swept for tokens, swept for zombies, and
+reported done — with **zero** annotations, despite the run having found six genuine, confirmed
+gaps along the way (a composed donut-adjacent slider replacement, a manually-built table, and three
+separate icon substitutions where CDS had no real match). Step 5 already said, in plain language, to
+annotate every gap — that was never the missing information. It surfaced only because the requester
+looked at the finished file and asked "where are the annotations?"
+
+**Root cause:** "annotate as you go" has no natural trigger in a build spread across a dozen-plus
+separate script calls over a long session. Each gap got composed correctly in the moment, and the
+annotation step silently never happened, because nothing forced a look-back at the full set of gaps
+found before the final report went out — the same shape of failure this file already names for
+zombie duplicates and mis-propagated fixes: an instruction that fires once, with nothing checking
+whether it actually landed.
+
+**Fixed:** Step 5 now requires a running written gap list (node id + one-line reason) started the
+moment the first gap is found, not held in memory. Step 6 now checks that list directly — reads
+back `node.annotations` on every listed id and confirms it is non-empty with the right category —
+before anything is reported done. An empty gap list is only correct if Step 5's own list is
+actually empty, not if the build simply never stopped to write one down.

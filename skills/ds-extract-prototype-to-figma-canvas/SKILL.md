@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.10.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Run end-to-end and corrected 9 times as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.12.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 11 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -17,6 +17,82 @@ the full story behind every rule here — read it when you want the "why," not t
 - **Target Figma file** (required) — the Figma file screens should be placed into.
 - **Design system project** (optional, but ask if missing) — link to the Core or Project DS
   library to bind against. Without this, Step 2 has nothing to bind to.
+- **Scope** (optional) — **defaults to the whole screen**: every element the caller can see or
+  reach on that screen — persistent chrome (top nav, sidebar) plus every section/card, and every
+  tab/state the screen exposes (see Step 0). A caller naming a specific section (e.g. "Risk level,
+  กองทุนแนะนำ") narrows the build to that section only — treat a bare section/card name as an
+  explicit narrowing, not as the caller silently accepting a partial screen. When scope is
+  ambiguous or unstated, build the whole screen; do not default narrow to save tokens. A caller
+  who genuinely wants only a fragment (e.g. to sanity-check the pipeline before committing to a
+  full build) will say so, and can always ask you to expand to the full screen afterward — but
+  redoing a partial build as a full one after the fact costs more total work than asking once
+  up front when scope is unclear.
+
+## Screen dimensions — default minimum size by device
+
+Unless the caller states an exact size, or the source's own layout dictates a different one, build
+the outer screen/shell frame at **no smaller than** these minimums for its device class (width
+`FIXED`, height free to grow/hug beyond the minimum — never shrink below it):
+
+| Device class | Minimum size (W×H) |
+|---|---|
+| Desktop / web | 1440×1024 |
+| Tablet | 1280×800 |
+| Phone / mobile | 375×812 |
+
+Infer device class from the prototype's own layout (a persistent side nav + multi-column content
+reads as desktop; a single-column, bottom-nav layout reads as phone) rather than guessing from the
+product name alone. If content naturally requires more width or height than the minimum (e.g. a
+wide data table), grow past the minimum rather than compressing content to fit it — these are
+floors, not fixed canvas sizes.
+
+## Step 0 — Find every tab/state the screen has, before deciding what "the screen" is
+
+**Do this before Step 1.** A rendered prototype's default view can hide entire structural layers —
+a screen with tabs shows only whichever tab loaded first; the others are real, separate content
+that a visual screenshot pass will never reveal just by scrolling. A real run extracted a screen's
+default tab faithfully, shipped it, and was only later discovered — by grepping the prototype's own
+bundled source for its tab/state definitions — to have three more tabs, one of which (a fund
+recommendation list) turned out to render as a completely different component shape (a real Table)
+than the guessed equivalent built earlier (card list). Visual browsing alone had no way to surface
+this: the other tabs never rendered without a click the browsing pass never made.
+
+Before treating any screen as fully understood:
+
+1. **Grep the prototype's actual source** (the bundled JS for a web artifact, or the component
+   source file) for state/tab arrays — look for patterns like a list of `{key, label}` objects, a
+   `useState` initialized to one tab's key, or a switch/ternary keyed on an active-tab variable.
+   This is more reliable than clicking through the live UI, and doesn't depend on a flaky browser
+   session.
+2. If tabs/states exist, **scope covers all of them** unless the caller named one specific
+   tab/state — build each as its own full screen (persistent chrome + that tab's content), not as
+   fragments bolted onto one page.
+3. Read each tab's real rendered content from source, the same way Step 1 reads the rest of the
+   screen — don't assume a tab's content shape from what a *different* tab's similar-sounding
+   section looks like (a "funds" list card and a "funds" data table are not interchangeable
+   guesses of each other).
+4. **This applies to persistent chrome too, not just tab content.** A sidebar/nav built from a
+   remembered screenshot rather than the source's own nav-item array shipped with three real
+   defects at once, none visible by eye from a static render: (a) the source marks 5 of 6 items
+   `enabled:false` — only one is real, the rest render dimmed/non-interactive, a state a screenshot
+   cannot reveal unless you already know to look for a subtle color difference; (b) two items'
+   icons were `iconKind:'glyph'` (a local custom asset CDS has no equivalent for at all) while one
+   was `iconKind:'cds', icon:'booking'` — an *explicit, authoritative* icon name sitting right in
+   the source that was never checked, guessed via semantic search instead, and happened to guess a
+   name (`mutual-funds`) that wasn't the one specified; (c) a segmented pill toggle that looked
+   custom was hand-composed from frames instead of searched for — it was the same real `Tab`
+   component (`Style=Fill - Pill`) already correctly identified for the tab bar elsewhere in this
+   very extraction. **Any nav item, toggle, or chrome element with per-item state (enabled/
+   disabled/selected) or an icon must be read from source the same way tab content is** — never
+   inferred from a screenshot, and never assume a custom-looking control has no CDS match without
+   searching for it by function (segmented control → search `tab`, `chip`, `toggle`) first.
+5. **When source names the icon system explicitly (`iconKind:'cds', icon:'X'`), that name is
+   ground truth — use it, don't run a separate semantic search that might return a different,
+   merely-plausible slug.** Only fall back to semantic `find_icon` search when source gives no
+   icon system at all, or explicitly marks it as a non-CDS/custom asset (`iconKind:'glyph'` or
+   equivalent) — and in that second case, the correct outcome is often a genuine gap (CDS has no
+   piggy-bank, package, or robot/AI icon; confirmed by search returning nothing close), not a
+   force-fitted "close enough" substitute presented as if it were the real one.
 
 ## Prerequisites
 
@@ -169,7 +245,25 @@ style):
   Prefer actually fixing it (Step 4) over reaching for this category — use it only when fixing is
   genuinely not possible.
 
+**Keep a running written gap list from the moment the first gap is found, and check it at Step 6.**
+A real multi-hour run found six genuine gaps (a composed chart, a composed slider, a manually-built
+table, and three separate icon substitutions) spread across a dozen separate script calls over the
+session — and annotated **none of them**, not because the rule was unknown, but because "annotate
+as I go" has no natural trigger when the actual gap-composing work is interleaved with everything
+else being built. It surfaced only when the requester asked "where are the annotations?" after the
+whole screen was already reported done. The fix is procedural, not a stronger reminder: the moment
+Step 5 identifies ANY gap, append it to a plain list (node id + one-line reason) before moving on —
+this list is the only thing Step 6 checks against, so there is nothing left to remember by the end.
+
 ## Step 6 — Verify before reporting anything done
+
+**Every entry on the Step 5 gap list has a real `node.annotations` value, read back — not just a
+memory of having meant to add one.** Query each listed node directly
+(`(await figma.getNodeByIdAsync(id)).annotations`) and confirm it is non-empty with the right
+`categoryId`, the same "don't trust a successful-looking call, read the actual state back"
+discipline already applied to token binding and TEXT writes elsewhere in this file. An empty gap
+list at this checkpoint is only correct if the screen genuinely had no gaps — verify that against
+Step 5's own list, not against how the build felt while it was happening.
 
 **A screenshot, actually looked at — not a structural node-tree read succeeding.** Two false "done"
 reports in one real run were caught only by looking at an actual screenshot.
@@ -180,6 +274,28 @@ past the timeout and complete later, silently inserting a duplicate of whatever 
 right next to an already-correct fix. Before concluding a screenshot/cache is broken: search the
 whole document for other nodes with the same stale name/characters
 (`figma.root` → walk every page/node).
+
+**A zombie can land *after* a screenshot you already took and already called clean.** One run
+timed out building a table, was judged to have created nothing (an immediate zombie-check right
+after the timeout found none), was rebuilt manually, screenshotted clean, and reported done — a
+straggler from that original timed-out call then finished server-side sometime *after* the
+screenshot, landing a second, unfixed copy of the section next to the reported-clean one. It sat
+undetected until the requester noticed a visibly doubled section on their own. **Re-run the
+duplicate-name sweep immediately before the final report, every time — not only right after a
+timeout is recovered from** — since the gap between "timeout recovered" and "work reported done"
+is exactly the window a straggler can complete in.
+
+**A corrective pass must diff against the last known-good state, not just re-read current state
+and trust it.** Fixing one bug (a wrong node-matching selector that made every item's label read as
+`null`) caused a second, silent one: every item — including the one item that should have stayed in
+its original, correct, non-default state — got swapped to the same fallback treatment before the
+selector was fixed. The follow-up corrective pass then re-ran with the fixed selector, correctly
+identified that one item by its now-readable label, and *left it alone* — because by then it was
+indistinguishable from "already handled," when it had actually been wrongly changed by the same bug
+the correction was fixing. A corrective pass that only asks "does this look right now?" for items
+it can positively identify will silently accept collateral damage on ones the original bug already
+touched. When a bug is found to have affected a batch of N similar items, verify **all N** against
+their intended end-state after the fix — not just the subset the fix's own logic newly touches.
 
 **A successful API return is not proof a TEXT write landed.** `instance.setProperties()` called
 raw in a script can silently no-op on TEXT-kind properties while visibly changing BOOLEAN
@@ -232,6 +348,17 @@ log, cross-checked and folded in at v0.10.0.
   wedges the plugin's single JS thread, and every later call queues behind it and times out too,
   even trivial reads. `figma_reload_plugin` does not clear this (only reloads the UI iframe) — a
   full close+reopen of the Desktop Bridge plugin does. One resource resolution per call.
+- **A single, unbatched first-time `importComponentByKeyAsync` on a never-before-used key can also
+  hang at the 30s cap, with the plugin thread otherwise healthy** (trivial reads succeed
+  immediately, in between and after the timeouts) — a distinct trap from the batching-wedge above.
+  `figma_reconnect` clears it for *some* component sets after one retry (confirmed: Avatar, Icon
+  Button, Text Field all hung once, then imported instantly post-reconnect) but is **not
+  guaranteed** — one set (Table Head / Table Cell, from CDS's own `🟦 Table` page) hung three
+  times running, across two separate reconnects, with nothing else in the script. Treat a second
+  consecutive hang on the same key after a reconnect as a real, reproducible blocker, not bad luck
+  — stop retrying, compose that piece manually from primitives/tokens (still using whichever
+  *other* real components in the same screen resolve fine), and report the specific key as a known
+  import blocker rather than silently downgrading the whole screen's fidelity.
 
 ### Filling slots & setting content
 
