@@ -377,3 +377,28 @@ moment the first gap is found, not held in memory. Step 6 now checks that list d
 back `node.annotations` on every listed id and confirms it is non-empty with the right category —
 before anything is reported done. An empty gap list is only correct if Step 5's own list is
 actually empty, not if the build simply never stopped to write one down.
+
+---
+
+## v0.13.0 — a sidebar rebuilt from real source, a header left untouched from before that habit existed
+
+Same run as v0.12.0/v0.11.0, one more real find: the requester compared the finished header against
+the live prototype and found it didn't match — wrong padding (16px vs source's 24px), wrong height
+(hugged ~88px vs source's fixed 72px), a full CDS `Text Field` component used for what source
+builds as a plain bordered `<input>` with no label/hint chrome, and a notification button with the
+wrong fill. Also flagged: a Card Container that had no earlier findable "Card" match was in fact
+available and should have been used for the sidebar's bordered nav grouping (fixed in-session by
+swapping to a real `Card Container` instance behind the existing nav content, not rebuilding it —
+same node, same content, real component added underneath).
+
+**Root cause:** the header was built early in the session, before this run had developed the
+habit (later written up as Step 0) of grepping source for chrome. Once the sidebar's real source
+component was found and correctly rebuilt from it, nothing prompted going back to re-check the
+header against source too — each piece of chrome had its own screenshot review and was judged
+individually "done," and a screenshot review checks internal consistency, not layout-against-source.
+The header's mismatches were exactly the kind Step 0 exists to catch, but Step 0 only fired once,
+for the sidebar, not again for its sibling.
+
+**Fixed:** Step 0 extended — grepping source for any one piece of chrome on a screen now requires
+grepping it for every other piece of chrome on that same screen too, including pieces already built
+and already screenshotted, before any of them count as finished.

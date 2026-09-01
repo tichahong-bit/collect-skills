@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.12.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 11 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.13.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 12 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -71,6 +71,24 @@ Before treating any screen as fully understood:
    screen — don't assume a tab's content shape from what a *different* tab's similar-sounding
    section looks like (a "funds" list card and a "funds" data table are not interchangeable
    guesses of each other).
+4b. **Finding real source for one piece of chrome does not retroactively fix a sibling piece of
+   chrome already built from assumption.** A real run found and correctly rebuilt a sidebar from
+   its exact source component — then left an already-built top header untouched, because the
+   header had been built earlier, before source-grepping habit existed for this run, and finding
+   the sidebar's source didn't trigger going back to check the header's. The header shipped with
+   several real, concrete mismatches an actual grep would have caught immediately: wrong padding
+   token (16px used where source specifies 24px), wrong fixed height (hugged to ~88px against a
+   real fixed 72px), a search field built from a full CDS `Text Field` component where source is a
+   plain bordered `<input>` with no label/hint chrome at all (a heavier real component substituted
+   for a lighter freehand element — the wrong direction of the usual mistake), and a notification
+   button with the wrong fill/no-border treatment. **The moment source is grepped for any one piece
+   of chrome on a screen, grep it for every other piece of chrome on that same screen too** — a
+   header, a footer, a rail — before considering any of them finished, even ones already built.
+   Chrome pieces are siblings under the same parent shell in real source; treating them as
+   independently "done" once each is individually screenshotted is how this kind of mismatch
+   survives a full token sweep and a visual review (both passed on the broken header, because
+   neither checks *layout against source*, only internal consistency of what was already built).
+
 4. **This applies to persistent chrome too, not just tab content.** A sidebar/nav built from a
    remembered screenshot rather than the source's own nav-item array shipped with three real
    defects at once, none visible by eye from a static render: (a) the source marks 5 of 6 items
