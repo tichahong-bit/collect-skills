@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.17.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 17 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.18.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 18 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -330,13 +330,28 @@ A component genuinely not in the DS gets a **real mockup**, composed from real t
 existing components — a chart from real color tokens on shapes, a layout from real spacing/radius
 tokens — so it reads as part of the screen. Never a "[Placeholder] X" blank frame.
 
-**Annotation content: plain, easy-to-read Thai prose — one or two natural sentences, no bold
-title, no bullet list.** Say what's missing, why, and what it means for whoever picks this up
-next, the way a designer would actually write a note. Example (translate the specifics, not the
-style):
+**Annotation content: a fixed bullet structure, not free prose — `**Existing Issue:**` /
+`**Recommend:**` / optional `**Inform:**`, one short line each, concise and easy to scan.**
 
-> ยังไม่มี component กราฟใน Core Design Library สำหรับส่วนนี้ จึงประกอบขึ้นเองจากสี token จริงของระบบ
-> นักออกแบบควรรู้ว่านี่เป็นของใหม่ ไม่ใช่ component จริงจากระบบ
+- **Existing Issue** — the gap/problem, stated plainly (what's missing, why it happened).
+- **Recommend** — the concrete action the designer should take (what to fix, or what to ask Core
+  DS for).
+- **Inform** (only when it applies) — a real link to a matching task on the team's Asana
+  "Component Issue" board, so the designer can see it's already tracked and reach the owner.
+  **Only add this bullet after actually querying the real Asana board and confirming a genuine
+  match for this specific gap — never assume or fabricate a "already submitted" state.** No match
+  found (the common case for a brand-new gap) means no Inform bullet, full stop.
+
+**Write the bold markers into `labelMarkdown`, not `label`.** `Annotation.label` renders `**text**`
+literally as asterisks — `Annotation.labelMarkdown` is the field Figma actually parses for bold.
+Setting `label` alone with markdown syntax in it ships visibly-broken formatting; always set
+`{ labelMarkdown: text, categoryId }` and leave `label` unset.
+
+Example (translate the specifics, not the structure):
+
+> **Existing Issue:** ยังไม่มี component กราฟโดนัทใน Core Design Library จึงประกอบเองจาก ELLIPSE +
+> token สีจริง
+> **Recommend:** เสนอ Core DS เพิ่ม component กราฟโดนัท เพื่อผูก token ได้จริง
 
 **Two categories, two different findings — use the one that matches:**
 - **"Log Note" (yellow)** — no component/pattern exists for this at all. Does **not** create a

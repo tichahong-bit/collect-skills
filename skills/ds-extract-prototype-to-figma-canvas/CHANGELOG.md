@@ -543,3 +543,33 @@ icon/color decision; resolve each slot against its own real source spec, reusing
 when repeating the identical slot/role. Step 0's re-audit rule (v0.16.0) now explicitly states that
 a genuine gap found during a later re-audit still requires a real annotation, not only gaps found
 during the original Step 5 pass.
+
+## v0.18.0 — annotation content needed a fixed structure, and the bold markers weren't even rendering
+
+Two separate real corrections landed back-to-back on the same 34 annotations across a completed
+extraction (`[StaffPortal_ABC] Dashboard`, page 1 + Page 4).
+
+**A. Plain prose wasn't what the requester actually wanted.** v0.7.0 had settled on "plain,
+easy-to-read Thai prose, no bold title, no bullet list" as the annotation format. The requester
+asked for a fixed structure instead: a bolded **Existing Issue** bullet (what's wrong), a bolded
+**Recommend** bullet (what the designer should do about it), and an optional **Inform** bullet —
+a link to a matching Asana "Component Issue" board task, added only when that specific gap is
+genuinely already tracked there. The real board (12 tasks: Slide-to-Delete, Slide-to-Confirm x2,
+High-Value Notice severity, Button, 3 example rows, Card Header Multi-Icon Row, Service Module
+Card, Full-page Error/Empty State) was queried and checked against all 17 distinct gap types found
+across the 34 annotations — none matched, so the Inform bullet was correctly omitted from every one
+of them. Per the mock-data-transparency principle, an Inform bullet is added only after a real
+board query confirms a real match — never assumed, never left in as a template placeholder.
+
+**B. `Annotation.label` does not render markdown — `Annotation.labelMarkdown` does.** First attempt
+wrote `**Existing Issue:**` directly into `label`; Figma rendered the literal asterisks, not bold
+text, because `label` is plain-text-only. The Plugin API's `Annotation` type carries a second,
+separate field — `labelMarkdown` — that is what the annotation panel actually parses for bold/
+formatting. Setting `label` with markdown syntax in it is a silent, visible failure: the script
+succeeds, the read-back looks fine as a string, and only an actual look at the rendered annotation
+in Figma (not just a value-exists check) caught it.
+
+**Fixed:** Step 5's annotation-content rule now specifies the three-bullet structure (Existing
+Issue / Recommend / optional Inform-with-real-Asana-link, real board confirmed each time before
+adding Inform) and requires setting `{ labelMarkdown: text, categoryId }` — never `label` — whenever
+the content uses bold markers.
