@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.14.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 14 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.15.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 15 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -246,6 +246,29 @@ variable, bind that exact one.
 **A data-driven mapping (category → color/token) must be read from the real source data**, never
 assumed by rotation. N categories getting N real accent colors in *some* order is not "close
 enough" — read the actual `{category: {token: ...}}` structure and match it exactly.
+
+**The same data entity rendered in more than one place on the same screen set needs the mapping
+verified at every occurrence, not derived once and trusted to carry over.** A real run correctly
+found the source's risk→color map (`{High:'Negative', Low:'Positive', Moderate:'Info'}`) but still
+shipped the "Moderate" badge wrong in **two different places** — `Warning` in a summary card view,
+`Positive` in a table view — because each occurrence had its color set independently, in a separate
+build pass, and neither pass was checked against the other or against the map itself. A visual
+review of each occurrence in isolation passed both times; the mismatch only surfaced when someone
+compared a screenshot against the real source's map value. When the same field (a risk level, a
+status, a category) appears more than once across a screen or its tabs, verify all occurrences
+against one written-down mapping, not each build's own guess.
+
+**A value that depends on interactive/stateful behavior must be extracted from the real *default*
+state, not from whichever value seems plausible.** A "propose to client" row can flip to a "sent"
+badge after a click; the correct default for a freshly-loaded screen is the *initial* state
+(check the real `useState` default — an empty set, `false`, `null` — not an assumed
+already-interacted-with state). A real run shipped one row of an otherwise-identical three-row list
+with the post-click "sent" badge while the other two (and the same data shown on a different tab)
+correctly showed the default "propose" button — an inconsistency invisible from that one row alone,
+caught only by noticing the same fund's status disagreed between two tabs. When a UI element's
+content can change based on interaction, read the state initializer in source rather than
+eyeballing a plausible-looking value, and check that every occurrence of the same underlying record
+agrees.
 
 **Text style, same standard:** every real `TEXT` node gets a real bound `textStyleId` via
 `list_text_styles`/`resolve_token` equivalents — never a manually-set `fontName`+`fontSize` that

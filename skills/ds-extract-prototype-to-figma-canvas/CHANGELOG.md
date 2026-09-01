@@ -447,3 +447,34 @@ branding, design system — the skill must ask which one to build, not choose si
 
 **Fixed:** new rule under "Expected input" — detect multiple named options before Step 1 finishes
 and stop to ask the caller which to build, every time, not only on a run's first screen.
+
+---
+
+## v0.15.0 — the same field, wrong in two different ways in two different places, plus a stale interaction state shipped as if it were default
+
+Following the requester's own visual audit against the live prototype (screenshot by screenshot),
+two more real defects, both about *wording/state* rather than layout or component choice.
+
+**A. A confirmed data mapping still shipped wrong twice.** Step 4 already required reading a
+data-driven color mapping from real source rather than guessing. This run did read it correctly
+(`{High:'Negative', Low:'Positive', Moderate:'Info'}`) — and still shipped the "Moderate" risk badge
+as `Warning` in one card view and `Positive` in a table view, both wrong, in the same screen set.
+Each occurrence had been built and visually reviewed independently; nothing ever checked the two
+occurrences against each other or against the map that had already been correctly found.
+
+**B. A post-interaction state shipped as if it were the default.** A three-row "propose fund to
+client" list had one row rendered as an already-"sent" status badge while its other two rows, and
+the same fund list shown again on a different tab, correctly showed the default "propose" button.
+The real source's state (`useState(new Set)`, empty by default) proves no fund starts pre-sent — the
+wrong row was extracted from an assumed/plausible-looking state rather than the real initializer.
+
+**Root cause, both:** neither defect was visible from looking at its own occurrence in isolation —
+each looked like a normal, plausible badge/button. Both surfaced only by cross-checking the same
+underlying record (a risk level, a fund's send status) across more than one place it's rendered.
+Nothing in this skill's process required that cross-check; Step 4's mapping rule and Step 6's
+verification both operated occurrence-by-occurrence, never entity-by-entity.
+
+**Fixed:** Step 4 now requires verifying a data-driven mapping at *every* occurrence of that field
+across a screen set, not deriving/trusting it once. New rule: a value driven by interactive state
+must come from the real state initializer in source (empty/false/null defaults), not a guessed
+plausible value — and every occurrence of the same record must agree.
