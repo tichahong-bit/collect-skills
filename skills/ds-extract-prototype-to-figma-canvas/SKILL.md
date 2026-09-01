@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.15.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 15 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.16.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 16 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -140,6 +140,19 @@ Before treating any screen as fully understood:
    The same caution applies to a locally cached copy of prototype source fetched earlier in a long
    session: re-fetch fresh before trusting it, the same standard Step 1 already states for using a
    fresh read over an earlier round's summary.
+7. **Finding one dead-code/stale-source mistake means re-checking every other component-vs-gap
+   decision made the same unreliable way — not just the piece that exposed it.** A run had already
+   "corrected" a screen's search field from a real CDS `Text Field` component to a plain composed
+   `<input>`, believing source specified a plain input — a real, deliberate fix at the time. Much
+   later, the same run discovered (per point 6) that a *different* element on the same screen had
+   been read from dead code. Re-grepping the search field against the current live bundle then
+   found it, too, was wrong: the live source uses a real `Text Field`, and the earlier "fix" to a
+   plain input had been reasoning from an unreliable read the whole time. The dead-code discovery
+   and the search-field mistake were found on different days, from different prompts, and were
+   never connected until directly asked why the search field wasn't a real component. **Once any
+   grep-vs-live mismatch is confirmed for one element, treat every other real-component/gap
+   ruling on that screen — even ones already "fixed" and shipped — as unverified until re-checked
+   against the current live render, not only the sibling still visibly wrong.**
 
 ## Prerequisites
 

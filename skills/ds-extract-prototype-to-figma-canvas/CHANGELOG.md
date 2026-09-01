@@ -478,3 +478,29 @@ verification both operated occurrence-by-occurrence, never entity-by-entity.
 across a screen set, not deriving/trusting it once. New rule: a value driven by interactive state
 must come from the real state initializer in source (empty/false/null defaults), not a guessed
 plausible value — and every occurrence of the same record must agree.
+
+---
+
+## v0.16.0 — a component was "corrected" away from CDS using the same unreliable read that v0.14.0 later caught
+
+Asked directly why a screen's search field wasn't a real CDS component, re-checking against the
+current live bundle found it should be: source uses a real `Text Field` there, not the plain
+composed `<input>` the field had been "corrected" to earlier in the same overall engagement. That
+earlier correction was a deliberate, reasoned fix at the time (source appeared to specify a plain
+input) — it just turned out to have been reading the same kind of unreliable source that v0.14.0
+later diagnosed as a dead-code trap, on a *different* element of the same screen. Because the two
+findings came from separate prompts on different days, nothing connected them: v0.14.0's fix
+targeted the sidebar switcher; the search field's own "already fixed, already shipped" status was
+never revisited even after the dead-code trap it depended on was identified.
+
+**Root cause:** finding and fixing one instance of a systemic verification blind spot (grep can't
+tell dead code from live code) does not automatically invalidate the *other* decisions made using
+that same blind spot before it was known about. Nothing in this skill's process ever asked "what
+else did I decide using the method I just learned is unreliable?" — Step 0 point 4b already covers
+re-checking sibling chrome not yet built; it doesn't cover chrome already built, fixed, and shipped
+under the old method.
+
+**Fixed:** new Step 0 point — once any grep-vs-live mismatch is confirmed for one element, treat
+every other real-component/gap ruling on that screen as unverified until re-checked against the
+current live render, including decisions already "fixed" and shipped, not only siblings still
+visibly wrong.
