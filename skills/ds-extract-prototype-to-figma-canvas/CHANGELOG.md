@@ -504,3 +504,42 @@ under the old method.
 every other real-component/gap ruling on that screen as unverified until re-checked against the
 current live render, including decisions already "fixed" and shipped, not only siblings still
 visibly wrong.
+
+---
+
+## v0.17.0 — a token resolved once got reused as a default for everything after it, and two more real-icon substitutions on the same screen
+
+Asked to re-audit the Overview screen for the same class of mistake, found two more real, concrete
+defects — neither a dead-code read this time, both from a different failure shape.
+
+**A. Wrong icon shape, on two screens.** Source specifies real CDS icons `preferred-account`
+(moderate risk) and `easy-ways-to-invest` (growth risk) for a 3-tile risk-level selector built from
+real `Card Container` instances (`Is Selected` variant, confirmed correct). The icons inside those
+tiles were wrong on **both** the Overview screen and the Risk Level tab that had already been
+"verified" earlier in the same engagement — a generic pie-chart and a line-graph glyph on Overview,
+an unrelated custom-drawn glyph on the Risk tab, none matching the real icon's path data. Checking
+one screen's version and assuming a sibling screen using the same data got it right (already fixed
+once, per v0.13.0's chrome-siblings rule) is not the same as re-verifying it.
+
+**B. A resolved token became a copy-paste default for unrelated icons.** `content-neutral-secondary`
+was correctly resolved once, early in a session, for one specific icon. Every icon added afterward
+in that same session — a dropdown's start/end icon overlays, a search field's icon, an unselected
+risk tile's icon, 12 instances total across 3 screens — reused that same already-imported variable
+instead of resolving what its own slot's real source actually specifies. The real source's Text
+Field component literally renders its start-icon span with `color: Kt('content-neutral-tertiary')`
+— a different, lighter shade in the same neutral family — visible directly in the component's own
+code, never checked because the secondary variable was already sitting in scope and looked
+plausible.
+
+**Root cause, both:** re-auditing a screen for one already-known failure shape (dead code) is not
+the same as checking for every failure shape. Point A is the "sibling occurrence not independently
+re-verified" mistake (already named in principle by v0.13.0/v0.15.0) recurring on a data-driven
+icon choice specifically; point B is a new shape — token reuse for *convenience* generalized into
+reuse for *every subsequent decision*, regardless of whether the new element's own source specifies
+something different.
+
+**Fixed:** new Step 4 rule — never reuse an already-resolved token as a default for a different
+icon/color decision; resolve each slot against its own real source spec, reusing a variable only
+when repeating the identical slot/role. Step 0's re-audit rule (v0.16.0) now explicitly states that
+a genuine gap found during a later re-audit still requires a real annotation, not only gaps found
+during the original Step 5 pass.

@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.16.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 16 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.17.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 17 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -152,7 +152,11 @@ Before treating any screen as fully understood:
    never connected until directly asked why the search field wasn't a real component. **Once any
    grep-vs-live mismatch is confirmed for one element, treat every other real-component/gap
    ruling on that screen — even ones already "fixed" and shipped — as unverified until re-checked
-   against the current live render, not only the sibling still visibly wrong.**
+   against the current live render, not only the sibling still visibly wrong.** If re-checking any
+   of these turns up a genuine gap (no real component after actually searching both sources per
+   Step 2), it gets a real annotation the same as any other Step 5 finding — a defect only found
+   during a later re-audit is not exempt from the annotation requirement just because it wasn't
+   caught during the original Step 5 pass.
 
 ## Prerequisites
 
@@ -259,6 +263,21 @@ variable, bind that exact one.
 **A data-driven mapping (category → color/token) must be read from the real source data**, never
 assumed by rotation. N categories getting N real accent colors in *some* order is not "close
 enough" — read the actual `{category: {token: ...}}` structure and match it exactly.
+
+**Never reuse a token key already resolved for one purpose as a shortcut for a new, unrelated
+icon/color decision — resolve each one against its own real source spec.** A real run resolved
+`content-neutral-secondary` once, correctly, for one icon early in a session, then reused that same
+already-imported variable for every icon added afterward (a dropdown's start/end icons, a search
+field's icon, a set of tile icons) purely because it was already on hand and looked plausible.
+Source specified `content-neutral-tertiary` for these icon slots the whole time (visible directly in
+the real component's own render, e.g. a Text Field's start-icon span: `color:
+Kt('content-neutral-tertiary')`) — a different, lighter shade in the same neutral family. The
+mismatch shipped identically across 12 separate icon instances on 3 screens because each one copied
+the same convenient variable instead of re-resolving. Convenience reuse of an already-imported
+variable is fine when the *same* slot/role is being repeated (e.g. the same icon color inside a
+loop); it is not fine as a default for a *different* slot just because a variable is already
+sitting in scope — resolve the token for what THIS element's real source actually specifies, every
+time.
 
 **The same data entity rendered in more than one place on the same screen set needs the mapping
 verified at every occurrence, not derived once and trusted to carry over.** A real run correctly
