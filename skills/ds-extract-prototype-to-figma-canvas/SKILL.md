@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.18.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 18 times as of 2026-09-01 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.19.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 19 times as of 2026-09-02 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -361,6 +361,18 @@ Example (translate the specifics, not the structure):
   real stated reason it has to stay literal (e.g. a gradient with no token in the library at all).
   Prefer actually fixing it (Step 4) over reaching for this category — use it only when fixing is
   genuinely not possible.
+
+**A frame that is a full-screen overlay/modal state (a scrim/backdrop covering the whole base
+screen, with a modal on top) does not display annotations for the background components it
+obscures.** These overlay frames are built as a duplicate of the base screen plus the modal/scrim
+layer, so the same background gaps (e.g. a composed chart, a composed nav icon) already carry a
+real annotation on the base, non-overlay frame — repeating that annotation on the hidden copy
+underneath the scrim just adds a pin the viewer can't connect to anything they can see. **Only the
+elements actually visible in that overlay state get an annotation in that frame** — the modal
+itself and the scrim/backdrop, not whatever it's covering. Concretely: when building an overlay
+frame, either don't copy the background gap's annotation onto its duplicate instance at all, or
+clear it (`node.annotations = []`) once the frame is confirmed complete — the canonical annotation
+for that gap lives on the base frame where it's actually visible.
 
 **Keep a running written gap list from the moment the first gap is found, and check it at Step 6.**
 A real multi-hour run found six genuine gaps (a composed chart, a composed slider, a manually-built

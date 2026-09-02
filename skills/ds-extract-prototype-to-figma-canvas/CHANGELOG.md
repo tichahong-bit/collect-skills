@@ -573,3 +573,24 @@ in Figma (not just a value-exists check) caught it.
 Issue / Recommend / optional Inform-with-real-Asana-link, real board confirmed each time before
 adding Inform) and requires setting `{ labelMarkdown: text, categoryId }` — never `label` — whenever
 the content uses bold markers.
+
+## v0.19.0 — overlay/modal frames don't display annotations for the background they hide
+
+A completed extraction ("PIN Modal — Empty State", "PIN Modal — Error State" in `[StaffPortal_ABC]
+Dashboard` Page 4) built each overlay state as a full duplicate of the base Customer View screen
+plus a scrim + modal on top. The background's own gaps (composed NavCard glyph icons, composed
+DonutCard, composed RebalanceCard) already had a real annotation on the base, non-overlay frame —
+but the same annotation was also carried onto the background's duplicate instance inside each PIN
+Modal frame, even though that background is entirely covered by the scrim in that state and isn't
+visible to anyone looking at the frame. The requester pointed out these pins have nothing visible
+to point at once the overlay is up.
+
+**Fixed:** new Step 5 rule — a frame that is a full-screen overlay/modal state (scrim covering the
+whole base screen, modal on top) only carries annotations for what's actually visible in that
+state (the modal, the scrim/backdrop itself) — never for background components the scrim hides.
+The canonical annotation for a background gap stays on the base frame where it's actually seen;
+an overlay frame's duplicate of that same component either skips the annotation or has it cleared
+(`node.annotations = []`) once confirmed. Applied retroactively to the two PIN Modal frames above:
+cleared the duplicate NavCard/DonutCard/RebalanceCard annotations underneath the scrim in both
+(6 nodes total), left the Scrim's own annotation and the base Customer View frame's annotations
+untouched.
