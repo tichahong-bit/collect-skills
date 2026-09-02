@@ -594,3 +594,32 @@ an overlay frame's duplicate of that same component either skips the annotation 
 cleared the duplicate NavCard/DonutCard/RebalanceCard annotations underneath the scrim in both
 (6 nodes total), left the Scrim's own annotation and the base Customer View frame's annotations
 untouched.
+
+## v0.20.0 — a mass reformat that didn't cover the whole file, then a clone that inherited its blind spot
+
+Building a new 4-tab "Customer view" case page reused (cloned) frames from an OLDER extraction on
+the file's original page ("page 1" — Overview/Risk Level/Funds screens built before v0.18's
+Existing Issue/Recommend bullet format existed). The clones carried over that page's annotations
+verbatim, still in the pre-v0.18 prose style, into the brand-new frames — and the requester caught
+it, twice in the same session, before it was noticed independently.
+
+**Two distinct failure points, not one:**
+
+1. **v0.18's own mass-reformat pass wasn't actually file-wide.** It discovered annotations by
+   scanning the pages already in view at the time (Page 4 and one specific old page reference) —
+   page 1's Overview/Risk/Funds frames sat outside whatever was scanned and were never touched,
+   so they were still on the old format the whole time, undetected, until reused months of
+   in-session-time later.
+2. **Cloning a node is not a content-neutral operation for its annotations.** `node.clone()` copies
+   the `annotations` array exactly as it stood on the source — old format, old wording, all of it —
+   with nothing that flags "this text predates the current convention." A clone built into a new
+   frame reads as freshly authored; nothing about the act of cloning prompts a re-check against
+   whatever this file currently says the format should be.
+
+**Fixed:** Prerequisites now states annotation format must always be the LATEST version this file
+describes, full stop — never whatever an existing/reused node already carries. Step 5 adds an
+explicit versioned-format rule: before treating any cloned/reused frame as finished, walk every
+annotated node in it and confirm it matches the CURRENT format, upgrading in place regardless of
+whether the content was authored fresh this run or inherited via clone. A future mass-reformat pass
+must scope its discovery scan to `figma.root.children` — every page — not to whichever frames
+happen to be already in view.

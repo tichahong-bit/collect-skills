@@ -1,7 +1,7 @@
 ---
 name: ds-extract-prototype-to-figma-canvas
-version: 0.19.0
-description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 19 times as of 2026-09-02 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 0.20.0
+description: Extracts a non-Figma prototype (e.g. an HTML/web prototype from ds-governance-prototype-notion or ds-governance-prototype-asana) into real Figma frames, binding each screen to the Design System and composing/annotating anything the DS doesn't cover yet. Composes figma-generate-design with โย's (Yo's) cds-consumer .skill files and ds-governance-audit-notion's annotation convention. Second step of the Requirement → Applied workflow, between prototyping and manual UX/BA wireframing. Defaults to the WHOLE screen unless the caller names a narrower scope. Run end-to-end and corrected 20 times as of 2026-09-02 — see CHANGELOG.md for the full defect history behind every rule below.
 ---
 
 # Extract Agent
@@ -172,6 +172,12 @@ Before treating any screen as fully understood:
 4. Ensure the target file has both a **"Log Note"** (yellow) and an **"Unbound"** (red) annotation
    category — check with `figma.annotations.getAnnotationCategoriesAsync()`, create whichever is
    missing. Don't assume either exists; a fresh extraction target usually has neither.
+5. **Annotation content must always be the LATEST format this file describes — no exceptions, no
+   "matches what's already there."** If this file's own annotation-format section has been updated
+   since a target file was last touched, every annotation this run creates OR reuses (via clone or
+   otherwise) follows the new version, full stop — never the older convention just because that's
+   what an existing/reused node happens to carry. See Step 5's versioned-format rule for the
+   concrete check this implies on cloned/reused frames.
 
 ## Step 1 — Translate the real structure
 
@@ -352,6 +358,25 @@ Example (translate the specifics, not the structure):
 > **Existing Issue:** ยังไม่มี component กราฟโดนัทใน Core Design Library จึงประกอบเองจาก ELLIPSE +
 > token สีจริง
 > **Recommend:** เสนอ Core DS เพิ่ม component กราฟโดนัท เพื่อผูก token ได้จริง
+
+**The annotation format is versioned — treat "current format" as whatever this file says on the day
+you're running, not whatever format happens to already be sitting on a node you're touching.** A
+run reused/cloned frames built before the Existing Issue/Recommend bullet structure existed (an
+older extraction's Overview/Risk/Funds screens, still on their original page) to assemble a new
+screen — the clone carried over the OLD prose-style annotation text verbatim, because cloning a
+node copies its `annotations` array exactly as-is, format and all. A prior file-wide reformat pass
+had already run once, but it was scoped to the frames known about at the time and never re-scanned
+every page — these particular frames sat outside that scan and were never touched, so they were
+still on the old format when they got reused as a clone source, and nobody caught it until the
+requester did — twice, on two different asks in the same session. **Two separate failure points,
+both real:** (1) a mass-reformat pass is only as complete as the pages/frames it actually scanned —
+scope it to the *whole file* (`figma.root.children`, every page), not to whichever frames are
+top-of-mind; (2) **cloning a node for reuse is not a content-neutral operation for its
+annotations** — before treating a cloned/reused frame as finished, walk every node in it with
+`annotations.length > 0` and confirm each one matches the CURRENT format this file specifies,
+upgrading in place (`node.annotations = [{labelMarkdown: newText, categoryId}]`) any that don't,
+regardless of whether that node's content was authored fresh in this run or inherited via clone
+from something built under an older version of this skill.
 
 **Two categories, two different findings — use the one that matches:**
 - **"Log Note" (yellow)** — no component/pattern exists for this at all. Does **not** create a
