@@ -247,6 +247,37 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.30.0 — sub-tab granularity, and a second research repository (2026-09-04)
+
+Two fixes from a real Staff Portal Option A rebuild:
+
+1. **Research Insight panel wasn't re-rendering per internal tab.** The Option A "Investment"
+   screen (4 internal tabs: Portfolio Overview/Rebalancing/Risk Level/Recommended Funds) and the
+   Option A "Dashboard" screen (4 internal tabs: My Performance/My Portfolio/Forecast/Todo) both
+   showed the identical combined Research Insight/UX Rationale/DS Evaluation list no matter which
+   internal tab was active — "per-screen data & focus interaction" was being applied at the
+   full-navigation-screen level only, and each tab bar's active-key state was local to the tab
+   component, never reaching whatever held the Design Review panel's state. Root-caused by reading
+   the actual bundled component tree (`w=Cr[c]` keyed only by top-level screen, a tab's `useState`
+   never wired to a callback prop) rather than assuming the panel already handled it because
+   "per-screen" sounded like it should cover this. Fixed by lifting each tab's active key via a new
+   `onTabChange` callback, filtering the four highlightId-tagged arrays by the active tab's id set
+   before render (shared-chrome ids like the tab bar itself included in every tab's set), and
+   verifying live by clicking through all 8 internal tabs across both screens and confirming the
+   card set actually changed each time — not just that the tab's own visible content changed. New
+   "Sub-tab granularity" rule in `SKILL.md` generalizes this for any future screen with its own
+   internal tabs.
+2. **A second real research repository exists, separate from the Asana Research index.**
+   `https://cib-bbl.vercel.app/` — real Bangkok Bank UX Research team studies (2022–2025),
+   independent of source 1's Asana Research index (some studies may exist in both, some only in
+   one). Confirmed directly relevant to staff-facing tools via its "สาขา & เครื่องมือขาย" (Branch &
+   sales tools) group on `/insights.html`, and found one study (`What Bangkok Bank's Fund Sales
+   Staff Need From a Better Sales Tool`) with concrete, quotable findings (a compliance-relevant
+   risk-check requirement, NAV/comparison gaps, a customer-profile/referral-tracking need) well
+   beyond what a single earlier citation from it had captured. New source **1b** in `SKILL.md`'s
+   knowledge-sources list — search or browse it alongside source 1, cite it with the same
+   real-`sourceHref`-to-the-specific-readout discipline as any Asana Research Report.
+
 ## v1.29.0 — split conditional-use sections into reference files (2026-08-30)
 
 Requester asked for the skill to be reorganized for an agent to retrieve/use more efficiently and

@@ -1,7 +1,7 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.29.0
-description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-08-29 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 1.30.0
+description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-09-04 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
   mode: mixed
@@ -87,6 +87,17 @@ in the final summary (several pages are brand-new and may have little in them ye
 1. **Research** — index gid `1217101228810755`. `page_get` it, follow every 🔹-block link, pull in
    any report plausibly relevant to this requirement. Note explicitly whether each *applies* to a
    screen or was *reviewed and found not applicable* — both get surfaced in Step 4, never dropped.
+1b. **UX Research readouts (`cib-bbl.vercel.app`)** — a second, independent research repository:
+   real Bangkok Bank UX Research team studies (2022–2025), **not** the same corpus as source 1's
+   Asana Research index — some reports may exist in both, some only in one; check both, don't
+   assume overlap either way. Search `https://cib-bbl.vercel.app/#q=<keyword>` (try the feature
+   name, the persona, "staff"/"branch" for anything staff-facing) or browse
+   `https://cib-bbl.vercel.app/insights.html` (146+ findings grouped "by what the user was doing" —
+   confirmed relevant group for staff-facing tools: "สาขา & เครื่องมือขาย" / Branch & sales tools).
+   Both the search and insights pages only show teaser text — open the specific
+   `/readouts/<slug>.html` page for the real findings before citing anything from it. Cite it in
+   Step 4 exactly like an Asana Research Report: real `sourceHref` to the specific readout URL,
+   the actual finding/quote, never paraphrased into something the report didn't say.
 2. **Copy Writing Guideline** — gid `1217629510106643`. Holds **multiple distinct sources** (a
    house style guide, a tone-of-voice quick guide, a grammar reference, etc.) as separate 🔹 rows.
    Use only the guide(s) the user named — find the row, open it, apply its rules to any copy
@@ -418,6 +429,35 @@ edit, since short variable names get reused across unrelated closures).
   meaningful element **while building the screen** (Step 3), not bolted on after the fact once
   Step 4 needs it. A row with nothing sensible to point at (the Requirement-summary card, a
   "reviewed — not applicable" research card) simply isn't clickable.
+
+### Sub-tab granularity (a "screen" with its own internal tabs)
+
+A screen that itself contains internal tabs/views (e.g. a Design Option variant using its own tab
+bar to switch sub-views, not a full page navigation) is **not** one flat re-render unit — treat
+each internal tab as its own filtered slice of that screen's data, same as "Per-screen data" above
+treats each full-navigation screen:
+
+- Lift the tab's active-key state out of the tab component (or add an `onTabChange` callback prop
+  the parent passes down) so whatever holds the Design Review panel's state knows which internal
+  tab is active, not just which top-level screen.
+- Tag every `researchInsights`/`research` (gap-flag)/`uxRationale`/DS-Evaluation row's `highlightId`
+  as belonging to one internal tab's real DOM ids — the same ids the click-to-highlight interaction
+  already uses. A row whose element only exists on one tab must only render while that tab is
+  active.
+- Filter those four arrays by the active tab's highlightId set before rendering the panel. An id
+  that describes the tab bar/shared chrome itself (not one specific tab's content) belongs in
+  *every* tab's set, not just the first one — otherwise it silently disappears once the viewer
+  leaves the default tab.
+- Requirement summary and Branding stay screen-wide (not per-tab) — they describe the whole
+  feature's scope, not one visible slice of it.
+- **Caught in a real build (2026-09-04):** an Option A "Investment" screen with 4 internal tabs
+  (Portfolio Overview/Rebalancing/Risk Level/Recommended Funds) and an Option A "Dashboard" screen
+  with 4 internal tabs (My Performance/My Portfolio/Forecast/Todo) both shipped with the Research
+  Insight panel showing the identical combined list regardless of which internal tab was active,
+  because the tab state was local to the tab component and never reached the panel. Don't repeat
+  this — wire the callback in Step 3, and verify in Step 4 by clicking through every internal tab
+  and confirming the Research Insight card set actually changes, not just that the tab's own
+  content changes.
 
 ### Language
 
