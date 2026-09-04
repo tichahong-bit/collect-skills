@@ -247,6 +247,26 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.31.0 — the Design System switcher must never hide a genuine gap's freehand mock (2026-09-04)
+
+Requester found a real Staff Portal screen's asset-allocation donut chart (a genuine Core gap — no
+donut/line/funnel/target-bar chart exists in the CDS registry) replaced by an empty "Core mode:
+freehand composed component ซ่อนไว้ — ไม่มี component นี้ใน Core Design System" text box whenever the
+Design System switcher was set to "Core." Step 3's own rule already required a genuine gap to be
+"mocked freehand, clearly labeled" — that part was followed — but the build then added an
+unrequested extra behavior found nowhere in this skill: gating that mock's visibility on the DS
+switcher, blanking it in "Core" mode since the chart is exactly the kind of thing "Core + composed"
+names. That directly contradicts the switcher's own existing "same screens/content, different
+project layer" rule, and defeats the point of a gap mock (there's still no Core donut chart in
+"Core" mode — hiding it doesn't make it more real, it just removes working content a reviewer came
+to see). Root cause: the switcher's row only said content stays the same across states in prose;
+nothing said explicitly that this includes gap fallbacks, so a later build invented its own
+plausible-sounding interpretation. Fixed the live build (removed the `dsMode === 'core'` branch
+from `GapFrame`, its dead CSS, and the now-unused `useApp()` import) and added an explicit standing
+rule in both Step 3 (point 2) and the Live switchers table's Design System row: a freehand gap mock
+renders unconditionally in every Design System switcher state — the switcher only ever changes
+which registry backs components that exist somewhere, never whether a gap's mock is shown.
+
 ## v1.30.0 — sub-tab granularity, and a second research repository (2026-09-04)
 
 Two fixes from a real Staff Portal Option A rebuild:

@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.30.0
+version: 1.31.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-09-04 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -258,6 +258,14 @@ For each screen/section the requirement implies:
 2. **Component doesn't exist yet** → check `cds-consumer`'s `DRIFT.md` first (an owner may have
    already ruled this deliberate). Still a genuine gap → mock it freehand, clearly labeled as a
    placeholder — never let it look indistinguishable from an accurately-rendered real component.
+   **This freehand mock renders unconditionally, in every Design System switcher state** (see the
+   Design System row below) — never gated behind "only shows in Core + composed mode" or hidden
+   with a text notice in "Core only" mode. The switcher changes which registry backs components
+   that exist somewhere; it is never a reason to blank a screen's actual content. A real defect: a
+   donut/line/funnel chart set (genuine Core gaps) was wrapped so switching to "Core" mode replaced
+   the working freehand-mocked chart with an empty "not in Core Design System" text box — the chart
+   still isn't in Core in that mode either way, so the correct behavior is to keep showing the same
+   labeled mock, not hide it.
 
 The requirement is the priority throughout — mostly-real-DS with some flagged placeholders,
 shipped on time, is the correct outcome, not a reason to stop and wait.
@@ -368,7 +376,7 @@ comparison, not whether the control exists.
 
 | Switcher | States | Mechanism |
 |---|---|---|
-| **Design System** | Core alone / named existing project DS (mode 2) / Core + composed layer (mode 3), plus a second project-layer link if given | Real token swap (e.g. `data-ds` attribute driving a second CSS token block) on top of the same Core base — same screens/content, different project layer. Never a second copy of the prototype. |
+| **Design System** | Core alone / named existing project DS (mode 2) / Core + composed layer (mode 3), plus a second project-layer link if given | Real token swap (e.g. `data-ds` attribute driving a second CSS token block) on top of the same Core base — same screens/content, different project layer. Never a second copy of the prototype. **"Same screens/content" is literal: a genuine gap's freehand mock (Step 3, point 2) renders identically in every state of this switcher — this control is never wired to show/hide it.** |
 | **Branding** | No guide (CDS/Core baseline) + every named guide (often one) | Swaps branding-driven visual identity per the active guide's rules. A needed color/token the DS doesn't have yet gets invented and tagged `Design System Gap` — never presented as if from the DS. **Exception:** an explicit "exactly ONE Branding Theme, no other choices" instruction removes the switcher entirely (state, control, and any CSS/token scope for the retired option) — a control pointed permanently one way is still a visible second "choice." |
 | **Tone of Voice** | Plain/ungoverned copy + every named guide | Swaps **every real piece of on-screen language**, comprehensively (see "Tone of Voice coverage" below) — not just long-form prose. **Every state must be in the same language** — the switcher shows a *feeling* difference (formal/casual); mixing languages shows a language switch instead. Pick the screen's natural language and write every state in it, even if a named guide's own examples lean toward a different language. A dedicated **Language** switcher (Thai/English UI copy) is separate and independent — don't cross the two into one combinatorial control unless specifically asked. |
 | **Design Option** | `Original` + `Option 1`/`Option A` — a genuinely different information architecture, never a relayout of the same grid | **Only when explicitly requested** — genuinely gated, unlike the three above, since a second full layout is real design work. Swaps which component tree renders; the DS Evaluation table reflects whichever option is selected. See "Design Option scope" below. |
