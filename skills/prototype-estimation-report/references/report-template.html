@@ -1,0 +1,407 @@
+<!--
+  REPORT TEMPLATE — prototype-estimation-report skill
+
+  This is a REAL, working HTML/CSS skeleton, not an abstract mail-merge
+  template. Copy it whole, then:
+    1. Fill every {{TOKEN}} with real content — never leave a token in the
+       published artifact.
+    2. The EPIC / STORY block below is ONE worked example. Duplicate the
+       whole <div class="epic">...</div> block once per epic, and the whole
+       <details class="story">...</details> block once per user story
+       inside it. Nothing about the count is fixed — a report can have 1
+       epic and 3 stories, or 5 and 20. Delete this comment block once done.
+    3. Swap the CSS custom properties in :root (and the two dark-mode
+       blocks) for the target team's own palette if this isn't being built
+       for BBL/CDS — the rest of the CSS reads entirely off those tokens,
+       so a palette swap alone re-themes the whole report. Do the same for
+       the Google Fonts <link> if the target uses a different type system.
+    4. See references/estimation-logic.md for how to actually fill in the
+       Estimate / Components / Functions content — this file only defines
+       the shape, not the judgment calls.
+-->
+<title>{{REPORT_TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#f5f6f9;
+    --surface:#ffffff;
+    --surface-2:#eef1f7;
+    --border:#dde2ec;
+    --text:#12151f;
+    --text-muted:#5b6475;
+    --accent:#2b52d6;
+    --accent-ink:#1c3aa3;
+    --accent-soft:#e7edfd;
+    --good:#1a8f5e;
+    --good-soft:#e3f5ec;
+    --warn:#a8720f;
+    --warn-soft:#faf0dd;
+    --bad:#c33a2f;
+    --bad-soft:#fbe9e6;
+    --navy:#101a30;
+    --navy-2:#182240;
+    --shadow: 0 1px 2px rgba(16,26,48,.04), 0 8px 24px -12px rgba(16,26,48,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b0e16; --surface:#12172a; --surface-2:#1a2038; --border:#2a3150;
+      --text:#e9ecf7; --text-muted:#95a0bd; --accent:#7d9bff; --accent-ink:#c1d0ff;
+      --accent-soft:#1c2547; --good:#4fcf98; --good-soft:#122a24; --warn:#e3b25a;
+      --warn-soft:#2c2416; --bad:#f0817a; --bad-soft:#301a1c; --navy:#0b0e16; --navy-2:#161d33;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b0e16; --surface:#12172a; --surface-2:#1a2038; --border:#2a3150;
+    --text:#e9ecf7; --text-muted:#95a0bd; --accent:#7d9bff; --accent-ink:#c1d0ff;
+    --accent-soft:#1c2547; --good:#4fcf98; --good-soft:#122a24; --warn:#e3b25a;
+    --warn-soft:#2c2416; --bad:#f0817a; --bad-soft:#301a1c; --navy:#0b0e16; --navy-2:#161d33;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:"Inter",system-ui,sans-serif; line-height:1.55; font-size:15px;}
+  h1,h2,h3,h4{font-family:"Manrope",system-ui,sans-serif; text-wrap:balance; letter-spacing:-.01em;}
+  code, .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+  a{color:var(--accent);}
+
+  .shell{
+    max-width:1160px; margin:0 auto; padding:28px 24px 100px;
+    display:grid; grid-template-columns:200px minmax(0,760px); gap:48px; justify-content:center;
+  }
+  @media (max-width:880px){
+    /* NOTE the ordering: this override MUST come after any earlier rule
+       touching the same property at the same specificity, or the later
+       rule silently wins regardless of the media query (observed bug:
+       a `.toc{display:flex}` rule defined further down the stylesheet
+       overrode this `display:none` because it came later in source order,
+       even though this media query correctly matched). Keep this block
+       as the LAST word on .toc/.shell for narrow viewports. */
+    .shell{grid-template-columns:minmax(0,1fr); padding:16px 14px 80px;}
+    .toc{display:none !important;}
+  }
+
+  .toc{position:sticky; top:24px; align-self:start; display:flex; flex-direction:column; gap:2px;}
+  .toc-label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin:0 0 10px 10px; font-weight:600;}
+  .toc a{display:flex; gap:8px; align-items:baseline; padding:7px 10px; border-radius:8px; color:var(--text-muted); text-decoration:none; font-size:13.5px;}
+  .toc a:hover{background:var(--surface-2); color:var(--text);}
+  .toc a span.n{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--accent);}
+
+  .cover{grid-column:1 / -1; max-width:760px; margin:0 auto 8px; margin-left:248px;}
+  @media (max-width:880px){ .cover{margin-left:0;} }
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.09em; color:var(--accent-ink); background:var(--accent-soft); padding:5px 10px; border-radius:999px; margin-bottom:14px;}
+  .cover h1{font-size:32px; font-weight:800; margin:0 0 6px;}
+  .cover p.sub{color:var(--text-muted); font-size:15.5px; margin:0 0 18px; max-width:60ch;}
+  .meta-row{display:flex; flex-wrap:wrap; gap:10px 22px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:14px;}
+  .meta-row b{color:var(--text); font-weight:600;}
+
+  main{min-width:0;}
+  section{scroll-margin-top:24px; margin-bottom:52px;}
+  section > h2{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-ink); margin:0 0 4px;}
+  section > h3.title{font-size:22px; font-weight:800; margin:0 0 16px;}
+  .lede{color:var(--text-muted); font-size:14px; margin:-8px 0 18px;}
+
+  .stats{display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+  @media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 14px 12px; box-shadow:var(--shadow);}
+  .stat .v{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:11.5px; color:var(--text-muted); margin-top:3px;}
+  .stat.accent .v{color:var(--accent-ink);}
+  .draft-note{margin-top:14px; font-size:12.5px; color:var(--text-muted); border-left:2px solid var(--warn); padding-left:10px;}
+
+  .scope-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:700px){.scope-grid{grid-template-columns:1fr;}}
+  .scope-col h4{font-size:13px; margin:0 0 10px; display:flex; align-items:center; gap:8px;}
+  .scope-col h4 .count{font-family:"IBM Plex Mono",monospace; color:var(--text-muted); font-weight:500;}
+  .row-list{display:flex; flex-direction:column; gap:6px;}
+  .row-item{display:flex; gap:9px; align-items:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:9px 11px; font-size:13px;}
+  .mark{flex:none; width:18px; height:18px; border-radius:5px; display:grid; place-items:center; font-size:11px; font-weight:700; margin-top:1px;}
+  .mark.ok{background:var(--good-soft); color:var(--good);}
+  .mark.no{background:var(--bad-soft); color:var(--bad);}
+  .mark.mid{background:var(--warn-soft); color:var(--warn);}
+  .row-item b{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:12px;}
+
+  .legend{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .legend .row-item{font-size:13.5px;}
+  .bar-wrap{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow);}
+  .bar-track{height:10px; border-radius:99px; background:var(--surface-2); overflow:hidden; margin-top:8px;}
+  .bar-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--good));}
+
+  .epic{margin-bottom:30px;}
+  .epic-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
+  .epic-head h4{font-size:17px; font-weight:800; margin:0;}
+  .epic-head .tag{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--accent-ink); background:var(--accent-soft); padding:2px 8px; border-radius:6px;}
+  .epic-overview{color:var(--text-muted); font-size:13.5px; margin:0 0 14px;}
+
+  .shot-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:10px;}
+  .shot-card{border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow);}
+  .shot-card img{display:block; width:100%; height:118px; object-fit:cover; object-position:top; background:var(--surface-2);}
+  .shot-card .cap{padding:7px 9px; font-size:11px; line-height:1.35; display:flex; gap:5px; align-items:flex-start; color:var(--text-muted);}
+  .shot-card .cap .mark{flex:none; width:15px; height:15px; font-size:9px; margin-top:1px;}
+  .shot-ghost{border:1.5px dashed var(--border); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; height:118px; color:var(--text-muted); background:var(--surface-2);}
+  .shot-ghost .x{width:26px; height:26px; border-radius:8px; background:var(--bad-soft); color:var(--bad); display:grid; place-items:center; font-weight:700; font-size:13px;}
+  .shot-ghost span.lbl{font-size:10.5px; text-align:center; padding:0 10px;}
+
+  details.story{background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow); overflow:hidden;}
+  details.story[open]{border-color:color-mix(in srgb, var(--accent) 35%, var(--border));}
+  details.story summary{list-style:none; cursor:pointer; padding:14px 18px; display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap;}
+  details.story summary::-webkit-details-marker{display:none;}
+  .s-left{display:flex; align-items:center; gap:10px; min-width:0;}
+  .s-id{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--accent-ink); flex:none;}
+  .s-title{font-weight:600; font-size:14.5px;}
+  .s-right{display:flex; align-items:center; gap:8px; flex:none;}
+  .chip{font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; white-space:nowrap;}
+  .chip.effort{background:var(--accent-soft); color:var(--accent-ink);}
+  .chip.complexity-low{background:var(--good-soft); color:var(--good);}
+  .chip.complexity-medium{background:var(--warn-soft); color:var(--warn);}
+  .chip.complexity-high{background:var(--bad-soft); color:var(--bad);}
+  .caret{color:var(--text-muted); transition:transform .15s ease; flex:none;}
+  details[open] .caret{transform:rotate(90deg);}
+
+  .story-body{padding:2px 18px 20px; display:flex; flex-direction:column; gap:18px;}
+  .story-body h5{font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin:0 0 8px; font-weight:700;}
+  .quote{font-size:13.5px; color:var(--text); background:var(--surface-2); border-radius:10px; padding:12px 14px; border-left:3px solid var(--accent);}
+  .estimate-row{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  @media (max-width:560px){.estimate-row{grid-template-columns:repeat(2,1fr);}}
+  .e-tile{background:var(--surface-2); border-radius:10px; padding:10px 12px;}
+  .e-tile .v{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;}
+  .e-tile .l{font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;}
+  .comp-block{font-size:13px;}
+  .comp-block .sub{font-size:11px; color:var(--text-muted); margin:8px 0 4px; font-weight:600;}
+  .comp-line{display:flex; gap:7px; align-items:flex-start; padding:3px 0;}
+
+  .figma-note{font-size:12.5px; color:var(--text-muted); background:var(--surface-2); border-radius:10px; padding:11px 14px; margin:10px 0 18px; border-left:3px solid var(--warn);}
+  .figma-note b{color:var(--text);}
+  .comp-items{display:flex; flex-direction:column; gap:6px; margin-top:8px;}
+  .comp-item{display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:12.5px; padding:7px 11px; border-radius:8px; background:var(--surface-2);}
+  .comp-item .mark{flex:none;}
+  .comp-item .comp-name{font-weight:600;}
+  .comp-item .comp-cds{margin-left:auto; font-size:11.5px; color:var(--accent-ink); white-space:nowrap;}
+  .comp-item .comp-cds + .comp-cds{margin-left:0;}
+  .comp-item.missing{background:var(--bad-soft);}
+  .comp-item.missing .comp-note{font-size:11.5px; color:var(--bad); flex-basis:100%;}
+  .comp-item.partial{background:var(--warn-soft);}
+  .comp-item.partial .comp-note{font-size:11.5px; color:var(--warn); flex-basis:100%;}
+  .why{font-size:13px; background:var(--accent-soft); color:var(--accent-ink); border-radius:10px; padding:11px 14px;}
+  .why b{color:var(--text);}
+
+  .rollup-total{background:var(--navy); color:#f2f4fb; border-radius:14px; padding:20px 22px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .rollup-total .l{font-size:12.5px; opacity:.7; text-transform:uppercase; letter-spacing:.06em;}
+  .rollup-total .v{font-family:"IBM Plex Mono",monospace; font-size:26px; font-weight:600;}
+  .rollup-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  @media (max-width:600px){.rollup-grid{grid-template-columns:1fr;}}
+  .rollup-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);}
+  .rollup-item .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px; color:var(--accent-ink);}
+  .rollup-item .l{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
+
+  .risk{display:flex; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 15px; margin-bottom:8px; box-shadow:var(--shadow);}
+  .risk .sev{flex:none; width:26px; height:26px; border-radius:8px; display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:700;}
+  .sev.high{background:var(--bad-soft); color:var(--bad);}
+  .sev.med{background:var(--warn-soft); color:var(--warn);}
+  .risk .t{font-size:13.5px;}
+  .risk .t b{display:block; font-size:13.5px; margin-bottom:2px;}
+  .risk .t span{color:var(--text-muted); font-size:12.5px;}
+
+  ol.steps{list-style:none; margin:0; padding:0; counter-reset:step; display:flex; flex-direction:column; gap:8px;}
+  ol.steps li{counter-increment:step; display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 15px; box-shadow:var(--shadow); font-size:13.5px;}
+  ol.steps li::before{content:counter(step); font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:12px; background:var(--accent-soft); color:var(--accent-ink); width:22px; height:22px; border-radius:7px; display:grid; place-items:center; flex:none;}
+
+  footer{max-width:760px; margin:60px auto 0 248px; padding-top:20px; border-top:1px solid var(--border); font-size:12.5px; color:var(--text-muted);}
+  @media (max-width:880px){footer{margin-left:0;}}
+</style>
+
+<div class="cover">
+  <span class="eyebrow">Design Estimation Report · Draft</span>
+  <h1>{{PROTOTYPE_NAME}}</h1>
+  <p class="sub">ประมาณการ design effort จาก annotation ใน prototype (PRD / Acceptance Criteria / UX Rationale / Design System Evaluation) เทียบกับ {{DESIGN_SYSTEM_NAME}}</p>
+  <div class="meta-row">
+    <div><b>Prototype:</b> <a href="{{PROTOTYPE_ARTIFACT_URL}}" target="_blank" rel="noopener">{{PROTOTYPE_NAME}} ↗</a></div>
+    <div><b>Design System:</b> <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}} ↗</a></div>
+    <div><b>Scope:</b> {{N_EPICS}} Epics · {{N_STORIES}} User Stories</div>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="toc">
+    <div class="toc-label">Contents</div>
+    <a href="#s01"><span class="n">01</span> Summary</a>
+    <a href="#s02"><span class="n">02</span> Scope Overview</a>
+    <a href="#s03"><span class="n">03</span> Readiness</a>
+    <a href="#s04"><span class="n">04</span> Story Estimates</a>
+    <a href="#s05"><span class="n">05</span> Estimate Roll-up</a>
+    <a href="#s06"><span class="n">06</span> Risks &amp; Gaps</a>
+    <a href="#s07"><span class="n">07</span> Next Step</a>
+  </nav>
+
+  <main>
+
+    <section id="s01">
+      <h2>01 · Summary</h2>
+      <h3 class="title">Key numbers</h3>
+      <div class="stats">
+        <div class="stat"><div class="v">{{TOTAL_SCREENS}}</div><div class="l">Total Screens</div></div>
+        <div class="stat"><div class="v">{{EXISTING_SCREENS}}</div><div class="l">Existing Screens</div></div>
+        <div class="stat"><div class="v">{{MISSING_SCREENS}}</div><div class="l">Missing / Exceptional</div></div>
+        <div class="stat"><div class="v">{{AVG_COMPONENTS_READY}}%</div><div class="l">Avg. Components Ready</div></div>
+        <div class="stat accent"><div class="v">{{TOTAL_EFFORT_RANGE}}</div><div class="l">Estimated Design Effort</div></div>
+      </div>
+      <p class="draft-note">Draft — ตัวเลขเป็นประมาณการเบื้องต้นจาก prototype และ Design System Evaluation</p>
+    </section>
+
+    <section id="s02">
+      <h2>02 · Scope Overview</h2>
+      <h3 class="title">Total Screens = Existing + Missing / Exceptional</h3>
+      <p class="lede">Existing = prototype มีแล้ว แต่ต้อง refine ให้ production-ready · Missing / Exceptional = requirement ต้องรองรับ แต่ prototype ยังไม่มี หรือมี business-rule / compliance gap ที่ต้องเพิ่ม UI</p>
+      <div class="scope-grid">
+        <div class="scope-col">
+          <h4>Existing Screens <span class="count">· {{EXISTING_SCREENS}}</span></h4>
+          <div class="row-list">
+            <!-- one row per existing screen -->
+            <div class="row-item"><div class="mark ok">✓</div><div><b>{{STORY_ID}}</b> — {{SCREEN_LABEL}}</div></div>
+          </div>
+        </div>
+        <div class="scope-col">
+          <h4>Missing / Exceptional Screens <span class="count">· {{MISSING_SCREENS}}</span></h4>
+          <div class="row-list">
+            <!-- one row per missing/exceptional screen -->
+            <div class="row-item"><div class="mark no">✕</div><div><b>{{STORY_ID}}</b> — {{SCREEN_LABEL}}</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="s03">
+      <h2>03 · Readiness</h2>
+      <h3 class="title">Components Ready — {{AVG_COMPONENTS_READY}}%</h3>
+      <div class="bar-wrap">
+        <div class="legend">
+          <div class="row-item"><div class="mark ok">✓</div><div><b>Ready</b> — Reuse ได้ทันที</div></div>
+          <div class="row-item"><div class="mark mid">△</div><div><b>Partial</b> — มีพื้นฐาน แต่ต้องปรับหรือ extend</div></div>
+          <div class="row-item"><div class="mark no">✕</div><div><b>Missing</b> — ยังไม่มี component ที่เหมาะสม</div></div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:{{AVG_COMPONENTS_READY}}%"></div></div>
+      </div>
+      <p class="lede" style="margin-top:14px;">Functions Ready: ประเมินแยกในระดับ User Story (ดู §04) · Code Readiness วัดจาก component ที่พร้อมใช้ซ้ำ / ต้องปรับแก้ / ยังไม่มีใน Design System ({{DESIGN_SYSTEM_NAME}})</p>
+    </section>
+
+    <section id="s04">
+      <h2>04 · User Story Estimates</h2>
+      <h3 class="title">แต่ละ User Story ต้องทำอะไร และใช้ effort เท่าไร</h3>
+      <div class="figma-note"><b>หมายเหตุเรื่องลิงก์ —</b> ลิงก์ "{{DESIGN_SYSTEM_SHORT_NAME}}" เปิดหน้า component จริงบน <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_URL}}</a> ลิงก์ "Figma" (ถ้ามี) เปิด node จริงในไฟล์ที่ publish component นั้น — ต้องมีสิทธิ์เข้าถึงไฟล์นั้นถึงจะเปิดได้ ถ้า Figma connector ยังไม่ได้เชื่อมต่อ ให้ตัดลิงก์ Figma ออกทั้งหมดและอธิบายข้อจำกัดตรงนี้แทน (ครั้งเดียว ไม่ใช่ซ้ำทุกแถว) — component ที่ทำเครื่องหมาย ✕ คือยังไม่มีใน design system เลย ต้องออกแบบ/สร้างเพิ่ม, △ คือมีพื้นฐานแต่ยังไม่ตรงเป๊ะ ต้องปรับ</div>
+
+      <!-- ============================================================
+           ONE EPIC + ONE STORY, fully worked. Duplicate the outer
+           <div class="epic"> block per epic, and the <details class="story">
+           block per story inside it. See references/estimation-logic.md
+           for how to fill Estimate / Components / Functions / Why.
+           ============================================================ -->
+      <div class="epic">
+        <div class="epic-head"><h4>EPIC · {{EPIC_NAME}}</h4><span class="tag">{{N_STORIES_IN_EPIC}} story</span></div>
+        <p class="epic-overview">Epic overview: {{EPIC_OVERVIEW}}</p>
+
+        <details class="story">
+          <summary>
+            <div class="s-left"><span class="caret">▶</span><span class="s-id">{{STORY_ID}}</span><span class="s-title">{{STORY_TITLE}}</span></div>
+            <div class="s-right"><span class="chip complexity-{{low|medium|high}}">{{Low|Medium|High}}</span><span class="chip effort">{{EFFORT_RANGE}}</span></div>
+          </summary>
+          <div class="story-body">
+
+            <div><h5>User Story</h5><div class="quote">{{USER_STORY_QUOTE — as-written in the prototype's own annotation, not paraphrased}}</div></div>
+
+            <div><h5>Screens — {{N_EXISTING}} Existing · {{N_MISSING}} Missing</h5>
+              <div class="shot-grid">
+                <!-- one <div class="shot-card"> per EXISTING screen this story touches -->
+                <div class="shot-card"><img src="{{BASE64_OR_ASSET_SRC}}" alt="{{SCREEN_ALT_TEXT}}"><div class="cap"><span class="mark ok">✓</span>{{SCREEN_LABEL}}</div></div>
+                <!-- one <div class="shot-ghost"> per MISSING/exceptional screen — NEVER a fabricated screenshot -->
+                <div class="shot-ghost"><div class="x">✕</div><span class="lbl">{{MISSING_SCREEN_LABEL}} — ยังไม่มีใน prototype</span></div>
+              </div>
+            </div>
+
+            <div><h5>Estimate</h5>
+              <div class="estimate-row">
+                <div class="e-tile"><div class="v">{{EFFORT_RANGE}}</div><div class="l">Design Effort</div></div>
+                <div class="e-tile"><div class="v">{{Low|Medium|High}}</div><div class="l">Complexity</div></div>
+                <div class="e-tile"><div class="v">{{COMPONENTS_READY}}%</div><div class="l">Components Ready</div></div>
+                <div class="e-tile"><div class="v">{{FUNCTIONS_READY}}%</div><div class="l">Functions Ready</div></div>
+              </div>
+            </div>
+
+            <div><h5>Acceptance Criteria</h5>
+              <div class="row-list">
+                <!-- ✓ = AC the prototype satisfies, ✕ = AC the annotation itself flags as unmet -->
+                <div class="row-item"><div class="mark ok">✓</div><div>{{AC_MET}}</div></div>
+                <div class="row-item"><div class="mark no">✕</div><div>{{AC_UNMET}} — {{why, e.g. "compliance blocker, ยังไม่ทำ"}}</div></div>
+              </div>
+            </div>
+
+            <div><h5>Readiness Detail</h5>
+              <div class="row-list">
+                <div class="row-item"><div class="mark ok">✓</div><div>{{what's reusable as-is}}</div></div>
+                <div class="row-item"><div class="mark mid">△</div><div>{{what needs verification or extension}}</div></div>
+                <div class="row-item"><div class="mark no">✕</div><div>{{what's genuinely missing, and why it matters}}</div></div>
+              </div>
+            </div>
+
+            <div class="comp-block"><h5>Components · {{COMPONENTS_READY}}%</h5>
+              <div class="comp-items">
+                <!-- ✓ ready: real component that exists in the design system catalog -->
+                <div class="comp-item"><span class="mark ok">✓</span><span class="comp-name">{{REAL_COMPONENT_NAME}}</span><a class="comp-cds" href="{{DESIGN_SYSTEM_URL}}/components/{{kebab-slug}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_SHORT_NAME}} ↗</a><a class="comp-cds" href="{{FIGMA_FILE_URL}}?node-id={{node-id, dash not colon}}" target="_blank" rel="noopener">Figma ↗</a></div>
+                <!-- △ partial: closest real primitive exists but needs extending -->
+                <div class="comp-item partial"><span class="mark mid">△</span><span class="comp-name">{{COMPONENT_NEEDED}}</span><span class="comp-note">ใช้ {{closest real primitive}} เป็นฐานได้ (<a class="comp-cds" style="margin-left:0" href="{{link}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_SHORT_NAME}} ↗</a>) แต่ {{what's missing}}</span></div>
+                <!-- ✕ missing: nothing like it in the real catalog — say why, never invent a fake component page -->
+                <div class="comp-item missing"><span class="mark no">✕</span><span class="comp-name">{{COMPONENT_NEEDED}}</span><span class="comp-note">ไม่มีใน {{DESIGN_SYSTEM_SHORT_NAME}} เลย — {{why, e.g. "คลังไม่มี chart component"}}</span></div>
+              </div>
+            </div>
+
+            <div class="comp-block"><h5>Functions · {{FUNCTIONS_READY}}%</h5>
+              <div class="sub">✓ รองรับแล้ว</div>
+              <div class="comp-line">{{business logic already working in the prototype}}</div>
+              <div class="sub">✕ ยังขาด</div>
+              <div class="comp-line">{{business logic the story needs but the prototype doesn't implement}}</div>
+            </div>
+
+            <div class="why"><b>Why this estimate —</b> {{one or two sentences: what actually drives the effort number — missing modals, validation complexity, compliance risk, icon/asset gaps, etc.}}</div>
+          </div>
+        </details>
+        <!-- repeat <details class="story"> for every other story in this epic -->
+      </div>
+      <!-- repeat the whole <div class="epic"> block for every other epic -->
+    </section>
+
+    <section id="s05">
+      <h2>05 · Estimate Roll-up</h2>
+      <div class="rollup-total">
+        <div><div class="l">Total Design Effort</div><div class="v">{{TOTAL_EFFORT_RANGE}}</div></div>
+        <div style="font-size:12.5px; opacity:.75; max-width:32ch;">{{e.g. "1 designer · รวม N epics / M user stories"}}</div>
+      </div>
+      <div class="rollup-grid">
+        <!-- these 4 categories are fixed; their low–high sums must reconcile with the sum of every per-story range in §04 -->
+        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Existing Screens Refinement</div></div>
+        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">New Screens / Exceptional States</div></div>
+        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Design System / Component Gaps</div></div>
+        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Responsive / Interaction Validation</div></div>
+      </div>
+    </section>
+
+    <section id="s06">
+      <h2>06 · Key Risks &amp; Gaps</h2>
+      <!-- most severe first; pull these from the prototype's own annotation warnings, don't invent new ones -->
+      <div class="risk"><div class="sev high">!</div><div class="t"><b>{{RISK_TITLE}}</b><span>{{one sentence: what it is and why it matters}}</span></div></div>
+      <div class="risk"><div class="sev med">△</div><div class="t"><b>{{RISK_TITLE}}</b><span>{{one sentence}}</span></div></div>
+    </section>
+
+    <section id="s07">
+      <h2>07 · Next Step</h2>
+      <ol class="steps">
+        <li>{{decision needed + who needs to confirm it}}</li>
+        <li>{{dependency + who owns unblocking it}}</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Source: annotation ใน <a href="{{PROTOTYPE_ARTIFACT_URL}}" target="_blank" rel="noopener">{{PROTOTYPE_NAME}}</a> · Design tokens อ้างอิง <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}}</a> · Draft สำหรับทบทวนร่วมกับ Product / Compliance / Dev ก่อนสรุปเป็นตัวเลขทางการ
+</footer>
