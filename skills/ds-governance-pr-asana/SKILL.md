@@ -1,10 +1,11 @@
 ---
 name: ds-governance-pr-asana
-version: 1.3.0
+version: 1.4.0
 description: >-
   Sync a Design System Governance "📋 Component issue" Asana task's status change (Publish & Pending
-  refine / Rejected / Consult Core DS / Applied) out to the Figma annotation on the original screen,
-  and to the relevant Asana Inventory task. Companion to ds-governance-audit-asana, which creates the
+  refine / Rejected / Consult Core DS / Applied) out to the Figma annotation on **every** node the
+  task's Source section names (same file or across files/projects — see Step 3), and to the relevant
+  Asana Inventory task. Companion to ds-governance-audit-asana, which creates the
   task in the first place — this skill is the second half ("PR" = Publish/Reject/refine). Has no
   Notion dependency anywhere — everything this skill reads or writes lives in Asana (the Component
   issue project, the Core/Project Inventory projects) and Figma (Dev Mode annotations). Always
@@ -22,6 +23,17 @@ metadata:
 > blue "Request Design system" annotation in Figma. This skill runs *after* a human resolves that
 > task — it pushes the resolution back out to Figma and to whichever Asana Inventory task is
 > affected.
+
+**v1.4.0 (2026-09-05)** — caught live during the first real dry-run right after v1.3.0's push: a
+Donut Chart Component issue task had **two** flagged nodes in its Source section (`72:8371` and
+`96:17406` — same file, different sections, from a recurring finding). The run only updated one of
+them; the other kept showing the stale blue "Request Design system" annotation after the task had
+already moved to `Publish & Pending refine`. Step 1 now reads *every* Source link as a checklist
+(not just the first), and Step 3 has a dedicated enumeration pass that resolves and writes to every
+node it names — same file or a different one entirely (cross-project duplicates need their own
+Desktop Bridge connection each). The output contract's `figma_node_annotated` is now
+`figma_nodes_annotated` (plural array) plus a `figma_nodes_skipped` list for anything unreachable, so
+a partial run is visible in the output instead of silently looking complete.
 
 **v1.3.0 (2026-09-05)** — logic pass before this skill's first push to GitHub (previous versions
 only ever existed as a local dev copy):
@@ -182,8 +194,14 @@ direct mode instead (set Issue Status on the Asana task themselves).
 - `notes`/`html_notes` (this project's tasks use the 4-section template from
   `ds-governance-audit-asana` Step 6b — pull **Summary Reason** for "Why", and if present, a
   **Reject Reason**/feedback line)
-- Figma section/node link (from the Source section of `notes`, or the task's linked Figma
-  annotation if arriving via Figma-initiated mode)
+- **Every** Figma section/node link the Source section names — plural, not singular. A task that's
+  recurred (Occurrence Count > 1) usually has more than one bullet in Source: the original finding
+  plus every later occurrence, sometimes in a different section of the same file, sometimes in a
+  completely different project's file. Treat this list as the checklist for Step 3 — every node it
+  names needs its annotation flipped in this run, not just the first one. If arriving via
+  Figma-initiated mode instead (no Source list read yet), the single node you started from is the
+  only one confirmed so far — still read the linked task's Source section once you get to it, since
+  it may name siblings you haven't seen.
 
 ## Step 2 — Branch on status, Asana-side write first
 
@@ -280,9 +298,33 @@ to "restore," this is a new annotation on a new node that happens to resolve the
 
 ## Step 3 — Write the Figma annotation
 
+**Enumerate every flagged node first — across every file and page, before writing anything.** A
+resolved task must flip the annotation on *every* node the task's Source section names (Step 1's
+checklist), not just one representative node. Group the Source links by file (the fileKey in each
+URL) and node-id:
+- **Same file, multiple sections/nodes** (today's common case — a recurring finding logged twice in
+  the same design file) — one Desktop Bridge connection covers all of them; just repeat the
+  resolve-and-write below for each node-id.
+- **Different files** (a cross-project duplicate — the same Gap logged once in one project's file
+  and again in another's, per `ds-governance-audit-asana` Step 6c's multi-project model) — each file
+  needs its *own* Desktop Bridge connection before you can write to it. Check
+  `figma_list_open_files`; for any named file that isn't connected yet, ask the user to open it in
+  Figma Desktop with the Desktop Bridge plugin running rather than silently skipping that node — a
+  partial update is exactly the stale-annotation bug this rule exists to prevent.
+
+**Confirmed live 2026-09-05:** a Donut Chart task's resolution was written to only one of its two
+flagged nodes (`72:8371` and `96:17406`, same file, different sections) on the first pass — the
+second node kept showing the old blue "Request Design system" annotation after the task had already
+moved to `Publish & Pending refine`, which is exactly the "bug, not an acceptable partial result"
+the "What triggers this skill" section already warns about for the Asana/Figma split. The same
+guarantee extends to every node a task names, not just the first one you happen to open.
+
 `figma_execute` runs arbitrary JS in the connected file's Plugin API context — use it for both
 category resolution and node resolution below; `figma_set_annotations` (a dedicated tool) can then
-write the final annotation once you have a real `categoryId` and target `nodeId`.
+write the final annotation once you have a real `categoryId` and target `nodeId`. Repeat category
+resolution + node resolution + write once per node on the checklist — the category only needs
+resolving once per *file* (annotation categories are per-file, so the same `categoryId` from one
+`ensureCategory` call reuses across every node in that file, but a second file needs its own call).
 
 **Resolve the annotation category** (create-if-missing, exactly like `ds-governance-audit-asana`
 Step 7 — this works standalone via the plain Plugin API, no extra setup needed):
@@ -431,14 +473,20 @@ node.annotations = [{
 
 ## Step 4 — Confirm back to the user
 
-Report, in one short block: which Figma node got the new annotation and its new category; what
-Asana write happened (Inventory task update/creation, or a comment) with a link; a reminder that the
-annotation only renders with formatting in Figma's own Dev Mode Annotate panel — a plain
-`figma_capture_screenshot`/`figma_execute` metadata read will not show it.
+Report, in one short block: **every** Figma node that got the new annotation (list all of them, not
+just one — cross-reference against Step 1's Source checklist so you can say plainly "N of N nodes
+updated") and its new category; what Asana write happened (Inventory task update/creation, or a
+comment) with a link; a reminder that the annotation only renders with formatting in Figma's own Dev
+Mode Annotate panel — a plain `figma_capture_screenshot`/`figma_execute` metadata read will not show
+it. If any named node couldn't be reached (file not connected, node not found), say so explicitly
+per node rather than reporting a bare "done."
 
 ## Guardrails
 
 - Overwrite the annotation, never stack a second one on the same node.
+- **Never annotate only one node when the task's Source section lists several** — resolve and
+  overwrite every one, across every file/page named, before reporting done (see Step 3's
+  enumeration step and its 2026-09-05 confirmed-live example).
 - Never guess the Publish/Reject shape (A vs B in Step 3) from the Asana task alone — check the
   *current* annotation's category first.
 - Never write `Applied` without live verification (Step 2's Applied branch) — a designer's word
@@ -461,7 +509,8 @@ annotation only renders with formatting in Figma's own Dev Mode Annotate panel �
   "ok": true,
   "task": "<Component issue task URL>",
   "status": "<Publish & Pending refine | Rejected | Consult Core DS | Applied>",
-  "figma_node_annotated": "<node id>",
+  "figma_nodes_annotated": ["<fileKey>:<node id>", "..."],
+  "figma_nodes_skipped": ["<fileKey>:<node id> — <why, e.g. file not connected>"],
   "inventory_task": "<Asana Inventory task URL or null>",
   "issues": []
 }
