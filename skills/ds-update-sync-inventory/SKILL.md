@@ -1,149 +1,281 @@
 ---
 name: ds-update-sync-inventory
-description: Bootstrap or re-sync a 🗂 Component Inventory in Asana from a published Figma design system library — creates/updates tasks matching Figma's real components/categories/order exactly, and grows a per-component Change log (subtasks, one per version, each with a reason and a Specification note of measured Figma values). Use when there's a Figma library but no Asana inventory yet, or when an existing inventory has drifted from the real library. First of the Design System Governance skills — ds-governance-audit-asana and any PR-sync skill assume this inventory already exists.
+description: Bootstrap or re-sync the 🗂 Core Design System Library (Inventory) Asana project from a published Figma design system library — creates/updates one task per component matching Figma's real names/categories/order exactly, checks each one's real shipped-in-code status against the CDS registry (cds-bbl.vercel.app, via the `cds` MCP tools), and links each task to its CDS docs page. This is a code/Figma existence tracker, not a Notion-style governance/narrative doc — category taxonomy and section order matter, prose guideline content does not. Requires the `asana-admin-mcp` MCP server for anything beyond plain task CRUD (custom fields, enum options, sections). First of the Design System Governance skills — ds-governance-audit-asana and any PR-sync skill assume this inventory already exists.
 ---
 
-> Read this before running: this is the **bootstrap / re-sync** skill. It doesn't audit screens (`ds-governance-audit-asana` does that) and it doesn't sync Component-issue status changes — both of those assume a 🗂 Component Inventory already exists and is accurate. This skill is what makes that true in the first place, and keeps it true as the library evolves.
+> Read this before running: this is the **bootstrap / re-sync** skill for the Asana Component
+> Inventory. Its job is narrow — keep one task per real Figma component, correctly categorized,
+> correctly ordered, and honestly marked as shipped-in-code or not. It doesn't write governance
+> narrative (that died with the Notion version of this project — see History below) and it doesn't
+> audit screens (`ds-governance-audit-asana` does that).
 
-## What triggers this skill
+## Prerequisite — install `asana-admin-mcp`
 
-The user has a **published Figma design system library** (Core or a project-level one) and either:
-
-- **No Asana inventory exists yet** — they want one built from scratch, matching the Figma file exactly (names, categories, order).
-- **An inventory exists but has drifted** — Figma moved on (renamed/recategorized/added/removed components) and Asana didn't follow. Re-sync it to match.
-
-Prompt shape the user will give you:
+Plain Asana task tools (`create_tasks`, `update_tasks`, `get_tasks`) are enough for day-to-day task
+edits. But **custom fields, dropdown options, and sections need `asana-admin-mcp`**
+(`https://github.com/plakorp/asana-admin-mcp`) — the standard Asana connector has no tools for any
+of that. If a task in this skill needs `enum_option_create`, `section_reorder`,
+`custom_field_attach`, or similar and those tools aren't in your tool list, install it first:
 
 ```
-Use the ds-update-sync-inventory skill.
-
-Figma library file: [URL of the published design library]
-Asana inventory: [URL/gid of an existing 🗂 Component Inventory project to re-sync, OR a team/workspace to create a new one under]
-Consumer doc repo (optional): [a folder/zip of component guideline docs, if the user has one — see default below]
+/plugin marketplace add plakorp/asana-admin-mcp
+/plugin install asana-admin@asana-admin-mcp
 ```
 
-**Default Asana inventory project (added 2026-09-04):** if the Asana inventory line is omitted, this
-project has a real one — `🗂 Core Design System Library (Inventory)`, project gid
-`1217578024173799` (workspace `1153565613997788`),
-`https://app.asana.com/1/1153565613997788/project/1217578024173799/list/1217578024173825`. It was
-cloned from the Notion inventory this skill previously targeted; Notion stays the source of truth
-for narrative/knowledge (see its `notes` field), this Asana project tracks the live inventory table
-only. Use it unless the user names a different project.
+Needs Node 20+ and a personal Asana token (see the repo's `GET-TOKEN.md`) saved to
+`~/.asana_token`. Each person needs their own token — don't share one, Asana logs the owner.
 
-**Default consumer doc repo (added 2026-08-15):** if that line is omitted, this project has a real
-one — โย's (Yo's) `cds-consumer`: `https://github.com/therealveldt/cds-consumer.git`. It is
-**private**, but this environment already has working git access to it (confirmed via
-`git ls-remote` — no extra auth setup needed). Clone it shallow into the scratchpad and use it as
-the consumer doc repo unless the user names a different one or says not to. Only fall back to "no
-repo, use the Figma description field" if the clone itself fails.
+**If a tool the README lists (e.g. `custom_field_detach`) doesn't show up in `ToolSearch` or errors
+`No such tool available`,** the running server instance is stale — the tool existing in the repo's
+source doesn't mean this session's connection has it loaded. Tell the user to restart/update the
+plugin (`/plugin update` or reconnect) rather than assuming the capability doesn't exist. This
+happened during this skill's own development: `custom_field_detach` was real in source (v1.4.0) but
+absent from the live session until reconnected.
 
-This repo also carries a machine-readable `context/` layer generated from live Figma captures —
-worth knowing about for this skill and `ds-governance-audit-asana` alike:
+## Default target project
 
-| File | Holds | Useful for |
+`🗂 Core Design System Library (Inventory)` — project gid `1217578024173799`, workspace
+`1153565613997788` (bangkokbank.com),
+`https://app.asana.com/1/1153565613997788/project/1217578024173799/list/1217578024173825`. Use it
+unless the user names a different project.
+
+### History — read before assuming Notion-style content belongs here
+
+This project was originally cloned from a Notion inventory, and this skill's first version
+(`ds-governance-inventory-notion`) was built around Notion conventions: per-component guideline
+prose, a toggle-chain changelog, literal token values in a "Specification" subpage. **All of that
+was the wrong model for Asana** and was reverted mid-session once the project's real purpose came
+out: *log which components exist in the Figma library, and whether each one is actually shipped in
+code yet* (checked against the CDS registry, not against a consumer-doc repo). Don't reintroduce
+Notion-shaped content (guideline prose sections, literal-value spec pages) unless a future user
+explicitly asks for it — it was tried once, on this exact project, and undone.
+
+### Current schema (custom fields)
+
+| Field | Type | What it means | Who sets it |
+| --- | --- | --- | --- |
+| Task **name** | — | Component Name, exactly as Figma names it (strip maturity marker + version suffix) | This skill |
+| `Category (Core)` | enum | One of the 15 categories below | This skill, kept in sync with section |
+| `Published Version` | text | The POC/version suffix from the Figma page name (e.g. `POC1.2`) | This skill |
+| `Design System Link` | text | Figma node URL (`...?node-id=...`) | This skill |
+| `Last Published Date` | date | When the component was last published in Figma | This skill (only if known — don't guess) |
+| `Code Status` | enum: `Shipped in Code` / `Design Ahead of Dev` | Whether the component is real, installable/documented CDS code today | This skill, via `cds` MCP tools — see Step 4 |
+| `Code Last Checked` | date | Last time Code Status was verified against the CDS registry | This skill, every time Step 4 runs |
+| `CDS Component Link` | text | `https://cds-bbl.vercel.app/#/components/<slug>` — the component's real CDS docs page | This skill — see Step 5 |
+| `Projects Using` | number | How many consuming projects use this component | Manual — not derivable from Figma or CDS, don't guess |
+
+**`Governance Status` existed on this project (Publish / Need Discussion / Updated) and was
+deliberately removed** (2026-09-05) — it was a leftover from the Notion-governance model and wasn't
+serving the code/Figma-tracking purpose. Don't recreate it unless asked.
+
+## The 15-category taxonomy — canonical reference
+
+This is the real, current Figma page-divider order for the Core Design Library
+(`ON8Azjo7wIi3P2oxnxKiBb`). **Section order in Asana, `Category (Core)` enum-option order, and task
+order within each section must all match this exactly** — get this list right and every ordering
+step below is mechanical.
+
+| # | Category | Components, in Figma order |
 | --- | --- | --- |
-| `context/COMPONENTS.md` | Every public component, its properties, and what each variant binds | Cross-checking a component's real property list before writing one into Asana |
-| `context/REGISTRY.md` | Every token/variable name and value, per collection | Cross-checking a token name actually exists before citing it |
-| `context/DRIFT.md` | Open Figma-library defects, and a "Settled — do not re-flag" table of owner rulings | `ds-governance-audit-asana` Step 4 checks this before logging a Gap |
-| `components/*.md` | Family-level guideline docs — what Step 4a below pulls from | Step 4a |
-| `CHANGELOG.md` | The real changelog shape this project uses | Reference for any PR-sync skill |
+| 1 | BUILDING BLOCKS | _Focus Ring, _State Overlay |
+| 2 | BUTTONS | Button, Button Combo, FAB |
+| 3 | CONTAINERS | Accordion, Card Container |
+| 4 | CONTENT BLOCKS | Content Blocks |
+| 5 | DATA DISPLAYS | Avatar, Badge, Progress Bar, Stepper, Tag |
+| 6 | FEEDBACK | Alert, Inline Message, Loader, Toast |
+| 7 | FIELDS | Select Field, Text Area, Text Field, Search |
+| 8 | LISTS | List |
+| 9 | NAVIGATION | Breadcrumb, Footer, Pagination, Sidebar, Tabs, Top Navbar |
+| 10 | OVERLAYS | Backdrop, Bottom Sheet, Dialog, Drawer, Menu, Popover, Tooltip |
+| 11 | PICKERS | Date Picker, Date Time Picker |
+| 12 | SELECTION CONTROLS | Checkbox, Chip, Radio, Slider, Switch |
+| 13 | TABLES | Table |
+| 14 | UTILITIES | Divider, _Icon Wrapper, Scroll Bar |
+| 15 | UI MOCKUPS | OS Native, Placeholder |
 
-These `context/*.md` files carry their own `captured:`/`library_version:` frontmatter — check that
-against the Figma library's current version before trusting them over a live `use_figma` read. They
-are a capture, not a live source; when their version looks behind what Step 1 reads live, prefer
-the live Figma read and say so in the summary.
-
-If no consumer doc repo resolves at all, guideline content comes from the Figma component's own description field (if set) — never invent "when to use" prose from nothing. Say so plainly rather than fabricating.
+Two names to watch: the Figma node that's currently named **Sidebar** used to publish as
+"Navigation Bar" — Asana may still say "Navigation Bar" on an unsynced project; rename it, don't
+duplicate it. And **NAVIGATION** (singular) is the current real category; an older/legacy Asana
+project may have "NAVIGATIONS" (plural) as leftover drift.
 
 ## Step 1 — Read the real Figma library structure
 
-**Load `figma-use`, then use `use_figma` for this — not `get_metadata`.** `get_metadata` called with no `nodeId` (to list top-level pages) is unreliable on multi-page library files — it returned only 1 of 9+ real pages in testing, silently dropping the rest with no error. `use_figma` reading `figma.root.children` returns the complete, accurate page list every time:
+**Load `figma-use` if `use_figma` is available, otherwise use the connected Figma Desktop Bridge
+(`figma-console` MCP — `figma_execute`, `figma_get_status`).** Check `figma_get_status(probe:true)`
+first; if no file is connected, tell the user to open Figma Desktop on the target file and run the
+Desktop Bridge plugin (Plugins → Development → Figma Desktop Bridge → Run), then re-probe.
+
+Read the full page list in one read-only script — don't paginate by hand:
 
 ```js
 return figma.root.children.map(p => ({ id: p.id, name: p.name }));
 ```
 
-From that list, classify each page:
-- **Category divider** — a page whose name is a decorative separator, e.g. `—— INPUTS ——` or `---`. Not a component; defines the category name for every component page that follows it until the next divider.
-- **Real component page** — everything else that represents an actual component, typically carrying a status marker emoji (e.g. 🟩/🟦/🟧 for build maturity) and a version suffix (e.g. `Checkbox – POC1.0`). Strip the marker emoji and version suffix to get the clean `Component Name`; keep the version string separately for `Published Version`.
-- **Not a component** — overview/onboarding/changelog/cover pages, sandbox or archived pages (often marked `⛔️` or living under a name like `_⛔️ Sandbox`), and non-component utility pages (e.g. a `Density` config page). Ask the user if a page's status is ambiguous — don't guess it away.
+`get_metadata` with no `nodeId` is unreliable on multi-page files (returned 1 of 9+ pages in prior
+testing) — always prefer the direct `figma.root.children` read.
 
-**Include everything that carries the maturity marker, including `_`-prefixed ones.** Don't exclude "private-looking" components (leading underscore) on your own judgment — that was tried in this skill's own development and was wrong; the user explicitly wanted every marked page in, private-named or not. If the user's instruction was "bring in anything marked 🟦/🟩/🟧," honor that literally.
+Classify each page:
+- **Category divider** — a page named like `——— BUTTONS ———`. Defines the category for every
+  component page until the next divider.
+- **Real component page** — carries a maturity marker (🟩/🟦/🟧) and a version suffix (e.g.
+  `Checkbox – POC1.0`). Strip both to get the clean Component Name; keep the version separately.
+- **Not a component** — overview/onboarding/changelog/cover pages, `_⛔️`-marked archived pages. Ask
+  if a page's status is ambiguous.
 
-For each real component page, also grab its **description field** (if the Plugin API exposes one on that node) and its **child variant/property structure** — you'll need both later.
+**Include every marked page, including `_`-prefixed ones** (`_Focus Ring`, `_State Overlay`,
+`_Icon Wrapper` are real, in-scope components) — don't exclude "private-looking" names on your own
+judgment.
 
-## Step 2 — Reconcile against Asana
+## Step 2 — Reconcile tasks against the taxonomy
 
-### If bootstrapping (no inventory project yet)
-Create the project (`mcp__plugin_asana-admin_asana-admin__project_create` or `create_project`) with this schema (adapt names to match the default project's conventions above if a sibling inventory already exists):
-- Task **name** = `Component Name`
-- `Category (Core)` (enum custom field) — **create the options in the exact order the dividers appeared in Figma**, not alphabetically. Attach with `custom_field_attach` / `custom_field_create`.
-- A **section per category**, in the same order, plus a `Needs Categorization` section for drift (see below). Sections are the Kanban-column view of the same category — keep both the enum value and the section membership in sync for every task.
-- `Design System Link` (text)
-- `Published Version` (text)
-- `Last Published Date` (date)
-- `Governance Status` (enum — matching whatever convention the org's other inventories use; check the default project's `Publish` / `Need Discussion` / `Updated` options first via `asana_list_custom_fields` rather than inventing a new one)
-
-Fields like `Code Status`, `Projects Using`, `Code Last Checked` (present on the default project) are **code-audit signals, not Figma-sync signals** — don't try to derive them from the Figma read; leave them blank on create and untouched on refresh unless the user explicitly gives you a value.
-
-### If re-syncing (inventory exists)
-Query every existing task (`get_tasks` with `opt_fields=name,notes,memberships.section.name,custom_fields.name,custom_fields.display_value`, paginating via `next_page.offset`), then for each real Figma component:
-- **Task exists, name/category match** → just refresh `Design System Link` and `Published Version` if they've drifted (`update_tasks`).
-- **Task exists, name or category differs** → this is a rename/recategorization case (e.g. Figma's real name is `Card Container`, Asana says `Card`) — fix the task name and/or `Category (Core)` value **and** move it to the matching section. Don't create a duplicate.
-- **No task matches** → create one (`create_tasks`), in the right section, with `Category (Core)` set to match.
-- **An Asana task matches nothing in the current Figma list** → this is drift *the other way* (component removed/renamed in Figma, or a task that was never real). **Never delete it.** Move it into the `Needs Categorization` section (it already exists on the default project for exactly this) so it's visually separated from the confirmed-accurate tasks, then flag it to the user in your summary. Deleting is their call.
-
-**Re-fetch task/custom-field state immediately before a large write batch, not just once at the start.** This is a live collaborative project — if you read it, then spent several turns doing something else, and only now fire 40+ writes, a human may have edited concurrently (renamed a field, deleted a task, changed enum options). A stale-schema write batch fails confusingly (e.g. an enum value gid that no longer exists) — cheaper to re-check than to debug 40 identical errors after the fact.
-
-## Step 3 — Fix section order and views
-
-1. **Section order.** List sections (`project_list_sections`) and reorder them (`section_reorder`) to match the exact divider order read in Step 1. Asana's board/list view renders sections in this stored order — there's no separate "sort by enum option order" concept to fight the way Notion's select-property sort did, so getting section order right is the whole fix.
-2. **Orphan section.** Keep `Needs Categorization` (or create it if a from-scratch bootstrap) as the last section, after every real category — it should read as "outside the confirmed structure," not blend into it.
-3. Don't rely on a saved custom "sort by Category" view if one exists on the project — verify the actual section membership of a few known components after a big write batch, the same way Notion's view/query split needed double-checking.
-
-If the user reports specific components "missing" after you've done all this, don't assume the data is wrong — re-query the task count and the specific tasks first (`get_tasks`, or `get_project` with `task_counts`). In this skill's own testing (back on Notion), the data was correct every time; the visible symptom was always a stale client view, never lost data — treat an Asana report of "missing" components the same way until proven otherwise.
-
-## Step 4 — Per-component task content
-
-Every component's Asana task gets two independent pieces. **Keep them separate — don't blend prose guidance with measured values in the same place.**
-
-### 4a. Guideline content (task `notes`, always visible)
-`When to use it` / `Do and don't` / `Accessibility` / `Related`, sourced from the optional consumer-doc repo's family-level file (e.g. `components/selection-controls.md` covering Checkbox/Radio/Switch as a family), **filtered down to what specifically concerns this one component** — don't paste the whole family file into every child component's task verbatim, that's noise. If no consumer-doc repo was given, use the Figma component's own description field if it has one; if neither exists, write a short line saying guideline content hasn't been written yet rather than inventing it. Always also keep the raw `Figma: [link]` line the default project's existing tasks use.
-
-Consumer-doc convention (if using one like `cds-consumer`) deliberately keeps this content **free of literal values** — "reference tokens by name only, never state what a token resolves to, never state a component's dimensions." Respect that split; the numbers belong in 4b, not here.
-
-### 4b. Change log (subtasks, growing over time)
-One **subtask** per version, named `Version 01 — [date]` (`Version 02 — [date]`, etc.), created under the parent component task. Each subtask's `notes`:
-
+Query every existing task:
 ```
-Reason: [what changed and why — the baseline entry reads "captured live from [library name] during initial inventory sync"]
+get_tasks(project, opt_fields="name,notes,memberships.section.name,custom_fields.name,custom_fields.display_value")
+```
+paginating via `next_page.offset`. Match by the Figma node id embedded in `Design System Link`
+(`...?node-id=X-Y`), not by name alone — names can legitimately be stale (see the Sidebar case
+above).
 
-Specification
-[measured spec content — see below]
+For each real Figma component:
+- **Task exists, node id matches, name/category already correct** → nothing to do beyond refreshing
+  `Published Version` / `Design System Link` if they drifted.
+- **Task exists, name differs from Figma's current name for that node** → rename the task, don't
+  create a duplicate.
+- **Task exists, but `Category (Core)` doesn't match the taxonomy above** → this happens after any
+  taxonomy migration or a legacy project — fix both the enum value **and** section membership (see
+  next paragraph) together.
+- **No task matches that node id** → create one, in the right section, with `Category (Core)` set.
+- **A task matches nothing in the current Figma list** → drift the other way. **Never delete it.**
+  Move it to a `Needs Categorization` section (create one if missing) and flag it in your summary.
+
+**`Category (Core)` (the enum value) and section membership are two separate pieces of state.**
+Setting one does not move the other — every task write that changes category must set both the
+custom field value *and* `add_projects` with the matching `section_id` in the same call:
+```
+update_tasks([{ task, custom_fields: { "<Category (Core) field gid>": "<enum option gid>" },
+                add_projects: [{ project_id, section_id }] }])
 ```
 
-**When this skill (or a later run of it) detects the same component changed again** — new `Published Version`, or the user names the component and says it changed — **add a new subtask** (`Version 02`, etc.) below the existing one(s). Never overwrite or delete an earlier version subtask; the whole point is a growing history. List the parent task's current subtasks first (`num_subtasks` / a tasks-by-parent read) so you know the next version number and don't duplicate one.
+**Re-fetch task/enum-option state right before a large write batch, not just at the start** — a
+human may edit concurrently, and a stale enum-option gid fails confusingly.
 
-#### Specification content — measured values only, not descriptions
-This is the part a prose guideline doc structurally cannot give you (see 4a) — pull it live from the actual Figma node:
+## Step 3 — Section order and task order within sections
 
-1. `get_metadata` on the component's canvas/frame to find real pixel dimensions and child layout (position/size of internal parts).
-2. `get_variable_defs` on a representative variant (and on each meaningfully-different state — default/selected/disabled/etc.) to get the actual bound token names **and their resolved values** (hex, px). This is the one case where citing a resolved value is correct and wanted — the Specification note is exactly the place that's allowed to say "`Border/Action/Action Primary` = `#0064ff`," unlike the guideline content above it.
-3. Write it as a table: state × (fill token+value, border token+value, icon/content token+value, size). Include corner radius and border width as their own lines with the literal px number and the token name that produces it.
-4. Close with a one-line source note: which node was measured, and the date.
+### Section order
+List sections (`project_list_sections`), then `section_reorder` each into the exact 15-category
+order above, plus any drift/legacy sections pushed to the tail (`Needs Categorization` last among
+the "live" sections). If a category's section doesn't exist yet (e.g. after re-enabling a
+previously-disabled taxonomy), `section_create` it — sections can silently disappear from
+`project_list_sections`/`get_project` once they go empty via API-driven moves (observed in this
+skill's own development), so don't assume a section you created earlier still exists; recreate it
+if it's missing rather than erroring.
 
-If `get_design_context` triggers a Code Connect mapping prompt you don't need for this task (you're extracting measurements, not generating code), you don't have to resolve it — `get_metadata` + `get_variable_defs` are sufficient and avoid that detour entirely.
+### Task order within a section — no direct tool, use the append-to-bottom workaround
+**No tool in `asana-admin-mcp` or the standard Asana connector supports positioning a task within a
+section** (no `insert_before`/`insert_after` exposed anywhere, even though Asana's REST API has it).
+The only controllable primitive is: adding a task to a section **always appends it after the
+current last task in that section.**
 
-## Step 5 — Confirm back to the user
+This means you *can* force full section order, by processing every task in the section **in your
+target order**, each as a *separate* remove-then-add:
+```
+update_tasks([{ task, remove_projects: [project_id] }])   // step 1, alone
+update_tasks([{ task, add_projects: [{ project_id, section_id }] }])  // step 2, alone
+```
+Process task 1 (remove, add), then task 2 (remove, add), then task 3, etc., in the exact order you
+want them to end up. Each append lands below everything currently in the section, so processing in
+target order reproduces that order exactly. Sections can be processed in parallel with each other
+(they don't interact) — within one section, the remove/add pairs must stay strictly sequential.
 
-One short summary: how many tasks created vs. updated vs. flagged-as-drift into `Needs Categorization`, whether section order needed fixing, and a couple of example component task links (`permalink_url`) so they can spot-check the guideline/spec split looks right before you (or they) run this across the rest of the library.
+**Never combine `remove_projects` and `add_projects` for the same task in one `update_tasks` call.**
+Confirmed bug: doing so silently drops the task from the project entirely (it ends up in no
+project, memberships empty) rather than moving it — custom field values survive on the task object,
+but you have to notice the task vanished from the section and re-add it. Always two separate calls.
 
-## Known gotchas (from building this skill)
+After a full reorder, verify a couple of sections with `get_tasks(section: <gid>)` — the returned
+order is the real displayed order.
 
-- `get_metadata` with no `nodeId` can silently under-report pages on a real multi-page file. Verified via `use_figma` + `figma.root.children` instead — always prefer that for a full, accurate page enumeration.
-- Don't apply your own judgment to exclude components that look "private" or "internal" (leading `_`) unless the user's own instruction implies it — ask, or follow their literal criterion (e.g. "anything with a 🟦/🟩/🟧 marker").
-- Never delete or archive an Asana task yourself, even one that's clearly stale/orphaned. Flag it, move it to `Needs Categorization`, let the human decide. (In practice, users often go delete flagged tasks themselves in the live project within the same session — don't race that; re-check state before your next big write.)
-- A live Asana project can change under you mid-task. If a batch of writes fails with a "field/enum option not found" error that contradicts what you read minutes ago, re-fetch the custom fields before retrying — don't assume the tool call was wrong.
-- `Category (Core)` (an enum custom field) and section membership are **two separate pieces of state that must be kept in sync by hand** — setting one does not move the other. Every create/update that changes category must touch both.
-- Component guideline prose and measured specs are different documents with different rules — one names tokens and never states values, the other exists specifically to state values. Keep them in different places (task `notes` vs. version-subtask `notes`) so neither convention gets violated by accident.
-- Fields carried over from the old Notion schema but not part of the Figma-sync contract (`Code Status`, `Projects Using`, `Code Last Checked`) belong to a different workflow (code audit) — don't guess values for them just because a row looks incomplete.
+## Step 4 — Verify Code Status against the real CDS registry
+
+**Use the `cds` MCP tools (`search_components`, `check_coverage`, `get_component`) — not a web
+fetch or browser scrape of `cds-bbl.vercel.app`.** These tools read the same registry live and
+return exact slugs, install commands, and doc-page URLs.
+
+1. `check_coverage(items: [<all clean component names>])` gives a fast first pass — but its
+   name-matching is naive (plain string match) and **under-counts real matches**: it missed
+   `Radio`→`radio-button`, `Switch`→`toggle-switch`, `Badge`→`status-badge`, `Loader`→
+   `circular-loader`, and every "not installable but still real" component (anything whose Figma
+   name differs from its CDS name). **Don't trust a `check_coverage` `false` as final** — cross-check
+   with `search_components(query: "", includeInternal: true)` (returns the full ~106-entry roster)
+   before concluding a component genuinely has no CDS equivalent.
+2. Only flip `Code Status` to `Shipped in Code` when there's a real registry entry — prefer one with
+   `installable: true`. An entry that's `internal: true` and `installable: false` (e.g.
+   `_Utilities / Focus Ring`) is ambiguous — a documented spec, not necessarily real shipped code —
+   leave its existing status alone rather than asserting either way, and say so in your summary.
+3. **A registry entry's `page` field is strong evidence for genuinely ambiguous Figma↔CDS name
+   mismatches** — e.g. `browser-search-bar`'s registry `page` is literally `"🟦 OS Native – POC1.2"`,
+   and `website-footer-template`'s `page` is literally `"🟦 Footer – POC1.2"`. When a Figma
+   component's name doesn't obviously match anything, check whether some registry entry's `page`
+   names *that exact Figma page* — that's a confirmed match, not a guess.
+4. Some Figma components are genuinely **1-to-many** against the registry (no single wrapper
+   component covers them): `Table` (→ `table-cell`, `table-head`, `table-cell-row`,
+   `table-head-row`, `table-footer`), `Content Blocks` (→ `heading-text-block`, `text-list`,
+   `paragraph-text-block`, `display-text-block`, `dialog-content-block`), `Button Combo` (→
+   `vertical-button-combo`, `horizontal-button-combo`). Still mark these `Shipped in Code` (the
+   underlying pieces are real) — just don't expect one clean docs link (see Step 5).
+5. Fields like `Code Status`/`Code Last Checked` are **code-audit signals, independent of the Figma
+   re-sync** — always update `Code Last Checked` to today whenever you run this check, even for
+   tasks whose status didn't change.
+6. Don't touch `Projects Using` — it isn't derivable from either Figma or the CDS registry.
+
+## Step 5 — `CDS Component Link` field
+
+Populate with the component's real docs page: `https://cds-bbl.vercel.app/#/components/<slug>`,
+using the slug from `search_components`/`check_coverage` (the tool's own `docs` field is already the
+exact URL — copy it, don't hand-construct unless the tool didn't return one).
+
+- **Genuine no-match** (no registry entry at all, not even by page-attribution — e.g. `Search`, a
+  FIELDS-category text input with nothing equivalent in the registry): leave the field blank. Don't
+  link a superficially-similar but conceptually different entry (`browser-search-bar` is a
+  browser-chrome address bar mockup piece, not a form search field — it does NOT satisfy a "Search"
+  field component just because the words overlap).
+- **1-to-many families** (see Step 4 point 4): pick the single most representative sub-component as
+  the primary link rather than leaving it blank — e.g. `Table` → `table-cell-row` (the composable
+  row unit), `Content Blocks` → `heading-text-block` (first/most foundational of the family),
+  `Button Combo` → `horizontal-button-combo` (the more general-purpose orientation per its own
+  description). State the pick and the reasoning in your summary; it's a judgment call, not a fact.
+- **Page-attribution matches** (Step 4 point 3): link with full confidence, these aren't guesses.
+
+## Step 6 — Confirm back to the user
+
+One short summary: tasks created vs. updated vs. flagged-as-drift, whether section/task order
+needed fixing, how many Code Status flips and why, which `CDS Component Link` entries stayed blank
+and why, and a couple of example task `permalink_url`s to spot-check.
+
+## Known gotchas
+
+- `get_metadata` with no `nodeId` under-reports pages on multi-page Figma files — always read
+  `figma.root.children` directly instead.
+- Don't exclude `_`-prefixed "private-looking" Figma components on your own judgment.
+- Never delete an Asana task — flag drift into `Needs Categorization` and let the human decide.
+- `Category (Core)` enum value and section membership are separate state — every recategorization
+  must update both.
+- **Combining `remove_projects` + `add_projects` for the same task in one `update_tasks` call drops
+  the task from the project entirely** — always two separate sequential calls (Step 3).
+- **Asana's API forbids deleting an enum option** (`DELETE /enum_options/{gid}` → 403 "Enum option
+  deletion is forbidden," even though the route exists and 404s look like it might work) —
+  `enum_option_update(enabled:false)` is the only retirement available; tasks already holding a
+  disabled option keep it.
+- **No tool exists to delete an Asana section** (`asana-admin-mcp` only offers `section_create`/
+  `section_update`(rename)/`section_reorder`, deliberately no delete) — an emptied, unwanted section
+  has to be removed by hand in the Asana UI (right-click the section → Delete). Don't spend time
+  looking for a tool-based workaround; there isn't one as of `asana-admin-mcp` v1.4.0.
+- A `project_list_sections`/`get_project` read can silently omit a section that has zero tasks in
+  it, even one you created moments ago — don't assume a "missing" section was never created; check
+  whether it's simply empty before recreating it.
+- Fields that look like Figma-sync fields but aren't: `Code Status`, `Code Last Checked`,
+  `Projects Using` are code-audit signals (Step 4), not something Step 2's Figma reconciliation
+  should ever guess at.
+- `check_coverage`'s plain name-matching under-counts real CDS matches — always cross-check
+  ambiguous "not CDS" results against the full `search_components("")` roster before concluding a
+  gap is real (Step 4).
