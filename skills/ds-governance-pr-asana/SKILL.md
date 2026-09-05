@@ -1,19 +1,22 @@
 ---
 name: ds-governance-pr-asana
-version: 1.4.0
+version: 1.5.0
 description: >-
-  Sync a Design System Governance "📋 Component issue" Asana task's status change (Publish & Pending
-  refine / Rejected / Consult Core DS / Applied) out to the Figma annotation on **every** node the
-  task's Source section names (same file or across files/projects — see Step 3), and to the relevant
-  Asana Inventory task. Companion to ds-governance-audit-asana, which creates the
-  task in the first place — this skill is the second half ("PR" = Publish/Reject/refine). Has no
-  Notion dependency anywhere — everything this skill reads or writes lives in Asana (the Component
-  issue project, the Core/Project Inventory projects) and Figma (Dev Mode annotations). Always
-  human-triggered: a person changes Issue Status in Asana (or marks an annotation Applied in Figma),
-  then runs this skill — there is no background/scheduled trigger, see "What triggers this skill".
-  See CHANGELOG.md for the full defect/correction history behind every rule below.
+  Sync every Design System Governance "📋 Component issue" Asana task whose board column doesn't
+  match its own Issue Status field (Publish & Pending refine / Rejected / Consult Core DS / Applied)
+  out to the Figma annotation on **every** node its Source section names (same file or across
+  files/projects — see Step 3), to the relevant Asana Inventory task, and to the board itself — moves
+  the card to the matching column, which doubles as this skill's own already-synced marker. Defaults
+  to scanning the whole board (see "What triggers this skill"); a single task URL still works as an
+  explicit override. Companion to ds-governance-audit-asana, which creates the task in the first
+  place — this skill is the second half ("PR" = Publish/Reject/refine). Has no Notion dependency
+  anywhere — everything this skill reads or writes lives in Asana (the Component issue project, the
+  Core/Project Inventory projects) and Figma (Dev Mode annotations). Always human-triggered: a
+  person changes Issue Status in Asana (or marks an annotation Applied in Figma), then runs this
+  skill — there is no background/scheduled trigger, see "What triggers this skill". See
+  CHANGELOG.md for the full defect/correction history behind every rule below.
 metadata:
-  status: stable — corrected across 4 documented versions, see CHANGELOG.md
+  status: stable — corrected across 5 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-pr-notion v1.4.0 (Notion sibling — reference only, not a runtime dependency)
@@ -89,41 +92,59 @@ Core above (shared fields), plus:
 on-demand via `figma.annotations.addAnnotationCategoryAsync()` if missing from the target file —
 see Step 3.
 
+**Board sections (columns) and which Issue Status each one means:**
+
+| Section name | gid | Issue Status value(s) it represents |
+|---|---|---|
+| Issue Found | `1217582199538063` | `Issue Found` — not this skill's concern |
+| Under Review / Consult Core DS | `1217582199499733` | `Under Review` (not this skill) and `Consult Core DS` |
+| Publish & Pending refine | `1217580490301372` | `Publish & Pending refine` |
+| Applied | `1217568218658774` | `Applied` |
+| Rejected | `1217568218485653` | `Rejected` |
+
+The board itself:
+[📋 Component issue](https://app.asana.com/1/1153565613997788/project/1217578024449430/board/1217578024449457)
+
 ## What triggers this skill
 
-The user changed **Issue Status** on a Component issue task (gid `1217578024449430`) to one of the
-four rows in the Reference table above (`Consult Core DS`, `Publish & Pending refine`, `Rejected`,
-`Applied`). Any other status (`Issue Found`, `Under Review`) is out of scope — this skill only fires
-on those four.
+**Default: the board itself, not one specific task.** The DS team's normal workflow is to change
+**Issue Status** on a task and leave it there — dragging the card to the matching column is a
+*separate, manual* action nobody reliably remembers to do (confirmed live 2026-09-05: two different
+test tasks both had their `Issue Status` field changed but stayed sitting in the `Issue Found`
+column). This skill's job is to reconcile the two: find every task whose column doesn't match its
+own `Issue Status` field, sync each one to Figma + Inventory, then move its card to the column that
+matches — which doubles as this skill's own "already handled" marker (see Step 1).
 
-**This is the primary, expected way to run this skill — not an edge case.** The DS team's normal
-workflow is: open a Component issue task in Asana, change **Issue Status**, then run this skill.
-Every time that happens, the Figma annotation on the original node **must** flip to match, in the
-same run:
-- `Issue Status` → `Publish & Pending refine` in Asana ⇒ the node's annotation, currently blue
-  (`Request Design system`, written when the task was `Issue Found`/`Under Review`), is **overwritten**
-  to orange (`Publish & Pending refine`, Step 3 shape A) with the new Published Version/Date/
-  Component Link/Changelog fields filled in.
-- `Issue Status` → `Rejected` in Asana ⇒ the same node's annotation is **overwritten** to red
-  (`Rejected Request`, Step 3 shape A or B depending on what kind of finding this was — see Step 3's
-  shape-selection note) with the Reject Reason filled in.
-
-This is not conditional on how the task got resolved — it's the direct consequence of Step 2 writing
-the Asana side and Step 3 writing the Figma side in the same run. If a run somehow updates Asana but
-skips the annotation (or vice versa), that's a bug, not an acceptable partial result — see Step 4's
-confirmation reminder to report both sides explicitly.
-
-Prompt shape:
+Prompt shape (no specific task needed — this is now the default):
 
 ```
 Use the ds-governance-pr-asana skill.
 
-Component issue task: [Asana task URL whose Issue Status just changed]
+Component issue board: https://app.asana.com/1/1153565613997788/project/1217578024449430/board/1217578024449457
 
 Design system project (if have/optional): [Figma project design system library link]
 ```
 
-**Precondition:** the Figma file that owns the flagged node must be open in Figma Desktop with the
+Pasting one specific task URL instead still works as an **explicit override** — use it to force a
+re-run on a task that's already sitting in the "right" column (e.g. to retry a run that failed
+partway through), since a board-wide scan (Step 1) would otherwise skip it as already synced.
+
+Every task the board scan (or an explicit override) picks up gets the same guarantee: the Figma
+annotation on every node it names **must** flip to match its `Issue Status`, in the same run:
+- `Issue Status` = `Publish & Pending refine` ⇒ every named node's annotation, currently blue
+  (`Request Design system`), is **overwritten** to orange (Step 3 shape A) with the new Published
+  Version/Date/Component Link/Changelog fields filled in.
+- `Issue Status` = `Rejected` ⇒ every named node's annotation is **overwritten** to red (Step 3
+  shape A or B depending on what kind of finding this was — see Step 3's shape-selection note) with
+  the Reject Reason filled in.
+
+This is not conditional on how the task got resolved — it's the direct consequence of Step 2 writing
+the Asana side, Step 3 writing the Figma side, and Step 4 moving the card, all in the same run for
+each task the scan finds. A run that updates Figma/Asana but skips the section move (or vice versa)
+is a bug, not an acceptable partial result — see Step 5's confirmation reminder to report all three
+explicitly, per task.
+
+**Precondition:** the Figma file that owns each flagged node must be open in Figma Desktop with the
 Desktop Bridge plugin running before Step 3 (same precondition `ds-governance-audit-asana` needs) —
 check with `figma_list_open_files`/`figma_get_status` first; ask the user to open it if not
 connected, don't guess a stale node id against a closed file.
@@ -131,15 +152,34 @@ connected, don't guess a stale node id against a closed file.
 **Figma-initiated Applied** (designer marks the annotation `Applied` themselves in Dev Mode instead
 of going to Asana first): read the node's `node.annotations` via `figma_execute` to get the "View
 issue in Asana" link embedded in the existing annotation, follow it to the task, then proceed as the
-Applied branch below. **Known failure case (carried over from the Notion-backed original): if the
-fix swapped the node instead of editing it in place, the old annotation — link and all — is gone
-with the deleted node.** When that happens, tell the designer plainly why and point them at the
-direct mode instead (set Issue Status on the Asana task themselves).
+Applied branch below (this counts as an explicit single-task override — the board scan didn't find
+it, since nobody touched Asana yet). **Known failure case (carried over from the Notion-backed
+original): if the fix swapped the node instead of editing it in place, the old annotation — link and
+all — is gone with the deleted node.** When that happens, tell the designer plainly why and point
+them at the direct mode instead (set Issue Status on the Asana task themselves).
 
-## Step 1 — Read the Asana task
+## Step 1 — Find which tasks need syncing, then read each one
 
-`get_task` the task URL/gid. Pull:
-- `Issue Status` custom field (must be one of the 4 in the Reference table)
+**Board mode (default):** list every task in the Component issue project (gid `1217578024449430`,
+paginate — this project has 15+ tasks and growing), with `custom_fields` and
+`memberships.section.name`. For each task, look up its `Issue Status` value in the section-mapping
+table above and compare against its *current* section:
+- `Issue Status` is `Issue Found` or `Under Review` → not this skill's concern, skip regardless of
+  section.
+- `Issue Status` is one of the other four **and** the current section already matches the mapped
+  one → **already synced, skip it**. This is the entire mechanism that makes repeat board scans
+  cheap and idempotent — don't re-process a task just because it's still sitting in the project.
+- `Issue Status` is one of the other four **and** the current section does *not* match → **this
+  task needs syncing this run.** Collect it.
+
+Run Steps 2–4 for every task collected, one at a time — a board scan can turn up more than one.
+
+**Single-task override mode:** if the user pasted one specific task URL, skip the scan above and
+process only that task, regardless of what section it's currently sitting in (see "What triggers
+this skill" for why this override exists).
+
+For each task being processed, `get_task` to pull:
+- `Issue Status` custom field (must be one of the 4 actionable rows in the Reference table)
 - `Issue Type`, `Related Project`, `Squad`
 - `notes`/`html_notes` (this project's tasks use the 4-section template from
   `ds-governance-audit-asana` Step 6b — pull **Summary Reason** for "Why", and if present, a
@@ -421,15 +461,44 @@ node.annotations = [{
 }];
 ```
 
-## Step 4 — Confirm back to the user
+## Step 4 — Move the card to match its status
 
-Report, in one short block: **every** Figma node that got the new annotation (list all of them, not
-just one — cross-reference against Step 1's Source checklist so you can say plainly "N of N nodes
-updated") and its new category; what Asana write happened (Inventory task update/creation, or a
-comment) with a link; a reminder that the annotation only renders with formatting in Figma's own Dev
-Mode Annotate panel — a plain `figma_capture_screenshot`/`figma_execute` metadata read will not show
-it. If any named node couldn't be reached (file not connected, node not found), say so explicitly
-per node rather than reporting a bare "done."
+**Only after every named node in Step 3 was actually annotated — never move the section on a
+partial or failed Figma write.** The section is this skill's own "already synced" marker (Step 1
+reads it back on the *next* run), so moving it early makes a real gap invisible: the next board
+scan would see the column matching and skip a task that's still broken.
+
+Look up the task's `Issue Status` in the section-mapping table (Reference, above) to get the target
+section gid. Move the card there with **two separate sequential `update_tasks` calls** — never
+combine them into one:
+
+```
+1. update_tasks: { task, remove_projects: ["1217578024449430"] }
+2. update_tasks: { task, add_projects: [{ project_id: "1217578024449430", section_id: "<target section gid>" }] }
+```
+
+**Never combine steps 1 and 2 into a single `update_tasks` call.** This project has an established,
+separately-documented gotcha (`ds-update-sync-inventory` skill's own "Known gotchas"): combining
+`remove_projects` and `add_projects` for the same task in one Asana `update_tasks` call silently
+drops the task from the project entirely, with the add failing silently. Always two calls, always
+in that order. Confirmed live 2026-09-05 (both calls run separately, task landed in the correct
+section both times) before this rule was written down.
+
+If `figma_nodes_skipped` is non-empty for this task (Step 3 couldn't reach every named node), do
+**not** move the section — leave the card exactly where it is so the next board scan picks it back
+up as still-needing-sync, and say so plainly in Step 5's summary.
+
+## Step 5 — Confirm back to the user
+
+Report, per task processed this run: **every** Figma node that got the new annotation (list all of
+them, not just one — cross-reference against Step 1's Source checklist so you can say plainly "N of
+N nodes updated") and its new category; what Asana write happened (Inventory task update/creation,
+or a comment) with a link; which board section the card moved to (or, if it didn't move, why —
+see Step 4). A reminder that the annotation only renders with formatting in Figma's own Dev Mode
+Annotate panel — a plain `figma_capture_screenshot`/`figma_execute` metadata read will not show it.
+If this was a board-scan run, also say how many tasks were scanned vs. how many actually needed
+syncing (most runs should find zero or a handful, not "all of them" — a high number every time
+means something upstream isn't moving sections correctly).
 
 ## Guardrails
 
@@ -451,17 +520,30 @@ per node rather than reporting a bare "done."
 - Never build or wire up a background/scheduled trigger for this skill — Figma's REST API cannot
   write annotations, so unattended automation can't do this skill's actual job (see "On automation"
   above). This stays human-triggered.
+- **Never move a task's board section (Step 4) before confirming every named node's annotation
+  actually wrote successfully** — the section is the "already synced" signal a board scan trusts;
+  moving it early hides a real partial failure from every future run.
+- **Never combine `remove_projects` and `add_projects` in one `update_tasks` call** for a section
+  move — always two separate sequential calls (Step 4). Combining them silently drops the task from
+  the project instead of moving it.
 
 ## Output contract
 
 ```json
 {
   "ok": true,
-  "task": "<Component issue task URL>",
-  "status": "<Publish & Pending refine | Rejected | Consult Core DS | Applied>",
-  "figma_nodes_annotated": ["<fileKey>:<node id>", "..."],
-  "figma_nodes_skipped": ["<fileKey>:<node id> — <why, e.g. file not connected>"],
-  "inventory_task": "<Asana Inventory task URL or null>",
+  "mode": "<board scan | single-task override>",
+  "tasks_scanned": 0,
+  "tasks_synced": [
+    {
+      "task": "<Component issue task URL>",
+      "status": "<Publish & Pending refine | Rejected | Consult Core DS | Applied>",
+      "figma_nodes_annotated": ["<fileKey>:<node id>", "..."],
+      "figma_nodes_skipped": ["<fileKey>:<node id> — <why, e.g. file not connected>"],
+      "inventory_task": "<Asana Inventory task URL or null>",
+      "section_moved_to": "<section name, or null if not moved — see Step 4>"
+    }
+  ],
   "issues": []
 }
 ```
