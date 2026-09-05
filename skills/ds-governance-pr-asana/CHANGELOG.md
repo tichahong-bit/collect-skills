@@ -10,6 +10,29 @@ v1.0.0 onward.
 
 ---
 
+## v1.6.0 (2026-09-05, board reorganized again — sections replaced with a group-by view)
+
+v1.5.0's "already synced" marker was board section membership. Within the same day, the requester
+reorganized the project again: deleted the named sections entirely and switched the display to a
+**Group by: Issue Status** view instead — confirmed live (`project_list_sections` now returns a
+single "Untitled section"; the named sections' gids from v1.5.0 no longer exist). A group-by view
+computes its "columns" straight from the `Issue Status` field itself, so there was never going to be
+independent membership to compare against going forward, and the whole section-mapping approach was
+gone in under an hour of real use.
+
+Replaced it with a dedicated custom field instead of anything display-related: **`Last Synced
+Status`** (enum, gid `1218217526490122`, options mirroring the 4 actionable `Issue Status` values —
+created and attached to the project live this session). Step 1's scan now compares `Issue Status`
+against `Last Synced Status` directly — plain field values, nothing about how the project is
+currently *displayed*. Step 4 is now a single `update_tasks` custom-field write instead of the old
+two-call section-move dance, which also retires the `remove_projects`/`add_projects` combining
+gotcha entirely for this skill (it never touches project membership at all anymore).
+
+This is deliberately more durable than v1.5.0's approach: sections, board columns, and group-by
+views are all part of how a project is *displayed*, and a team reorganizing that display is normal,
+ongoing behavior, not a one-off event this skill needs to specially detect. A field the skill owns
+and nothing else reads or writes doesn't have that problem.
+
 ## v1.5.0 (2026-09-05, requester feedback after watching the first two live test runs)
 
 Two things came up watching the Donut Chart / PIN Passcode test runs (v1.4.0's own worked example):
