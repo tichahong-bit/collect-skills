@@ -10,6 +10,30 @@ v1.0.0 onward.
 
 ---
 
+## v1.5.0 (2026-09-05, requester feedback after watching the first two live test runs)
+
+Two things came up watching the Donut Chart / PIN Passcode test runs (v1.4.0's own worked example):
+
+1. **The default trigger changed from "one specific task URL" to "the whole board."** Requiring a
+   task link every time meant someone had to already know exactly which task needed syncing — in
+   practice the DS team just changes `Issue Status` and moves on, they don't separately go find and
+   paste a link. The skill now scans the whole Component issue project by default and finds every
+   task whose `Issue Status` doesn't match its board column itself. A single task URL still works,
+   now as an explicit override (e.g. to force a retry on a task that already looks synced).
+2. **Both test tasks stayed in the `Issue Found` column after their `Issue Status` field was
+   changed** — nobody had dragged the cards. That's expected (it's a manual board, no automation
+   moves cards on its own) but it meant the skill had no way to tell "already handled" from "needs
+   handling" across separate runs, other than trusting whatever task URL it was handed.
+
+Fixed both together: Step 1 is now a scan that compares every task's `Issue Status` against its
+current section (new mapping table in Reference), and only tasks that disagree get processed. Step
+4 is new — after Step 3's Figma writes succeed, move the card to the section that matches its
+status, using the project's own established two-call `remove_projects` then `add_projects` pattern
+(never combined — see `ds-update-sync-inventory`'s documented gotcha, confirmed live again here).
+That section move *is* the "already synced" marker Step 1 reads on the next run — which is also why
+Step 4 explicitly refuses to run if any node was skipped in Step 3: moving the card on a partial
+failure would make that gap invisible forever.
+
 ## v1.4.0 (2026-09-05, caught during the first real dry-run right after v1.3.0's push)
 
 A Donut Chart Component issue task had **two** flagged nodes in its Source section (`72:8371` and
