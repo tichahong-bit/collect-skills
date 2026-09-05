@@ -1,15 +1,17 @@
 ---
 name: prototype-estimation-report
-description: Turns a coded Claude Artifact prototype into a published design-estimation report Artifact — scope, per-user-story effort/complexity, real component-readiness checked against the team's actual design system, risks, and next steps. Use this whenever someone shares a prototype Artifact link and asks for an estimation report, a design-effort estimate, scope sizing, or "how long will this take to build" — phrases like "ทำ estimation report", "สร้าง design estimation report จาก prototype นี้", "ประเมิน effort จาก prototype", "estimate this prototype", "scope this design", or "how much work is this screen". Also trigger if they ask to update or add more detail (e.g. real screenshots, real component links) to an estimation report already made with this skill. Do NOT use this for estimating a from-scratch feature with no prototype yet, or for a generic project-timeline request unrelated to a Claude Artifact prototype.
+description: Turns a coded Claude Artifact prototype into a published design scope-and-readiness report — full scope (epics/user stories from the prototype's own annotations), per-story component/function readiness checked against the real design system, risks, next steps. Deliberately skips any Design Effort week range or Low/Medium/High complexity label — too unreliable to state as a number, leaves time-sizing to whoever knows the team's velocity. Use whenever someone shares a prototype Artifact link and asks for an estimation report, scope/readiness report, or "how much work is this" — "ทำ estimation report", "สร้าง design estimation report จาก prototype นี้", "ประเมิน scope จาก prototype", "scope this design". Also trigger to update/add detail to a report already made with this skill. Not for a from-scratch feature with no prototype, or a generic timeline request unrelated to an Artifact prototype.
 ---
 
 # Prototype estimation report
 
-Reads a coded prototype's own in-app annotations (not guesswork) and turns them into a structured, presentable estimation report — the kind a design lead can hand to Product/Compliance/Dev to scope a build. The report is itself a published HTML Artifact, styled to match the target design system.
+Reads a coded prototype's own in-app annotations (not guesswork) and turns them into a structured, presentable scope-and-readiness report — the kind a design lead can hand to Product/Compliance/Dev to scope a build themselves. The report is itself a published HTML Artifact, styled to match the target design system.
+
+It reports scope and readiness, not a time estimate. No Design Effort week range, no Low/Medium/High complexity chip, anywhere in the output — not per story, not rolled up. That's a deliberate choice: those numbers are a judgment call with no objective basis, they've been observed to vary between runs on the *same* prototype, and stating them next to the (checkable) component-readiness percentages implied a precision the report didn't actually have. See `estimation-logic.md` for the full reasoning if you're tempted to add one back — don't, unless the user explicitly asks, and even then say the same caveat applies.
 
 This is a judgment-heavy skill, not a fill-in-the-blanks one. The three reference files below carry the actual know-how; read them before doing the corresponding step, don't try to wing it from memory:
 
-- `references/estimation-logic.md` — how scope, effort, complexity, and component-readiness are actually decided. Read before you write a single Estimate or Components block.
+- `references/estimation-logic.md` — how scope, readiness, and risk severity are actually decided. Read before you write a single Readiness, Components, or Functions block.
 - `references/screenshot-capture.md` — the exact click-through-and-recover procedure for turning what you see in the Browser pane into real image files. Read before opening the Browser pane.
 - `references/report-template.html` — the real HTML/CSS skeleton to copy and fill. Read before writing the output file.
 - `scripts/extract_screenshots.py` — run this once you've captured every screen you need; see screenshot-capture.md for the exact command.
@@ -34,7 +36,7 @@ Ask for whatever's missing before starting — don't guess these:
 4. **Write the report** by copying `references/report-template.html` and filling every `{{TOKEN}}`:
    - Duplicate the worked Epic/Story example once per real epic/story — the count isn't fixed.
    - Embed each processed screenshot as an inline `data:image/jpeg;base64,...` `<img src>` (read the processed file, base64-encode it, splice it in — a Python one-liner over the file is fine). Never embed the raw/full-resolution capture; see `screenshot-capture.md` for why.
-   - Section 05's four category ranges must reconcile with the sum of every per-story range in section 04 (see `estimation-logic.md`) — check the arithmetic before publishing, don't let §01, §04, and §05 quietly disagree on the total.
+   - Don't add a Design Effort or Complexity value anywhere — the template has none, keep it that way (see above).
    - If this design system uses different brand colors/type than the default navy-and-blue BBL/CDS palette baked into the template, swap the CSS custom properties in `:root` (and the two dark-mode blocks) and the Google Fonts `<link>` — the rest of the CSS reads entirely off those tokens.
 
 5. **Publish** the finished HTML as a new Artifact (unless the user is explicitly asking you to update a report you already published earlier in this conversation, in which case republish to that same Artifact — see the Artifact tool's own guidance on updating vs. creating). Give it a real title (e.g. "`<Prototype Name>` Estimation"), a one-line description, and a favicon. Before publishing, remember to actually look at the rendered report once — a clipped image, a broken link, or a token left un-filled is much cheaper to catch here than after the user opens it.

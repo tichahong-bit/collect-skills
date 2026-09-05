@@ -1,6 +1,8 @@
 # Estimation logic
 
-Read this before filling in any Estimate, Components, or Functions block in the report template. It's the judgment layer the template's `{{TOKENS}}` don't encode by themselves.
+Read this before filling in any Scope, Readiness, Components, or Functions block in the report template. It's the judgment layer the template's `{{TOKENS}}` don't encode by themselves.
+
+**This skill deliberately does not output a Design Effort week range or a Complexity (Low/Medium/High) label — not for any story, and not as a rolled-up total.** Earlier versions did, and it was misleading: those numbers are a judgment call with no objective basis, they varied between runs on the *same* prototype, and stating them with the same visual confidence as the component-readiness percentages (which are at least checkable against a real catalog) implied a precision the report doesn't have. What the report gives instead is the raw material a human who knows the team's velocity actually needs to size the work themselves: full scope, per-story readiness, and the specific reasoning behind every gap (the "Why this matters" callout). Don't reintroduce a numeric effort or complexity estimate unless the user explicitly asks for it back — and if they do, say plainly that it'll carry the same "your mileage may vary" caveat as before.
 
 ## Where scope comes from — never invent it
 
@@ -9,7 +11,7 @@ This team's coded prototypes carry their own annotation layer, usually reachable
 - **Prototype Settings** — a Design Direction toggle (e.g. "Original" vs. "Option A"), and usually Dark Mode / Branding Theme / Tone of Voice toggles too.
 - **Design Review** — per screen, structured blocks: a **Requirement** (User Story + Acceptance Criteria), a **UX Rationale**, and a **Design System Evaluation**.
 
-The Design Review content *is* the scope. Every Epic, every User Story, every Acceptance Criteria line, every risk in §06 should trace back to something actually written in one of these blocks. If the prototype states its own scope summary (e.g. "Scope: 3 Epics · 7 User Stories"), treat that as a checksum on your own count, not a number to just copy — if your derived list doesn't match it, go find the story you missed rather than fudging the total.
+The Design Review content *is* the scope. Every Epic, every User Story, every Acceptance Criteria line, every risk in §05 should trace back to something actually written in one of these blocks. If the prototype states its own scope summary (e.g. "Scope: 3 Epics · 7 User Stories"), treat that as a checksum on your own count, not a number to just copy — if your derived list doesn't match it, go find the story you missed rather than fudging the total.
 
 Don't pad the report with plausible-sounding stories that "should" exist. If a screen has no annotation at all, either it's out of scope for this report or the prototype hasn't been annotated yet — say so, don't guess.
 
@@ -22,20 +24,14 @@ Don't pad the report with plausible-sounding stories that "should" exist. If a s
 
 If the prototype exposes more than one Design Direction, toggle to the one the user asked for (or the one they name if they don't specify — ask if it's genuinely ambiguous) **before** reading a single annotation or taking a single screenshot. The underlying screens can restructure completely between options — in one real case, a page that was a single long scroll under "Original" became four separate tabs under "Option A", with different sub-navigation entirely. A report that mixes annotations read under one toggle state with screenshots taken under another will describe a prototype that doesn't actually exist in either state.
 
-## Effort and complexity
+## What drives a gap, even without a number
 
-Per story you're estimating four things: a **Design Effort** week range (e.g. `"0.5–1 wk"`), a **Complexity** tier (Low / Medium / High), a **Components Ready %**, and a **Functions Ready %**.
+You're not scoring effort, but every ✕ and △ (in Components, Functions, or a §05 risk) should still say *why it matters*, in the "Why this matters" callout or the risk's one-liner — not just that it's missing. Signal to weight in that reasoning, roughly in order of how much a reader should care:
 
-What actually pushes complexity and effort up — weight these above a naive "how many screens does this touch" count:
-
-- **Missing modals/states attached to the story.** A story with 1 existing screen and 2 missing modals is not a "1 screen" story — building those 2 modals from nothing is usually the bulk of the effort.
-- **Validated business logic**, e.g. "must sum to 100% before the button enables," multi-branch conditional flows, anything with a real state machine behind it.
-- **Compliance-risk language in the annotation.** If a UX Rationale or Design System Evaluation block calls something a "compliance blocker," or says a recommendation engine isn't filtered by an eligibility rule the business actually requires, that's not a nice-to-have gap — flag it in §06 as high severity and let it raise the story's complexity even if the screen itself looks simple.
-- Low-complexity stories are usually ones where the prototype is already close to production-ready and the annotation's own gaps are cosmetic (sort order, a missing badge variant) rather than structural.
-
-### The roll-up must reconcile
-
-Section 05 has exactly four macro categories: **Existing Screens Refinement**, **New Screens / Exceptional States**, **Design System / Component Gaps**, **Responsive / Interaction Validation**. Their low–high ranges are a re-slice of the *same* total effort you already estimated per-story in §04, not a separate second estimate. Before publishing, add up the low ends and high ends of every story's effort range from §04, and check the four category ranges sum to (approximately) the same total — if they don't, you've either double-counted or dropped a story. It's fine for the four categories to overlap loosely (e.g. a story that's mostly "new screens" might also carry a bit of "responsive validation"), but the grand total in the dark banner at the top of §05 must match the sum of §04, and the summary stat tile in §01 should match §05's total too — three places stating the same number should say the same number.
+- **Missing modals/states attached to the story.** A story with 1 existing screen and 2 missing modals is doing a lot more than the screen count suggests — say that plainly rather than leaving it implied by the ✕ count.
+- **Validated business logic**, e.g. "must sum to 100% before the button enables," multi-branch conditional flows, anything with a real state machine behind it — these are usually where a "looks simple" screen hides real build work.
+- **Compliance-risk language in the annotation.** If a UX Rationale or Design System Evaluation block calls something a "compliance blocker," or says a recommendation engine isn't filtered by an eligibility rule the business actually requires, that's not a nice-to-have gap — flag it in §05 as high severity regardless of how simple the screen looks.
+- A story that reads as low-risk is usually one where the prototype is already close to production-ready and the annotation's own gaps are cosmetic (sort order, a missing badge variant) rather than structural — say that too, it's useful signal on its own.
 
 ## Component reality-check
 

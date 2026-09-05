@@ -102,7 +102,7 @@
   section > h3.title{font-size:22px; font-weight:800; margin:0 0 16px;}
   .lede{color:var(--text-muted); font-size:14px; margin:-8px 0 18px;}
 
-  .stats{display:grid; grid-template-columns:repeat(5,1fr); gap:10px;}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
   @media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
   .stat{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 14px 12px; box-shadow:var(--shadow);}
   .stat .v{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; font-variant-numeric:tabular-nums;}
@@ -152,18 +152,14 @@
   .s-title{font-weight:600; font-size:14.5px;}
   .s-right{display:flex; align-items:center; gap:8px; flex:none;}
   .chip{font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; white-space:nowrap;}
-  .chip.effort{background:var(--accent-soft); color:var(--accent-ink);}
-  .chip.complexity-low{background:var(--good-soft); color:var(--good);}
-  .chip.complexity-medium{background:var(--warn-soft); color:var(--warn);}
-  .chip.complexity-high{background:var(--bad-soft); color:var(--bad);}
+  .chip.readiness{background:var(--accent-soft); color:var(--accent-ink);}
   .caret{color:var(--text-muted); transition:transform .15s ease; flex:none;}
   details[open] .caret{transform:rotate(90deg);}
 
   .story-body{padding:2px 18px 20px; display:flex; flex-direction:column; gap:18px;}
   .story-body h5{font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin:0 0 8px; font-weight:700;}
   .quote{font-size:13.5px; color:var(--text); background:var(--surface-2); border-radius:10px; padding:12px 14px; border-left:3px solid var(--accent);}
-  .estimate-row{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
-  @media (max-width:560px){.estimate-row{grid-template-columns:repeat(2,1fr);}}
+  .estimate-row{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
   .e-tile{background:var(--surface-2); border-radius:10px; padding:10px 12px;}
   .e-tile .v{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;}
   .e-tile .l{font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-top:2px;}
@@ -186,14 +182,6 @@
   .why{font-size:13px; background:var(--accent-soft); color:var(--accent-ink); border-radius:10px; padding:11px 14px;}
   .why b{color:var(--text);}
 
-  .rollup-total{background:var(--navy); color:#f2f4fb; border-radius:14px; padding:20px 22px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
-  .rollup-total .l{font-size:12.5px; opacity:.7; text-transform:uppercase; letter-spacing:.06em;}
-  .rollup-total .v{font-family:"IBM Plex Mono",monospace; font-size:26px; font-weight:600;}
-  .rollup-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
-  @media (max-width:600px){.rollup-grid{grid-template-columns:1fr;}}
-  .rollup-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);}
-  .rollup-item .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px; color:var(--accent-ink);}
-  .rollup-item .l{font-size:12.5px; color:var(--text-muted); margin-top:2px;}
 
   .risk{display:flex; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 15px; margin-bottom:8px; box-shadow:var(--shadow);}
   .risk .sev{flex:none; width:26px; height:26px; border-radius:8px; display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:700;}
@@ -212,9 +200,9 @@
 </style>
 
 <div class="cover">
-  <span class="eyebrow">Design Estimation Report · Draft</span>
+  <span class="eyebrow">Design Scope &amp; Readiness Report · Draft</span>
   <h1>{{PROTOTYPE_NAME}}</h1>
-  <p class="sub">ประมาณการ design effort จาก annotation ใน prototype (PRD / Acceptance Criteria / UX Rationale / Design System Evaluation) เทียบกับ {{DESIGN_SYSTEM_NAME}}</p>
+  <p class="sub">สรุป scope, ความพร้อมของ component/function และความเสี่ยง จาก annotation ใน prototype (PRD / Acceptance Criteria / UX Rationale / Design System Evaluation) เทียบกับ {{DESIGN_SYSTEM_NAME}} — ไม่รวมตัวเลข effort/complexity เพราะเป็นดุลยพินิจที่ผันแปรสูง ให้ทีมประเมินเองจาก scope/readiness ด้านล่าง</p>
   <div class="meta-row">
     <div><b>Prototype:</b> <a href="{{PROTOTYPE_ARTIFACT_URL}}" target="_blank" rel="noopener">{{PROTOTYPE_NAME}} ↗</a></div>
     <div><b>Design System:</b> <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}} ↗</a></div>
@@ -228,10 +216,9 @@
     <a href="#s01"><span class="n">01</span> Summary</a>
     <a href="#s02"><span class="n">02</span> Scope Overview</a>
     <a href="#s03"><span class="n">03</span> Readiness</a>
-    <a href="#s04"><span class="n">04</span> Story Estimates</a>
-    <a href="#s05"><span class="n">05</span> Estimate Roll-up</a>
-    <a href="#s06"><span class="n">06</span> Risks &amp; Gaps</a>
-    <a href="#s07"><span class="n">07</span> Next Step</a>
+    <a href="#s04"><span class="n">04</span> Story Detail</a>
+    <a href="#s05"><span class="n">05</span> Risks &amp; Gaps</a>
+    <a href="#s06"><span class="n">06</span> Next Step</a>
   </nav>
 
   <main>
@@ -243,10 +230,9 @@
         <div class="stat"><div class="v">{{TOTAL_SCREENS}}</div><div class="l">Total Screens</div></div>
         <div class="stat"><div class="v">{{EXISTING_SCREENS}}</div><div class="l">Existing Screens</div></div>
         <div class="stat"><div class="v">{{MISSING_SCREENS}}</div><div class="l">Missing / Exceptional</div></div>
-        <div class="stat"><div class="v">{{AVG_COMPONENTS_READY}}%</div><div class="l">Avg. Components Ready</div></div>
-        <div class="stat accent"><div class="v">{{TOTAL_EFFORT_RANGE}}</div><div class="l">Estimated Design Effort</div></div>
+        <div class="stat accent"><div class="v">{{AVG_COMPONENTS_READY}}%</div><div class="l">Avg. Components Ready</div></div>
       </div>
-      <p class="draft-note">Draft — ตัวเลขเป็นประมาณการเบื้องต้นจาก prototype และ Design System Evaluation</p>
+      <p class="draft-note">Draft — ตัวเลขเป็นประมาณการเบื้องต้นจาก prototype และ Design System Evaluation เท่านั้น ไม่มี effort/complexity เพราะเป็นดุลยพินิจ ให้ทีมที่เข้าใจ context จริงประเมินเวลาเอง</p>
     </section>
 
     <section id="s02">
@@ -286,15 +272,15 @@
     </section>
 
     <section id="s04">
-      <h2>04 · User Story Estimates</h2>
-      <h3 class="title">แต่ละ User Story ต้องทำอะไร และใช้ effort เท่าไร</h3>
+      <h2>04 · User Story Detail</h2>
+      <h3 class="title">แต่ละ User Story ต้องทำอะไร และ readiness เป็นยังไง</h3>
       <div class="figma-note"><b>หมายเหตุเรื่องลิงก์ —</b> ลิงก์ "{{DESIGN_SYSTEM_SHORT_NAME}}" เปิดหน้า component จริงบน <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_URL}}</a> ลิงก์ "Figma" (ถ้ามี) เปิด node จริงในไฟล์ที่ publish component นั้น — ต้องมีสิทธิ์เข้าถึงไฟล์นั้นถึงจะเปิดได้ ถ้า Figma connector ยังไม่ได้เชื่อมต่อ ให้ตัดลิงก์ Figma ออกทั้งหมดและอธิบายข้อจำกัดตรงนี้แทน (ครั้งเดียว ไม่ใช่ซ้ำทุกแถว) — component ที่ทำเครื่องหมาย ✕ คือยังไม่มีใน design system เลย ต้องออกแบบ/สร้างเพิ่ม, △ คือมีพื้นฐานแต่ยังไม่ตรงเป๊ะ ต้องปรับ</div>
 
       <!-- ============================================================
            ONE EPIC + ONE STORY, fully worked. Duplicate the outer
            <div class="epic"> block per epic, and the <details class="story">
            block per story inside it. See references/estimation-logic.md
-           for how to fill Estimate / Components / Functions / Why.
+           for how to fill Readiness / Components / Functions / Why.
            ============================================================ -->
       <div class="epic">
         <div class="epic-head"><h4>EPIC · {{EPIC_NAME}}</h4><span class="tag">{{N_STORIES_IN_EPIC}} story</span></div>
@@ -303,7 +289,7 @@
         <details class="story">
           <summary>
             <div class="s-left"><span class="caret">▶</span><span class="s-id">{{STORY_ID}}</span><span class="s-title">{{STORY_TITLE}}</span></div>
-            <div class="s-right"><span class="chip complexity-{{low|medium|high}}">{{Low|Medium|High}}</span><span class="chip effort">{{EFFORT_RANGE}}</span></div>
+            <div class="s-right"><span class="chip readiness">{{COMPONENTS_READY}}% ready</span></div>
           </summary>
           <div class="story-body">
 
@@ -318,10 +304,8 @@
               </div>
             </div>
 
-            <div><h5>Estimate</h5>
+            <div><h5>Readiness</h5>
               <div class="estimate-row">
-                <div class="e-tile"><div class="v">{{EFFORT_RANGE}}</div><div class="l">Design Effort</div></div>
-                <div class="e-tile"><div class="v">{{Low|Medium|High}}</div><div class="l">Complexity</div></div>
                 <div class="e-tile"><div class="v">{{COMPONENTS_READY}}%</div><div class="l">Components Ready</div></div>
                 <div class="e-tile"><div class="v">{{FUNCTIONS_READY}}%</div><div class="l">Functions Ready</div></div>
               </div>
@@ -361,7 +345,7 @@
               <div class="comp-line">{{business logic the story needs but the prototype doesn't implement}}</div>
             </div>
 
-            <div class="why"><b>Why this estimate —</b> {{one or two sentences: what actually drives the effort number — missing modals, validation complexity, compliance risk, icon/asset gaps, etc.}}</div>
+            <div class="why"><b>Why this matters —</b> {{one or two sentences: what actually drives the gap here — missing modals, validation complexity, compliance risk, icon/asset gaps, etc. No week numbers or complexity labels — just the reasoning, so whoever schedules the work can weigh it themselves.}}</div>
           </div>
         </details>
         <!-- repeat <details class="story"> for every other story in this epic -->
@@ -370,29 +354,14 @@
     </section>
 
     <section id="s05">
-      <h2>05 · Estimate Roll-up</h2>
-      <div class="rollup-total">
-        <div><div class="l">Total Design Effort</div><div class="v">{{TOTAL_EFFORT_RANGE}}</div></div>
-        <div style="font-size:12.5px; opacity:.75; max-width:32ch;">{{e.g. "1 designer · รวม N epics / M user stories"}}</div>
-      </div>
-      <div class="rollup-grid">
-        <!-- these 4 categories are fixed; their low–high sums must reconcile with the sum of every per-story range in §04 -->
-        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Existing Screens Refinement</div></div>
-        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">New Screens / Exceptional States</div></div>
-        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Design System / Component Gaps</div></div>
-        <div class="rollup-item"><div class="v">{{RANGE}}</div><div class="l">Responsive / Interaction Validation</div></div>
-      </div>
-    </section>
-
-    <section id="s06">
-      <h2>06 · Key Risks &amp; Gaps</h2>
+      <h2>05 · Key Risks &amp; Gaps</h2>
       <!-- most severe first; pull these from the prototype's own annotation warnings, don't invent new ones -->
       <div class="risk"><div class="sev high">!</div><div class="t"><b>{{RISK_TITLE}}</b><span>{{one sentence: what it is and why it matters}}</span></div></div>
       <div class="risk"><div class="sev med">△</div><div class="t"><b>{{RISK_TITLE}}</b><span>{{one sentence}}</span></div></div>
     </section>
 
-    <section id="s07">
-      <h2>07 · Next Step</h2>
+    <section id="s06">
+      <h2>06 · Next Step</h2>
       <ol class="steps">
         <li>{{decision needed + who needs to confirm it}}</li>
         <li>{{dependency + who owns unblocking it}}</li>
