@@ -1,7 +1,7 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.31.0
-description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. In active use, corrected across 10+ real builds as of 2026-09-04 — see CHANGELOG.md for the full defect history behind every rule below.
+version: 1.32.0
+description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. Before building, Step 2c decides the solution direction from real research/rationale — Step 3 implements that decision, not requirement text directly. In active use, corrected across 10+ real builds as of 2026-09-05 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
   mode: mixed
@@ -213,7 +213,31 @@ pattern as `asana-requirement-log`'s "Related prototype runs") — not just the 
 panel. Each entry: screen/decision with no support, dated, one-line recommendation. Read-then-
 merge — append, never overwrite or re-list an existing gap entry.
 
-## Step 3 — build the prototype, DS-first, gaps placeholdered not blocked
+## Step 2c — decide the solution direction before building
+
+**Don't jump straight from requirement text to UI.** Before Step 3 builds anything, decide what
+*shape* the solution should actually take, and ground that decision in the same research/rationale
+sources Step 4's panel later cites — walk the Research index (source 1) and the UX Research
+readouts on `cib-bbl.vercel.app` (source 1b) for anything relevant to this requirement, and any
+Design Knowledge covering the pattern in play, before picking an approach.
+
+- This is a real design decision, not a formality — e.g. if a past study found users missed a
+  multi-step wizard's later steps, that's a reason to prefer a single-page form here, not something
+  to notice only after building the wizard. The research should shape *what gets built*, not just
+  decorate it afterward.
+- Note explicitly which sources actually informed the direction, and which you checked and found
+  **not applicable** — both matter (same citation discipline as source 1's own rule), and both
+  carry forward into Step 4's Research Insight cards rather than being re-derived from scratch.
+- **If nothing relevant exists in any source, say so plainly and proceed on UX-fundamentals
+  judgment instead** — never manufacture a citation to make an arbitrary choice look
+  research-backed.
+- Decide once per flow, or once per screen if screens genuinely warrant different approaches —
+  don't re-litigate the direction per component once it's settled.
+- The chosen direction is what Step 3 builds. If a Design Option exploration was requested
+  (Expected input), that's a *second*, explicitly-different direction built alongside the first —
+  still each grounded the same way, never a reskin of the same layout.
+
+## Step 3 — build the chosen direction, DS-first, gaps placeholdered not blocked
 
 Nothing here touches Figma.
 

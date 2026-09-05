@@ -247,6 +247,18 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.32.0 — decide the solution direction from research before building, not after (2026-09-05)
+
+Requester correction: the skill went from requirement text straight to Step 3's build, with research/
+rationale only surfacing afterward as citations in Step 4's presentation panel. That's backwards —
+a past study's finding (e.g. "users missed a wizard's later steps") should shape *which pattern gets
+built* in the first place, not just get name-dropped next to whatever pattern was picked anyway.
+Added Step 2c: walk the Research index and `cib-bbl.vercel.app` readouts (the same sources Step 4
+already cites) *before* Step 3, pick the solution direction they actually support, and say plainly
+when nothing applies rather than building on requirement-text instinct and dressing it up with a
+citation after the fact. Step 3's heading now reads "build the chosen direction," not "build the
+prototype" — it implements Step 2c's decision, it doesn't make its own from scratch.
+
 ## v1.31.0 — the Design System switcher must never hide a genuine gap's freehand mock (2026-09-04)
 
 Requester found a real Staff Portal screen's asset-allocation donut chart (a genuine Core gap — no
