@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.2.0
+version: 1.4.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -66,6 +66,27 @@ copied from the older `ds-governance-audit` skill's convention. Corrected agains
 actual format is four narrative `h2` sections — Summary Reason, AI Recommend, Core System
 Recommendation, Source — not a field-per-line dump. Rewrote 3 already-created Gap tasks
 (GG_obie ×2, Wealth_G14 ×1) to match retroactively; new runs use the corrected template directly.
+
+**v1.3.0** — Step 3 was silent on an entire class of finding: a hand-built element standing in for
+a whole *category* of asset the DS never shipped at all (not a misused/detached copy of something
+that exists — nothing in the category exists to misuse). Worked example (2026-09-05,
+`[StaffPortal_ABC] Dashboard`, node `72:8371`): a hand-drawn donut chart, built as an empty frame
+with a manual gradient fill. `search_components` for `chart`, `donut`, `pie` each returned 0 of 71
+cds sets — no chart/data-visualization primitive exists anywhere in Core. Without an explicit rule
+this was at risk of being waved through as "just a raw frame, not obviously a violation" since
+nothing on the screen resembles a detached instance. Added the **zero-category check** to Step 3:
+run it before falling back to the ambiguous-composition question in Step 3, since that question
+("mistake vs. intentional variant of an existing pattern") only makes sense when an existing pattern
+is the thing in question — here there was no candidate pattern to compare against at all, so asking
+would have been meaningless. See Step 3 for the exact check.
+
+**v1.4.0** — Every Gap task had a creation timestamp buried in Asana's own metadata but nothing that
+read as an SLA. Added two fields, set on every Gap task Step 6b creates (added live to the "📋
+Component issue" project, 2026-09-05): **`Submitted Date`** (custom field, gid
+`1218215634621446`, type `date`) = today, and the task's native **`due_on`** = `Submitted Date` +
+**2.5 weeks (17.5 days, rounded up to 18 calendar days)**. Rounded up rather than down so the SLA
+window is never shorter than 2.5 weeks. Both are set once at creation, never recomputed on a later
+occurrence update (Step 6c) — a repeat sighting doesn't reset another team's clock.
 
 ## Inputs
 
@@ -156,6 +177,20 @@ or the filename.
   documented — if unsure whether a composition is real, ask the designer running the audit rather
   than assuming either way.
 
+**Zero-category check (added v1.3.0) — run this before the ambiguous-composition question.** When a
+hand-built/raw node looks like it's standing in for a whole *kind* of asset (a chart, a map, a
+signature pad, anything that isn't just "a component built wrong"), call `search_components` (cds,
+plus the project's own DS if one applies) for the category's generic name and its obvious synonyms
+— not just one term; a chart could be searched as `chart`, `donut`, `pie`, `graph`. **If every
+synonym returns zero results, this is a confirmed Design System Gap immediately — do not ask the
+designer running the audit "mistake or intentional?"** That question exists for the case where an
+*existing* pattern might be the intended target and the build merely diverges from it (Step 3's
+ambiguous-composition case, later in this file's sibling `ds-governance-audit-notion`); it has no
+answer here because there is no existing pattern to compare against — asking it would be
+meaningless. Log the Gap and move on. (Real example: `[StaffPortal_ABC] Dashboard`'s hand-drawn
+donut chart — `chart`/`donut`/`pie` all returned 0 of 71 cds sets, so it went straight to Step 6, no
+question asked.)
+
 A finding with a matching build-time "not in design system" annotation from whatever skill built the
 screen is almost always a Gap already — don't reclassify it as an Issue without a documented reason.
 
@@ -206,12 +241,20 @@ Project: `1217578024449430` ("📋 Component issue"). Section = current status (
 | Feature | Feature — `1217582198962677` | multi_enum |
 | Occurrence Count | Occurrence Count — `1217567936067965` | number |
 | Suggest to add in Core System? | Suggest to add in Core System? — `1217580489547133` | enum |
+| *(new, v1.4.0)* | Submitted Date — `1218215634621446` | date |
 
 Set `Origin` to the `Figma Audit (ds-governance-audit-notion)` option (gid `1217568217901597`) —
 **keep this exact option value**, even though this skill is the Asana-writing variant. The option
 name identifies *how* the finding was produced (a Figma audit run), not which skill wrote the row;
 downstream tooling (and any future `ds-governance-pr-asana` companion) dedupes/gates on this value,
 so don't create a parallel `Figma Audit (ds-governance-audit-asana)` option.
+
+**Submitted Date + due date (added v1.4.0).** Set custom field `Submitted Date` (gid
+`1218215634621446`) to today's date. Then set the task's **native** `due_on` (not a custom field —
+Asana tasks carry this natively, pass it directly on `create_tasks`) to `Submitted Date` **+ 18
+calendar days** (2.5 weeks = 17.5 days, rounded up so the window is never shorter than 2.5 weeks).
+Both are write-once at creation — a later Step 6c occurrence update to an existing row must not
+touch either field, since a repeat sighting doesn't reset another team's SLA clock.
 
 **Body format — use `html_notes`, not `notes`.** Match the real Notion "Component issue" row body
 exactly (verified live against the "Service Module Card" row,
