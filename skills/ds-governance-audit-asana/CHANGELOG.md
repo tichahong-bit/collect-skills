@@ -9,6 +9,17 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v1.6.0 (2026-09-05, requester policy: no Notion dependency in this skill, at all)
+
+v1.5.0 (below, same day) had this skill mirror Context Knowledge into *both* Notion and the
+dashboard. Requester overrode that within the hour: this Asana-backed skill should have **no Notion
+dependency anywhere**, full stop — not "mirror both," migrate off Notion entirely. Reverted the
+Notion half of Step 2/8: Context Knowledge is now dashboard-only for this skill (the Notion-backed
+sibling keeps its own separate copy, untouched, no longer read or written by this skill). Updated
+the Reference table, "How this relates to other skills," and the guardrails bullet on Context
+Knowledge writes to match — this skill's only remaining Notion mentions are historical/naming
+(the sibling skill's name, the companion doc, the fixed `Origin` enum string), none of them live I/O.
+
 ## v1.5.0 (2026-09-05, DS Governance Log gets its own Context Knowledge)
 
 Context Knowledge existed only in Notion, with no `Squad` column at all — the

@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.5.0
+version: 1.6.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -8,12 +8,12 @@ description: >-
   both, and — for Gaps only — logs a task into the Asana "📋 Component issue" project (part of the
   "Design System Governance" portfolio). Asana-backed sibling of ds-governance-audit-notion: same
   classification logic and Figma annotation contract, only the tracked-table write target changed
-  from a Notion database to Asana. Context Knowledge is mirrored into both Notion (narrative source,
-  unchanged) and the DS Governance Log dashboard (Squad-aware copy, ds-governance-dashboard.vercel.app)
-  — this skill reads/writes both, migrates neither. See CHANGELOG.md for the full defect/correction
-  history behind every rule below.
+  from a Notion database to Asana. Has no Notion dependency anywhere — Context Knowledge lives on
+  the DS Governance Log dashboard (Squad-aware, ds-governance-dashboard.vercel.app), fully separate
+  from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
+  behind every rule below.
 metadata:
-  status: stable — corrected across 5 documented versions, see CHANGELOG.md
+  status: stable — corrected across 6 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -41,8 +41,9 @@ never run silently in the background.
   the same Figma annotation contract. The only difference: where a **Design System Gap** lands. A
   Notion "📋 Component issue" row here becomes an **Asana task** in the shared
   [📋 Component issue](https://app.asana.com/1/1153565613997788/project/1217578024449430) project.
-  Narrative knowledge (Context Knowledge, Design system knowledge) stays in Notion either way — see
-  Step 2. Full rationale + field-mapping table lives in
+  Context Knowledge is **not** shared with the Notion-backed sibling anymore (see Step 2) — this
+  skill's copy lives on the DS Governance Log dashboard, Squad-aware, no Notion dependency. Full
+  rationale + field-mapping table for the Asana side lives in
   [Design System Governance V.2 with Asana](https://app.notion.com/p/3c07817ccced80d0b1b1ee2cc458ae0c)
   — read that page once before the first run in a new session; this file only carries the IDs
   needed to execute, not the "why".
@@ -106,7 +107,7 @@ disagree, this table wins — update both together.
 - Asana Inventory tasks (Step 5, informational `Code Status` tag only):
   [🗂 Core Design System Library (Inventory)](https://app.asana.com/1/1153565613997788/project/1217578024173799) /
   [🗂 Project Component Inventory](https://app.asana.com/1/1153565613997788/project/1217568055044505)
-- Notion — [Context Knowledge](https://app.notion.com/p/3bc7817ccced80088cc6c2b85b2d7361) (Step 2/8)
+- DS Governance Log — [Context Knowledge](https://ds-governance-dashboard.vercel.app/context-knowledge) (`https://ds-governance-dashboard.vercel.app/api/features`, Step 2/8) — no Notion dependency
 - Local `cds-consumer` repo, `context/DRIFT.md` (Step 4), if checked out
 
 ## Step 1 — Read the section like Figma's own "Check designs" feature
@@ -166,27 +167,24 @@ A frame that already hosts real instances of *other* published components inside
 frame holding `Text Field` × 2 + `Button` instances) is a **composition template**, not itself a
 violation — don't flag the container for not being an instance of something else.
 
-## Step 2 — Resolve Feature name against Context Knowledge (Notion + the DS Governance Log — both, not either/or)
+## Step 2 — Resolve Feature name against Context Knowledge (DS Governance Log — no Notion)
 
-Cross-check the Feature name against
-[Context Knowledge](https://app.notion.com/p/3bc7817ccced80088cc6c2b85b2d7361) (Notion) instead of
-relying on the file name alone. Context Knowledge carries a **Figma link** column per feature —
-backfill it when empty. This is one of two Notion writes this skill still performs on purpose:
-narrative/knowledge content stays in Notion by design (see the companion doc), only the tracked Gap
-**table** moved to Asana.
+Cross-check the Feature name against the DS Governance Log's Context Knowledge
+(`https://ds-governance-dashboard.vercel.app/context-knowledge`) instead of relying on the file name
+alone or guessing. **This skill has no Notion dependency anywhere** — Context Knowledge for the
+Asana-backed variant lives entirely on the dashboard now, Squad-aware, not mirrored to or read from
+the Notion Context Knowledge page the older Notion-backed sibling still uses.
 
-**Also mirror the same Feature into the DS Governance Log's own Context Knowledge**
-(`https://ds-governance-dashboard.vercel.app/context-knowledge`) — added 2026-09-05, this is a
-second, Squad-aware copy of the same knowledge, not a replacement for the Notion page:
 1. `GET https://ds-governance-dashboard.vercel.app/api/features` and look for a row with matching
    `project` + `feature` (case-sensitive, exact).
 2. **Found, `figmaLink` empty, and you have one now** — `PATCH
-   https://ds-governance-dashboard.vercel.app/api/features/<id>` with `{"figmaLink": "..."}`. Same
-   backfill-only rule as the Notion column — never overwrite an existing link.
+   https://ds-governance-dashboard.vercel.app/api/features/<id>` with `{"figmaLink": "..."}`. Never
+   overwrite an existing link — backfill only.
 3. **Not found** — `POST https://ds-governance-dashboard.vercel.app/api/features` with
    `{"project", "squad", "feature", "source", "notes", "figmaLink"}` (see the parsing rule below for
    `project`/`squad`). A 409 here means another run already created it between your GET and POST —
    treat that the same as "found," not an error.
+
 Do this for every Feature this step resolves, new or existing — not just ones missing a Figma link.
 This endpoint has no auth (low-stakes internal log); a failed request here should be reported in the
 final summary, not allowed to block the rest of the audit.
@@ -194,10 +192,8 @@ final summary, not allowed to block the rest of the audit.
 If the Figma file follows the `[<Project>_<Squad>] <Feature/epic name>` naming convention (see the
 companion doc's callout), parse `Project`/`Squad` from the filename verbatim — don't resolve a squad
 code into a guessed full name, and don't invent a Feature name that isn't in Context Knowledge or the
-filename. This is exactly the shape the DS Governance Log's own `squad` field expects — pass the
-parsed `Squad` straight through as `squad` in the POST above. The Notion Context Knowledge page has
-no Squad column (Notion write stays name/source/notes/link only, unchanged) — Squad only lives on
-the dashboard's copy.
+filename. Pass the parsed `Squad` straight through as `squad` in the POST above — this is exactly the
+shape the dashboard's `squad` field expects.
 
 ## Step 3 — Classify every finding
 
@@ -399,12 +395,12 @@ Both directions of the link: the Asana task's `notes` link to the Figma node, an
 annotation links back to the Asana task's `permalink_url` once the task exists. Write the Asana task
 first (Step 6), then the annotation (this step needs the URL).
 
-## Step 8 — Knowledge growth (Notion, same as the Notion-backed skill)
+## Step 8 — Knowledge growth (DS Governance Log — no Notion)
 
-If Step 2 found a genuinely new Feature, write it back into
-[Context Knowledge](https://app.notion.com/p/3bc7817ccced80088cc6c2b85b2d7361) (including its Figma
-link) so the next audit — Asana- or Notion-backed — finds it there. This keeps the knowledge loop
-shared across both skill variants instead of forking it.
+If Step 2 found a genuinely new Feature, it's already been created on the dashboard's Context
+Knowledge in Step 2 itself (POST, with `squad` if parsed) — this step is just confirming that write
+actually landed (re-`GET` and check the row is there) before closing out, not a second write. Nothing
+here touches Notion.
 
 ## Final chat summary
 
@@ -426,9 +422,9 @@ doubt. Never invoke those tools yourself from inside this skill.
   there's no existing pattern to compare against, the question has no answer to give.
 - Never touch `Submitted Date` or `due_on` on a Step 6c occurrence update — both are write-once at
   creation.
-- Never write a Design System Gap's narrative (Context Knowledge, Design system knowledge pages) —
-  those stay Notion-only, read-only from this skill's perspective except the Step 2/8 Feature
-  backfill.
+- Never write a Design System Gap's own narrative page anywhere — the only Context Knowledge write
+  this skill ever does is Step 2/8's Feature-name backfill/create (dashboard, not Notion); nothing
+  else about a Gap gets narrative content written to any knowledge page.
 - Never fabricate an Occurrence Count or Impact line without actually searching the Component issue
   project first (Step 6c).
 
