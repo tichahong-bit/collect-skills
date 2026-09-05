@@ -1,6 +1,6 @@
 ---
 name: prototype-estimation-report
-description: Turns a coded Claude Artifact prototype into a published design scope-and-readiness report — full scope (epics/user stories from the prototype's own annotations), per-story component/function readiness checked against the real design system, risks, next steps. Deliberately skips any Design Effort week range or Low/Medium/High complexity label — too unreliable to state as a number, leaves time-sizing to whoever knows the team's velocity. After publishing, stamps the report's full HTML into the team's central DS Governance Log (https://ds-governance-dashboard.vercel.app/estimation-reports) so it renders natively there — no claude.ai Artifact link needed to view it — alongside every other report anyone runs this skill on. Use whenever someone shares a prototype Artifact link and asks for an estimation report, scope/readiness report, or "how much work is this" — "ทำ estimation report", "สร้าง design estimation report จาก prototype นี้", "ประเมิน scope จาก prototype", "scope this design". Also trigger to update/add detail to a report already made with this skill. Not for a from-scratch feature with no prototype, or a generic timeline request unrelated to an Artifact prototype.
+description: Turns a coded Claude Artifact prototype into a published design scope-and-readiness report — full scope (epics/user stories from the prototype's own annotations), per-story component/function readiness checked against the real design system, risks, next steps. Deliberately skips any Design Effort week range or Low/Medium/High complexity label — too unreliable to state as a number, leaves time-sizing to whoever knows the team's velocity. After publishing, stamps the report's full HTML into the team's central DS Governance Log so it renders natively there (no claude.ai Artifact link needed to view it) and links it from the relevant Context Knowledge feature row(s) when a confident match exists — there's no standalone report list, a report only surfaces via that link. Use whenever someone shares a prototype Artifact link and asks for an estimation report, scope/readiness report, or "how much work is this" — "ทำ estimation report", "สร้าง design estimation report จาก prototype นี้", "ประเมิน scope จาก prototype", "scope this design". Also trigger to update/add detail to a report already made with this skill. Not for a from-scratch feature with no prototype, or a generic timeline request unrelated to an Artifact prototype.
 ---
 
 # Prototype estimation report
@@ -63,6 +63,17 @@ Ask for whatever's missing before starting — don't guess these:
    Build the JSON payload via a script (as above), not a shell-quoted `-d` string — the report HTML is 100+ KB with embedded quotes, backslashes, and base64 image data that a hand-quoted string will mangle. Keep `url` too (the Artifact link) as a backup reference even though the dashboard no longer needs it to render the report.
 
    Always do this — it isn't optional, and don't ask the user first (same footing as publishing the Artifact itself). If the request fails (site down, network error), say so plainly in the summary rather than silently skipping it — don't let a stamp failure block or delay handing the user their report link. Skip this step entirely on a **republish** of a report already stamped (same Artifact URL) — there's nothing new to log, the existing entry already has the content. This endpoint has no auth — it's a low-stakes internal log, not a place to send anything sensitive.
+
+7. **Link it to the relevant Context Knowledge feature row(s), if you can tell which ones.** There is
+   no standalone report list on the dashboard anymore (2026-09-05) — a stamped report only surfaces
+   through the **Report** column on whichever Context Knowledge feature row(s) it's linked to
+   (`https://ds-governance-dashboard.vercel.app/context-knowledge`). The POST in step 6 returns
+   `report.id` — if the prototype's own project/feature names give you a confident match against
+   `GET https://ds-governance-dashboard.vercel.app/api/features` (same `project`, or a feature name
+   that's obviously the same epic), `PATCH` that feature's `reportId` to the new report's `id` for
+   each matching row. **If there's no confident match** (wrong/no project on Context Knowledge yet,
+   ambiguous feature names), don't guess — say so in the summary and name the report id so the user
+   can link it themselves in the dashboard.
 
 ## A known environment gotcha worth knowing up front
 
