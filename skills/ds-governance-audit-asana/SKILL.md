@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.4.0
+version: 1.5.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -8,11 +8,12 @@ description: >-
   both, and — for Gaps only — logs a task into the Asana "📋 Component issue" project (part of the
   "Design System Governance" portfolio). Asana-backed sibling of ds-governance-audit-notion: same
   classification logic and Figma annotation contract, only the tracked-table write target changed
-  from a Notion database to Asana. Narrative knowledge (Context Knowledge, Design system knowledge)
-  stays in Notion — this skill reads it, never migrates it. See CHANGELOG.md for the full
-  defect/correction history behind every rule below.
+  from a Notion database to Asana. Context Knowledge is mirrored into both Notion (narrative source,
+  unchanged) and the DS Governance Log dashboard (Squad-aware copy, ds-governance-dashboard.vercel.app)
+  — this skill reads/writes both, migrates neither. See CHANGELOG.md for the full defect/correction
+  history behind every rule below.
 metadata:
-  status: stable — corrected across 4 documented versions, see CHANGELOG.md
+  status: stable — corrected across 5 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -165,19 +166,38 @@ A frame that already hosts real instances of *other* published components inside
 frame holding `Text Field` × 2 + `Button` instances) is a **composition template**, not itself a
 violation — don't flag the container for not being an instance of something else.
 
-## Step 2 — Resolve Feature name against Context Knowledge (Notion, read-only + one backfill write)
+## Step 2 — Resolve Feature name against Context Knowledge (Notion + the DS Governance Log — both, not either/or)
 
 Cross-check the Feature name against
-[Context Knowledge](https://app.notion.com/p/3bc7817ccced80088cc6c2b85b2d7361) instead of relying on
-the file name alone. Context Knowledge carries a **Figma link** column per feature — backfill it
-when empty. This is the one Notion write this skill still performs on purpose: narrative/knowledge
-content stays in Notion by design (see the companion doc), only the tracked Gap **table** moved to
-Asana.
+[Context Knowledge](https://app.notion.com/p/3bc7817ccced80088cc6c2b85b2d7361) (Notion) instead of
+relying on the file name alone. Context Knowledge carries a **Figma link** column per feature —
+backfill it when empty. This is one of two Notion writes this skill still performs on purpose:
+narrative/knowledge content stays in Notion by design (see the companion doc), only the tracked Gap
+**table** moved to Asana.
 
-If the Figma file follows the `[<Project>_<squad name>] <Feature/epic name>` naming convention (see
-the companion doc's callout), parse `Project`/`Squad` from the filename verbatim — don't resolve a
-squad code into a guessed full name, and don't invent a Feature name that isn't in Context Knowledge
-or the filename.
+**Also mirror the same Feature into the DS Governance Log's own Context Knowledge**
+(`https://ds-governance-dashboard.vercel.app/context-knowledge`) — added 2026-09-05, this is a
+second, Squad-aware copy of the same knowledge, not a replacement for the Notion page:
+1. `GET https://ds-governance-dashboard.vercel.app/api/features` and look for a row with matching
+   `project` + `feature` (case-sensitive, exact).
+2. **Found, `figmaLink` empty, and you have one now** — `PATCH
+   https://ds-governance-dashboard.vercel.app/api/features/<id>` with `{"figmaLink": "..."}`. Same
+   backfill-only rule as the Notion column — never overwrite an existing link.
+3. **Not found** — `POST https://ds-governance-dashboard.vercel.app/api/features` with
+   `{"project", "squad", "feature", "source", "notes", "figmaLink"}` (see the parsing rule below for
+   `project`/`squad`). A 409 here means another run already created it between your GET and POST —
+   treat that the same as "found," not an error.
+Do this for every Feature this step resolves, new or existing — not just ones missing a Figma link.
+This endpoint has no auth (low-stakes internal log); a failed request here should be reported in the
+final summary, not allowed to block the rest of the audit.
+
+If the Figma file follows the `[<Project>_<Squad>] <Feature/epic name>` naming convention (see the
+companion doc's callout), parse `Project`/`Squad` from the filename verbatim — don't resolve a squad
+code into a guessed full name, and don't invent a Feature name that isn't in Context Knowledge or the
+filename. This is exactly the shape the DS Governance Log's own `squad` field expects — pass the
+parsed `Squad` straight through as `squad` in the POST above. The Notion Context Knowledge page has
+no Squad column (Notion write stays name/source/notes/link only, unchanged) — Squad only lives on
+the dashboard's copy.
 
 ## Step 3 — Classify every finding
 

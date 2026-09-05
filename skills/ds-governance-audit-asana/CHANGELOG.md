@@ -9,7 +9,20 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
-## v1.1.0 (2026-08-18, Wealth_G14 schedule-payment screen)
+## v1.5.0 (2026-09-05, DS Governance Log gets its own Context Knowledge)
+
+Context Knowledge existed only in Notion, with no `Squad` column at all — the
+`[<Project>_<Squad>]` naming convention Step 2 already parsed had nowhere to put the Squad half of
+what it extracted, so it silently got dropped after informing the Feature-name resolution and
+never persisted anywhere. Meanwhile a separate DS Governance Log (Next.js + Vercel KV,
+`ds-governance-dashboard.vercel.app`) got built the same day for Estimation Reports, and gained its
+own Context Knowledge page with a real `squad` field and its own `[Project_Squad] Feature` parser —
+built against this exact skill's own `[StaffPortal_ABC] Dashboard` example from v1.3.0/v1.4.0.
+
+Step 2 now mirrors every Feature it resolves into both places: the existing Notion page (unchanged,
+no Squad column there) and the dashboard's `/api/features` (with `squad`). Read-then-write per
+Feature (GET, PATCH-if-found-and-link-missing, POST-if-not-found, treat a 409 as "found") — same
+backfill-only discipline as the Notion column, just duplicated across two stores instead of one.
 
 Two corrections from a real run:
 
