@@ -11,71 +11,21 @@ description: >-
   issue project, the Core/Project Inventory projects) and Figma (Dev Mode annotations). Always
   human-triggered: a person changes Issue Status in Asana (or marks an annotation Applied in Figma),
   then runs this skill — there is no background/scheduled trigger, see "What triggers this skill".
+  See CHANGELOG.md for the full defect/correction history behind every rule below.
 metadata:
-  status: stable
+  status: stable — corrected across 4 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-pr-notion v1.4.0 (Notion sibling — reference only, not a runtime dependency)
   companion_doc: https://app.notion.com/p/3c07817ccced80d0b1b1ee2cc458ae0c
 ---
 
-> Read this before running: `ds-governance-audit-asana` creates a Component issue **task** and a
-> blue "Request Design system" annotation in Figma. This skill runs *after* a human resolves that
-> task — it pushes the resolution back out to Figma and to whichever Asana Inventory task is
-> affected.
+# Design System Governance Agent — PR/Publish sync (Asana-backed)
 
-**v1.4.0 (2026-09-05)** — caught live during the first real dry-run right after v1.3.0's push: a
-Donut Chart Component issue task had **two** flagged nodes in its Source section (`72:8371` and
-`96:17406` — same file, different sections, from a recurring finding). The run only updated one of
-them; the other kept showing the stale blue "Request Design system" annotation after the task had
-already moved to `Publish & Pending refine`. Step 1 now reads *every* Source link as a checklist
-(not just the first), and Step 3 has a dedicated enumeration pass that resolves and writes to every
-node it names — same file or a different one entirely (cross-project duplicates need their own
-Desktop Bridge connection each). The output contract's `figma_node_annotated` is now
-`figma_nodes_annotated` (plural array) plus a `figma_nodes_skipped` list for anything unreachable, so
-a partial run is visible in the output instead of silently looking complete.
-
-**v1.3.0 (2026-09-05)** — logic pass before this skill's first push to GitHub (previous versions
-only ever existed as a local dev copy):
-- Replaced every tool reference to the official `use_figma`/`search_design_system`/`get_metadata`/
-  `get_screenshot` names (not available in every environment) with the `figma-console` Desktop
-  Bridge tool names confirmed working this session — `figma_execute`, `figma_search_components`,
-  `figma_capture_screenshot`, `figma_set_annotations`, `figma_get_annotation_categories`. If your
-  environment does expose `use_figma` directly, the same JS bodies below work unchanged — only the
-  wrapping tool call differs.
-- Removed every "see `ds-governance-pr-notion` Step X" cross-reference — this file is now
-  self-contained; the Notion sibling is prior art, not a dependency.
-- **Fixed a wrong field name:** the Publish branch said to set `Governance Status` = `Publish` on
-  *any* Inventory task. Checked live against both real Inventory projects — `Governance Status`
-  (gid `1217567936300826`) only exists on **🗂 Project Component Inventory** (gid
-  `1217568055044505`); the **🗂 Core Design System Library (Inventory)** (gid `1217578024173799`)
-  has no such field at all. Step 2's Publish branch now only touches it for a Project-Inventory
-  match.
-- **Fixed a field that doesn't exist:** the Rejected branch referenced a "`Related Core Component`"
-  field on the Component issue task — no such field exists (checked live against the project's real
-  custom fields). Rejected now just says to search the Inventory project by task name, same
-  technique Step 2's Publish branch already uses.
-- Added the **Reference** table below — every gid this skill reads or writes, in one place, instead
-  of scattered inline through the steps (matches `ds-governance-audit-asana`'s own Reference
-  section).
-
-**v1.1.0** — the Applied template was a guess, ported from `ds-governance-pr-notion`'s documented
-shape without a live check. Verified live against `0ZPE1y1pXUAmFoYhrFdc2X` node `110:1467`: real
-shape has no separate Component-Link/Resolved split, the component link is inlined into **Why**,
-and a *partial* Applied (most common real case — a designer usually fixes one site at a time) has
-no closing checkmark and stays a plain status line with a `(test — N of total sites)` suffix. Only a
-fully-resolved Applied closes the case. Also made explicit: the normal path into the Applied branch
-is annotation-driven and the **original annotation is expected to be gone** — swapping a raw/broken
-frame for a real component instance deletes the old node, and annotations attach to a node's own id.
-Write a fresh annotation on the new node; there's nothing to "restore." See Step 2's Applied branch
-and Step 3's Applied templates.
-
-**v1.2.0** — made the Asana-initiated direction explicit and non-optional: DS team changes `Issue
-Status` to `Publish & Pending refine` or `Rejected` in Asana, runs this skill, and the Figma
-annotation on the original node **must** flip from blue (`Request Design system`) to orange/red in
-the same run. This was always the design (it's the primary trigger, see "What triggers this skill"),
-but wasn't stated as a hard guarantee anywhere — added a dedicated callout so it can't be read as
-optional or Figma-initiated-only.
+Syncs a resolved Component issue task back out to Figma and the Asana Inventory — the second half
+of the audit/PR pair, after `ds-governance-audit-asana` creates the task and its blue "Request
+Design system" annotation. `CHANGELOG.md` in this folder has the full defect/correction history
+behind every rule below — read it for the "why," not to run the skill.
 
 **Blast radius:** writes a Figma Dev Mode annotation and updates Asana tasks (custom fields,
 comments). Both visible to the whole team immediately — confirm scope before running, never
@@ -120,7 +70,7 @@ ever writes (Applied branch only, see Step 2). Everything else on that task (`Is
 | Code Status | `1217578023775939` | enum | `Shipped in Code`=`1217578023775940`, `Design Ahead of Dev`=`1217578023775941` |
 | Category (Core) | `1217587701861245` | enum | ~20 options, list live via `asana_list_custom_fields` rather than hardcoding — infer from the component, ask if unclear |
 
-**No `Governance Status` field exists on this project.** Don't set one — see v1.3.0 changelog above.
+**No `Governance Status` field exists on this project.** Don't set one — see CHANGELOG.md v1.3.0.
 
 **Asana — 🗂 Project Component Inventory:** project gid `1217568055044505`
 
@@ -497,7 +447,7 @@ per node rather than reporting a bare "done."
 - A name match on an Inventory task is not proof it's the same component — confirm by
   `Design System Link` node, not string alone (Step 2, Publish branch).
 - Never set `Governance Status` on a Core Inventory task — that field only exists on Project
-  Component Inventory (see Reference table and v1.3.0 changelog).
+  Component Inventory (see Reference table and CHANGELOG.md v1.3.0).
 - Never build or wire up a background/scheduled trigger for this skill — Figma's REST API cannot
   write annotations, so unattended automation can't do this skill's actual job (see "On automation"
   above). This stays human-triggered.
