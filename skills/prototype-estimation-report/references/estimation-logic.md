@@ -15,6 +15,16 @@ The Design Review content *is* the scope. Every Epic, every User Story, every Ac
 
 Don't pad the report with plausible-sounding stories that "should" exist. If a screen has no annotation at all, either it's out of scope for this report or the prototype hasn't been annotated yet — say so, don't guess.
 
+### When the prototype has no annotation layer at all
+
+Some prototypes — or plain product surfaces the user points this skill at anyway, like a live research archive or an app with no Design Review panel built in — carry no Requirement, Acceptance Criteria, or UX Rationale text anywhere. Don't stop at "say so, don't guess" when the user still wants a report out of it. Instead:
+
+1. **Tell the user plainly, once, before drafting anything** — this prototype has no annotation layer, so every User Story and Acceptance Criteria in the report will be AI-drafted from directly observed behavior, not literal text pulled from the prototype. Get their go-ahead (or their choice of a different prototype) before proceeding — this is a required-inputs decision, not a footnote to add after the fact.
+2. **Ground every drafted story in something you actually clicked, typed, or read on screen in this session.** A real search box that live-filters, a real toggle that visibly changes state, a real list you scrolled through and read. Never draft a story for a screen or interaction you didn't personally exercise.
+3. **Label the drafted story with one short badge, not a sentence baked into the story.** Put a small one-time tag (e.g. "AI-drafted from observed use") directly above the quote — a reader must be able to tell instantly which is which, every time, without you re-explaining it in prose each time. The quote itself contains *only* the "As a … I want … so that …" sentence — no rationale, no cited evidence, no explanation before or inside it. If the evidence behind the story is worth showing (a page's own tagline, a self-declared limitation, something you tested), put it in that story's "Why this matters" callout, never in the User Story block itself — a User Story that opens with a paragraph of justification reads as an explanation, not a story.
+4. **Acceptance Criteria drafted this way are what you verified worked (or didn't) when you tried it** — "typed X, got Y" — not a guess at what the product *should* do. If you didn't test an interaction, don't assert it as an AC; say plainly that it wasn't verified.
+5. This fallback never overrides a real annotation layer when one exists. Prefer literal Requirement/Acceptance-Criteria/UX-Rationale text per the rule above whenever it's there — use AI-drafted stories only when there is genuinely nothing written to read.
+
 ### Existing vs. Missing/Exceptional
 
 - **Existing** = the prototype renders this screen right now, even if the annotation says it needs work before it's production-ready (wrong sort order, unverified responsive behavior, a copy issue — all still "existing, needs refinement").
@@ -23,6 +33,22 @@ Don't pad the report with plausible-sounding stories that "should" exist. If a s
 ### The Design Direction toggle matters more than it looks
 
 If the prototype exposes more than one Design Direction, toggle to the one the user asked for (or the one they name if they don't specify — ask if it's genuinely ambiguous) **before** reading a single annotation or taking a single screenshot. The underlying screens can restructure completely between options — in one real case, a page that was a single long scroll under "Original" became four separate tabs under "Option A", with different sub-navigation entirely. A report that mixes annotations read under one toggle state with screenshots taken under another will describe a prototype that doesn't actually exist in either state.
+
+## Writing so a non-technical reader understands it
+
+The report's audience is Product, Compliance, and Dev — not this team's own design-process vocabulary. Never let this skill's own internal terms leak into the report's prose: "annotation layer," "Design Review panel," "Prototype Settings panel," "Design Direction toggle" mean nothing to someone outside this team's tooling. Say what they mean in plain language instead, every time you'd otherwise reach for the term — e.g. "a written requirements document set out in advance," not "an annotation layer." This file and `SKILL.md` can keep using the real term for the agent's own operating instructions; the report's own visible text never should.
+
+This also means: say the "how do we know this" caveat once, in the report's own top summary — never per-story, and never inside a section heading (a heading reading "Acceptance Criteria (observed from real use, not annotation)" is a methodology footnote wearing a heading's clothes; the heading is just "Acceptance Criteria").
+
+### Acceptance Criteria marks mean what they say
+
+Every Acceptance Criteria line is a real, testable statement about the product itself — never a note about the report's own methodology. "There's no annotation to check this against" is not an Acceptance Criteria line; that caveat belongs once, in the report's top summary, not scattered through every story's AC list disguised as a bullet. Use the marks for what a reader actually expects them to mean:
+
+- **✓** — you tried it and it worked as stated.
+- **△** — a real, relevant condition or limitation that matters to the reader, but you didn't (or couldn't) fully verify it end to end — e.g. the product's own copy states a caveat ("not yet reviewed by a person"), or a stated rule applies to more items than you individually checked one by one.
+- **✕** — you tried it and it failed, or the criteria requires something the product doesn't have at all.
+
+Never use ✕ to mean "no source text exists to check this against" — that's a sourcing note, not a failed criterion, and it doesn't belong in this list at all.
 
 ## What drives a gap, even without a number
 
@@ -45,9 +71,11 @@ The single most common way this report goes wrong is inventing a component name 
    - **✕ missing** — nothing in the library resembles it. Say why (e.g. "the catalog has no chart component of any kind").
    Never write a component name in the ✓ column that you didn't actually find on the catalog site, and never construct a `#/components/<slug>` link by guessing the slug from the display name — confirm it (a find/search on the catalog page, or a direct visit) before using it.
 
-### Figma links (only if the connector is authorized)
+### Figma links
 
-If the Figma plugin/connector is authorized this session:
+**If this team's own design-system MCP is available for the system in play (e.g. `cds`, `mbds`, `webds`), prefer it over the generic Figma plugin flow below.** Its `get_component(slug)` call returns the real published Figma key and node ID for that exact component, already joined to the library file it's meant to resolve against — no search, no guessing a slug, no risk of pulling a key from a duplicated working copy. Build the link as `https://www.figma.com/design/<fileKey>/<url-encoded-file-name>?node-id=<id-with-dash-not-colon>` using exactly the key and node ID the tool returns.
+
+If no such design-system MCP exists for this system, fall back to the generic Figma plugin/connector, only if it's authorized this session:
 
 1. Ask the user for the actual published library file URL if you don't already have it — **never guess a fileKey**. A duplicated/working-copy Figma file re-keys every component, so a fileKey for the wrong copy of the library will produce links that don't resolve to what you think they do.
 2. Resolve real per-component node IDs against that exact file — call the Figma plugin's `search_design_system` and/or `list_file_components_for_code_connect` tools with the fileKey, and match by **exact component name** (e.g. "Card Container", not "KPI Card" — you're looking up the real primitive you already mapped to, not the prototype's invented label). `list_file_components_for_code_connect` returns the whole file's component list in one call including each `nodeId` — for files with 100+ published components this response can exceed the tool's token limit and gets saved to a result file instead; read that file directly (search it for the exact name, don't try to read it end-to-end if it's huge).
