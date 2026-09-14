@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.32.0
+version: 1.33.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. Before building, Step 2c decides the solution direction from real research/rationale — Step 3 implements that decision, not requirement text directly. In active use, corrected across 10+ real builds as of 2026-09-05 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -87,17 +87,24 @@ in the final summary (several pages are brand-new and may have little in them ye
 1. **Research** — index gid `1217101228810755`. `page_get` it, follow every 🔹-block link, pull in
    any report plausibly relevant to this requirement. Note explicitly whether each *applies* to a
    screen or was *reviewed and found not applicable* — both get surfaced in Step 4, never dropped.
-1b. **UX Research readouts (`cib-bbl.vercel.app`)** — a second, independent research repository:
-   real Bangkok Bank UX Research team studies (2022–2025), **not** the same corpus as source 1's
-   Asana Research index — some reports may exist in both, some only in one; check both, don't
-   assume overlap either way. Search `https://cib-bbl.vercel.app/#q=<keyword>` (try the feature
-   name, the persona, "staff"/"branch" for anything staff-facing) or browse
-   `https://cib-bbl.vercel.app/insights.html` (146+ findings grouped "by what the user was doing" —
-   confirmed relevant group for staff-facing tools: "สาขา & เครื่องมือขาย" / Branch & sales tools).
-   Both the search and insights pages only show teaser text — open the specific
-   `/readouts/<slug>.html` page for the real findings before citing anything from it. Cite it in
-   Step 4 exactly like an Asana Research Report: real `sourceHref` to the specific readout URL,
-   the actual finding/quote, never paraphrased into something the report didn't say.
+1b. **UX Research readouts (`cib-bbl.vercel.app`, via the `cib` MCP server)** — a second,
+   independent research repository: real Bangkok Bank UX Research team studies (2022–2025),
+   **not** the same corpus as source 1's Asana Research index — some reports may exist in both,
+   some only in one; check both, don't assume overlap either way. Call `get_rules` once per run
+   (the three rules, four-layer model, confidence rubric — read it before touching findings) then
+   `check_coverage` for the feature/persona/keyword before relying on this source at all — an empty
+   archive here is a gap to note, not a reason to invent something. Use `search_insights` (try the
+   feature name, the persona, "staff"/"branch" for anything staff-facing) to find candidates —
+   every hit already carries `fit`, `evidence`, and `confidence`, so surface all three, never drop
+   the confidence label to make a finding read stronger than it is. **296 of 397 insights in this
+   archive have no measured fact behind them** — before citing anything as a finding, check whether
+   it's backed by one with `search_facts` (165 measured sentences) or is opinion/judgment only, and
+   say which. `get_study` pulls one report in full (meta, every insight, context, fact and
+   conclusion) when a candidate needs the whole picture, not just one insight. Cite in Step 4
+   exactly like an Asana Research Report, but address it with `get_note`'s stable note address
+   (`<studyId>/i3`, not a scraped URL) plus its fit/evidence/confidence labels — the actual
+   finding/quote, never paraphrased into something the report didn't say, and never a fact
+   presented without its confidence level.
 2. **Copy Writing Guideline** — gid `1217629510106643`. Holds **multiple distinct sources** (a
    house style guide, a tone-of-voice quick guide, a grammar reference, etc.) as separate 🔹 rows.
    Use only the guide(s) the user named — find the row, open it, apply its rules to any copy

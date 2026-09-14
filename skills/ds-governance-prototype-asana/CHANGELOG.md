@@ -247,6 +247,23 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.33.0 — `cib-bbl.vercel.app` wired as a real MCP server, not scraped HTML (2026-09-14)
+
+Source 1b was reading `cib-bbl.vercel.app` by fetching its search/insights HTML pages and opening
+each `/readouts/<slug>.html` teaser by hand — the site actually publishes its own MCP server
+(`POST /api/mcp`, documented at its `llms.txt`) with 12 tools purpose-built for exactly this: `get_rules`,
+`list_studies`, `get_study`, `search_insights`, `search_facts`, `search_conclusions`, `get_note`,
+`check_coverage`, `get_synthesis`, `list_tags`, `request_research`, `get_changelog`. Registered it
+as the `cib` MCP server (same HTTP shape as `cds`/`mbds`/`webds`). Source 1b in `SKILL.md` now
+calls `get_rules` once per run, `check_coverage` before relying on the source at all,
+`search_insights`/`search_facts` to find and separate measured fact from opinion (**296 of the
+archive's 397 insights carry no measured fact at all** — this distinction was invisible when just
+reading teaser HTML, and is exactly the kind of thing this skill's Research Insight cards must
+never blur), `get_study` when a candidate needs its full context, and cites with `get_note`'s
+stable `<studyId>/i3` address instead of a scraped URL. Net effect: more reliable retrieval,
+fit/evidence/confidence carried on every hit instead of re-derived by hand, and fact-vs-opinion
+now checkable instead of assumed.
+
 ## v1.32.0 — decide the solution direction from research before building, not after (2026-09-05)
 
 Requester correction: the skill went from requirement text straight to Step 3's build, with research/
