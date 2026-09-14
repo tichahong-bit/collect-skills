@@ -2,9 +2,13 @@
 
 Read this before filling in any Scope, Readiness, Components, or Functions block in the report template. It's the judgment layer the template's `{{TOKENS}}` don't encode by themselves.
 
+Sections below follow the order you'll actually need them in, roughly matching the report's own §02→§06 flow: scope first, then how to write for the report's real audience, then how to judge and word Acceptance Criteria/Readiness/Components/Functions, then risk severity, then the environment gotchas that have bitten past runs.
+
+## No Design Effort or Complexity number — ever
+
 **This skill deliberately does not output a Design Effort week range or a Complexity (Low/Medium/High) label — not for any story, and not as a rolled-up total.** Earlier versions did, and it was misleading: those numbers are a judgment call with no objective basis, they varied between runs on the *same* prototype, and stating them with the same visual confidence as the component-readiness percentages (which are at least checkable against a real catalog) implied a precision the report doesn't have. What the report gives instead is the raw material a human who knows the team's velocity actually needs to size the work themselves: full scope, per-story readiness, and the specific reasoning behind every gap (the "Why this matters" callout). Don't reintroduce a numeric effort or complexity estimate unless the user explicitly asks for it back — and if they do, say plainly that it'll carry the same "your mileage may vary" caveat as before.
 
-## Where scope comes from — never invent it
+## Scope: where it comes from, and never inventing it
 
 This team's coded prototypes carry their own annotation layer, usually reachable from a floating control (often labeled "Presentation Mode" or similar) that opens two panels:
 
@@ -34,11 +38,15 @@ Some prototypes — or plain product surfaces the user points this skill at anyw
 
 If the prototype exposes more than one Design Direction, toggle to the one the user asked for (or the one they name if they don't specify — ask if it's genuinely ambiguous) **before** reading a single annotation or taking a single screenshot. The underlying screens can restructure completely between options — in one real case, a page that was a single long scroll under "Original" became four separate tabs under "Option A", with different sub-navigation entirely. A report that mixes annotations read under one toggle state with screenshots taken under another will describe a prototype that doesn't actually exist in either state.
 
-## Writing so a non-technical reader understands it
+## Writing for the report's actual audience
 
 The report's audience is Product, Compliance, and Dev — not this team's own design-process vocabulary. Never let this skill's own internal terms leak into the report's prose: "annotation layer," "Design Review panel," "Prototype Settings panel," "Design Direction toggle" mean nothing to someone outside this team's tooling. Say what they mean in plain language instead, every time you'd otherwise reach for the term — e.g. "a written requirements document set out in advance," not "an annotation layer." This file and `SKILL.md` can keep using the real term for the agent's own operating instructions; the report's own visible text never should.
 
 This also means: say the "how do we know this" caveat once, in the report's own top summary — never per-story, and never inside a section heading (a heading reading "Acceptance Criteria (observed from real use, not annotation)" is a methodology footnote wearing a heading's clothes; the heading is just "Acceptance Criteria").
+
+The rule below on Readiness Detail/Functions is this same principle applied to two specific blocks that keep sliding back into jargon because they sit right next to the one block that's supposed to be technical (Components).
+
+## Judging and writing Acceptance Criteria, Readiness, Components, and Functions
 
 ### Acceptance Criteria marks mean what they say
 
@@ -50,30 +58,7 @@ Every Acceptance Criteria line is a real, testable statement about the product i
 
 Never use ✕ to mean "no source text exists to check this against" — that's a sourcing note, not a failed criterion, and it doesn't belong in this list at all.
 
-### Readiness Detail and Functions are for the same non-technical reader as everything else
-
-Two blocks are the easiest place for jargon to sneak back in, because they sit right next to the Components list, which *is* technical (real component names, real links, meant for a developer to click through). Readiness Detail and Functions are not that — they're read by the same Product/Compliance/Dev audience as the rest of the report, and a sentence like "Card Container, Tag, Avatar, and the CTA Button map to existing CDS components" means nothing to most of that audience.
-
-- **Readiness Detail** restates the same ✓/△/✕ judgment as the Components list below it, but in plain terms of what it means for someone building this — never by re-listing component names a second time. "The cards, badges, and buttons on this screen all have ready-made pieces to build from" (✓), "the search box has a ready-made piece to start from, but the icon inside it needs extra work" (△), "there's nothing ready-made for the language switch — it needs to be designed and built from nothing" (✕). The Components block below still names the real components with real links; Readiness Detail is the human summary of the same facts, not a duplicate written in code terms.
-- **Functions** describes what a person sees happen when they use the feature, never the implementation. Not "live search-filter with URL state," but "typing in the search box filters the list immediately, and the search term is saved in the link so it can be shared." Not "regex-extracted sentences, not yet QA'd," but "the system pulls out sentences with numbers automatically, and no one has checked them by hand yet." Banned words in this block: any framework/API/pattern name, "regex," "prop," "re-render," "handshake," "self-declared," "URL state," or a bare component name.
-- Head the two Functions sub-lists **"✓ Works already" / "✕ Not there yet"** (Thai: "✓ ทำงานได้แล้ว" / "✕ ยังไม่มี"), not "✓ Supported" / "✕ Missing" — the former reads as what happened when you used it, the latter reads like a spec-compliance checklist.
-
-### Never wire a script-triggered print or download button
-
-A "Download as PDF" or "Print" button whose `onclick` calls `window.print()` (or attempts any file save) looks reasonable and is broken in this environment: the published Artifact runs inside a sandboxed frame that silently blocks script-triggered print and download calls — no console error, the click just does nothing. Confirmed by testing: clicking such a button did nothing at all, while the viewer's own `Ctrl+P` / `Cmd+P` keyboard shortcut opened the print dialog correctly, because that command comes from the browser itself, not the sandboxed page's script.
-
-Don't build the button. Instead, ship `@media print` CSS in every report so a viewer's own Ctrl+P/Cmd+P produces something worth saving: hide `.toc` and the lightbox, prevent a story card or epic from splitting across a page break, and force `print-color-adjust: exact` (plus its `-webkit-` prefix) so status badges and readiness colors don't print as plain black text. `report-template.html` ships this block already — keep it, and never add a button on top of it that promises a click will do something it can't.
-
-## What drives a gap, even without a number
-
-You're not scoring effort, but every ✕ and △ (in Components, Functions, or a §05 risk) should still say *why it matters*, in the "Why this matters" callout or the risk's one-liner — not just that it's missing. Signal to weight in that reasoning, roughly in order of how much a reader should care:
-
-- **Missing modals/states attached to the story.** A story with 1 existing screen and 2 missing modals is doing a lot more than the screen count suggests — say that plainly rather than leaving it implied by the ✕ count.
-- **Validated business logic**, e.g. "must sum to 100% before the button enables," multi-branch conditional flows, anything with a real state machine behind it — these are usually where a "looks simple" screen hides real build work.
-- **Compliance-risk language in the annotation.** If a UX Rationale or Design System Evaluation block calls something a "compliance blocker," or says a recommendation engine isn't filtered by an eligibility rule the business actually requires, that's not a nice-to-have gap — flag it in §05 as high severity regardless of how simple the screen looks.
-- A story that reads as low-risk is usually one where the prototype is already close to production-ready and the annotation's own gaps are cosmetic (sort order, a missing badge variant) rather than structural — say that too, it's useful signal on its own.
-
-## Component reality-check
+### Component reality-check
 
 The single most common way this report goes wrong is inventing a component name that sounds plausible ("KPI Card", "Donut Chart", "Segment Tile") and treating it as if it exists in the design system. It probably doesn't. Ground every single line in the Components list in something you actually looked up.
 
@@ -85,7 +70,7 @@ The single most common way this report goes wrong is inventing a component name 
    - **✕ missing** — nothing in the library resembles it. Say why (e.g. "the catalog has no chart component of any kind").
    Never write a component name in the ✓ column that you didn't actually find on the catalog site, and never construct a `#/components/<slug>` link by guessing the slug from the display name — confirm it (a find/search on the catalog page, or a direct visit) before using it.
 
-### Figma links
+#### Figma links
 
 **If this team's own design-system MCP is available for the system in play (e.g. `cds`, `mbds`, `webds`), prefer it over the generic Figma plugin flow below.** Its `get_component(slug)` call returns the real published Figma key and node ID for that exact component, already joined to the library file it's meant to resolve against — no search, no guessing a slug, no risk of pulling a key from a duplicated working copy. Build the link as `https://www.figma.com/design/<fileKey>/<url-encoded-file-name>?node-id=<id-with-dash-not-colon>` using exactly the key and node ID the tool returns.
 
@@ -96,6 +81,30 @@ If no such design-system MCP exists for this system, fall back to the generic Fi
 3. Build the link as `https://www.figma.com/design/<fileKey>/<url-encoded-file-name>?node-id=<id-with-dash-not-colon>` (Figma's own node IDs use `:`, e.g. `2597:18224` — the URL parameter wants `2597-18224`).
 4. If Figma isn't authorized yet, or the user hasn't given you a file link, don't block on it and don't fake a link. Add **one** note near the top of §04 explaining the limitation and how to fix it (tell the user to authorize the connector, or say where to find "authorize Figma" in their client) — never repeat that explanation on every single component row.
 
-## Functions readiness
+### Readiness Detail and Functions: plain language, no repeated component names
 
-Separate from Components — this is about business logic, not UI. "✓ ทำงานได้แล้ว" is behavior the prototype's own interactions demonstrate working (you clicked it, it validated, it did the right thing) — described in plain, user-visible terms, per "Readiness Detail and Functions are for the same non-technical reader as everything else" above. "✕ ยังไม่มี" is behavior the Acceptance Criteria requires but the prototype doesn't implement — including anything the UX Rationale explicitly calls out as a known gap ("ยังเป็นช่องว่างที่ build นี้ยังไม่ได้ทำ" is a direct quote worth watching for — the prototype's own annotations often say this plainly).
+Readiness Detail and Functions sit right next to the Components list, which *is* technical (real component names, real links, meant for a developer to click through) — and that's exactly why jargon keeps sneaking back into these two blocks. They're read by the same Product/Compliance/Dev audience as the rest of the report, and a sentence like "Card Container, Tag, Avatar, and the CTA Button map to existing CDS components" means nothing to most of that audience.
+
+- **Readiness Detail** restates the same ✓/△/✕ judgment as the Components list below it, but in plain terms of what it means for someone building this — never by re-listing component names a second time. "The cards, badges, and buttons on this screen all have ready-made pieces to build from" (✓), "the search box has a ready-made piece to start from, but the icon inside it needs extra work" (△), "there's nothing ready-made for the language switch — it needs to be designed and built from nothing" (✕). The Components block below still names the real components with real links; Readiness Detail is the human summary of the same facts, not a duplicate written in code terms.
+- **Functions** is separate from Components — it's about business logic, not UI — and it describes what a person sees happen when they use the feature, never the implementation. Not "live search-filter with URL state," but "typing in the search box filters the list immediately, and the search term is saved in the link so it can be shared." Not "regex-extracted sentences, not yet QA'd," but "the system pulls out sentences with numbers automatically, and no one has checked them by hand yet." Banned words in this block: any framework/API/pattern name, "regex," "prop," "re-render," "handshake," "self-declared," "URL state," or a bare component name.
+- Head the two Functions sub-lists **"✓ Works already" / "✕ Not there yet"** (Thai: "✓ ทำงานได้แล้ว" / "✕ ยังไม่มี"), not "✓ Supported" / "✕ Missing" — the former reads as what happened when you used it, the latter reads like a spec-compliance checklist.
+- "✓ Works already" is behavior the prototype's own interactions demonstrate working (you clicked it, it validated, it did the right thing). "✕ Not there yet" is behavior the Acceptance Criteria requires but the prototype doesn't implement — including anything the UX Rationale explicitly calls out as a known gap ("ยังเป็นช่องว่างที่ build นี้ยังไม่ได้ทำ" is a direct quote worth watching for — the prototype's own annotations often say this plainly).
+
+## What drives a §05 risk's severity, even without a number
+
+You're not scoring effort, but every ✕ and △ (in Components, Functions, or a §05 risk) should still say *why it matters*, in the "Why this matters" callout or the risk's one-liner — not just that it's missing. Signal to weight in that reasoning, roughly in order of how much a reader should care:
+
+- **Missing modals/states attached to the story.** A story with 1 existing screen and 2 missing modals is doing a lot more than the screen count suggests — say that plainly rather than leaving it implied by the ✕ count.
+- **Validated business logic**, e.g. "must sum to 100% before the button enables," multi-branch conditional flows, anything with a real state machine behind it — these are usually where a "looks simple" screen hides real build work.
+- **Compliance-risk language in the annotation.** If a UX Rationale or Design System Evaluation block calls something a "compliance blocker," or says a recommendation engine isn't filtered by an eligibility rule the business actually requires, that's not a nice-to-have gap — flag it in §05 as high severity regardless of how simple the screen looks.
+- A story that reads as low-risk is usually one where the prototype is already close to production-ready and the annotation's own gaps are cosmetic (sort order, a missing badge variant) rather than structural — say that too, it's useful signal on its own.
+
+## Environment gotchas
+
+### Never wire a script-triggered print or download button
+
+A "Download as PDF" or "Print" button whose `onclick` calls `window.print()` (or attempts any file save) looks reasonable and is broken in this environment: the published Artifact runs inside a sandboxed frame that silently blocks script-triggered print and download calls — no console error, the click just does nothing. Confirmed by testing: clicking such a button did nothing at all, while the viewer's own `Ctrl+P` / `Cmd+P` keyboard shortcut opened the print dialog correctly, because that command comes from the browser itself, not the sandboxed page's script.
+
+Don't build the button. Instead, ship `@media print` CSS in every report so a viewer's own Ctrl+P/Cmd+P produces something worth saving: hide `.toc` and the lightbox, prevent a story card or epic from splitting across a page break, and force `print-color-adjust: exact` (plus its `-webkit-` prefix) so status badges and readiness colors don't print as plain black text. `report-template.html` ships this block already — keep it, and never add a button on top of it that promises a click will do something it can't.
+
+See `references/screenshot-capture.md`'s own final section for the other known environment gotcha (the Browser pane going silently unresponsive mid-session) — not duplicated here since it's specific to the screenshot-capture workflow, not to writing the report itself.
