@@ -35,17 +35,25 @@ Ask for whatever's missing before starting — don't guess these:
 
 3. **Capture screenshots** for every existing screen and every explicitly named state (success/error pairs, etc.) — follow `references/screenshot-capture.md` exactly, including running `extract_screenshots.py` at the end to turn what you saw into real files. Missing/exceptional screens (per `estimation-logic.md`'s Existing-vs-Missing distinction) never get a screenshot — they get the ghost placeholder card the template already defines.
 
-4. **Write the report** by copying `references/report-template.html` and filling every `{{TOKEN}}`:
-   - Duplicate the worked Epic/Story example once per real epic/story — the count isn't fixed.
-   - Embed each processed screenshot as an inline `data:image/jpeg;base64,...` `<img src>`, and its larger `zoom/` counterpart (see `screenshot-capture.md` step 5) as that same `<img>`'s `data-zoom` attribute so the template's click-to-enlarge lightbox has something worth enlarging to. Never embed the raw/full-resolution capture as the inline `src`; see `screenshot-capture.md` for why.
-   - Every `<details class="story">` ships `open` by default in the template — keep it that way for every story you add. A collapsed-by-default story hides its User Story/Acceptance Criteria/Components content from anyone skimming the published report, which reads as the section being empty.
-   - The User Story quote is *only* the "As a … I want … so that …" sentence — no rationale or cited evidence inside it. If the prototype has no annotation to quote, follow `estimation-logic.md`'s AI-drafted fallback: a short `quote-label` tag above the quote, evidence in that story's "Why this matters" instead.
-   - The "Acceptance Criteria" heading is plain, no parenthetical explaining where it came from — and no line in that list is a methodology note (see `estimation-logic.md`'s "Acceptance Criteria marks mean what they say"). Say how the report was built once, in the top summary, never per story.
-   - Never let this skill's own internal terms ("annotation layer," "Design Review panel," "Prototype Settings panel," "Design Direction toggle") appear in the report's own visible text — see `estimation-logic.md`'s "Writing so a non-technical reader understands it." Plain language only, every time.
-   - Readiness Detail and Functions are read by the same non-technical audience as the rest of the report — never re-list component names or implementation terms there (that's what the Components block below is for). Say what's ready to build from, what needs adjustment, and what's missing in plain terms; describe Functions as what a person sees happen, not "regex," "prop," "URL state," or any other implementation word. Head the Functions sub-lists "✓ ทำงานได้แล้ว" / "✕ ยังไม่มี", not "รองรับแล้ว/ยังขาด" — see `estimation-logic.md`'s "Readiness Detail and Functions are for the same non-technical reader as everything else."
-   - Never add a button whose `onclick` calls `window.print()` or attempts a file download, even if the user asks for a "download as PDF" button — the published Artifact runs in a sandbox that silently blocks script-triggered print/download (confirmed: the click does nothing, no console error). The template already ships `@media print` CSS so the viewer's own Ctrl+P/Cmd+P produces a clean result; if asked for a PDF export, point the user at that keyboard shortcut instead of building a non-functional button. See `estimation-logic.md`'s "Never wire a script-triggered print or download button."
-   - Don't add a Design Effort or Complexity value anywhere — the template has none, keep it that way (see above).
-   - If this design system uses different brand colors/type than the default navy-and-blue BBL/CDS palette baked into the template, swap the CSS custom properties in `:root` (and the two dark-mode blocks) and the Google Fonts `<link>` — the rest of the CSS reads entirely off those tokens.
+4. **Write the report** by copying `references/report-template.html` and filling every `{{TOKEN}}`. This is a checklist — `estimation-logic.md` has the reasoning behind each line, read it there if anything below is unclear:
+
+   **Structure**
+   - Duplicate the worked Epic/Story block once per real epic/story — the count isn't fixed.
+   - Every `<details class="story">` stays `open` — a collapsed story reads as an empty section to anyone skimming the published report.
+   - No Design Effort or Complexity value anywhere — the template has none, keep it that way (see above).
+   - Different design system than default navy-and-blue BBL/CDS? Swap the CSS custom properties in `:root` (both dark-mode blocks too) and the Google Fonts `<link>` — the rest of the CSS reads off those tokens.
+
+   **User Story & Acceptance Criteria** — see estimation-logic.md's "Scope" and "Acceptance Criteria marks mean what they say"
+   - The quote is *only* the "As a … I want … so that …" sentence — no rationale or cited evidence inside it. No annotation to quote → the AI-drafted fallback: a `quote-label` tag above the quote, evidence goes in "Why this matters" instead.
+   - "Acceptance Criteria" heading stays plain, no parenthetical. Every line is a real testable statement — marks mean what estimation-logic.md says, never a methodology note about how the report was made.
+
+   **Readiness Detail, Components, Functions** — see estimation-logic.md's "Judging and writing Acceptance Criteria, Readiness, Components, and Functions"
+   - Readiness Detail and Functions: plain language, no component names or implementation terms (that vocabulary belongs only in Components, below them). Functions sub-headers are "✓ ทำงานได้แล้ว" / "✕ ยังไม่มี".
+   - Embed each processed screenshot as `<img src="data:image/jpeg;base64,...">`, plus its larger `zoom/` counterpart (screenshot-capture.md step 5) as that same `<img>`'s `data-zoom` — never the raw capture as `src`.
+
+   **Language & environment** — see estimation-logic.md's "Writing for the report's actual audience" and "Environment gotchas"
+   - Never let this skill's internal terms ("annotation layer," "Design Review panel," "Prototype Settings panel," "Design Direction toggle") reach the report's visible text — plain language always, said once in the top summary.
+   - Never add a button whose `onclick` calls `window.print()` or attempts a file download — it's silently broken in the Artifact sandbox. The template's `@media print` CSS plus the viewer's own Ctrl+P/Cmd+P is the only thing that works here.
 
 5. **Publish** the finished HTML as a new Artifact (unless the user is explicitly asking you to update a report you already published earlier in this conversation, in which case republish to that same Artifact — see the Artifact tool's own guidance on updating vs. creating). Give it a real title (e.g. "`<Prototype Name>` Estimation"), a one-line description, and a favicon. Before publishing, remember to actually look at the rendered report once — a clipped image, a broken link, a collapsed story, or a token left un-filled is much cheaper to catch here than after the user opens it.
 
