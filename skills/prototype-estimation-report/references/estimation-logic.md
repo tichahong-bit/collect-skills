@@ -50,6 +50,20 @@ Every Acceptance Criteria line is a real, testable statement about the product i
 
 Never use ✕ to mean "no source text exists to check this against" — that's a sourcing note, not a failed criterion, and it doesn't belong in this list at all.
 
+### Readiness Detail and Functions are for the same non-technical reader as everything else
+
+Two blocks are the easiest place for jargon to sneak back in, because they sit right next to the Components list, which *is* technical (real component names, real links, meant for a developer to click through). Readiness Detail and Functions are not that — they're read by the same Product/Compliance/Dev audience as the rest of the report, and a sentence like "Card Container, Tag, Avatar, and the CTA Button map to existing CDS components" means nothing to most of that audience.
+
+- **Readiness Detail** restates the same ✓/△/✕ judgment as the Components list below it, but in plain terms of what it means for someone building this — never by re-listing component names a second time. "The cards, badges, and buttons on this screen all have ready-made pieces to build from" (✓), "the search box has a ready-made piece to start from, but the icon inside it needs extra work" (△), "there's nothing ready-made for the language switch — it needs to be designed and built from nothing" (✕). The Components block below still names the real components with real links; Readiness Detail is the human summary of the same facts, not a duplicate written in code terms.
+- **Functions** describes what a person sees happen when they use the feature, never the implementation. Not "live search-filter with URL state," but "typing in the search box filters the list immediately, and the search term is saved in the link so it can be shared." Not "regex-extracted sentences, not yet QA'd," but "the system pulls out sentences with numbers automatically, and no one has checked them by hand yet." Banned words in this block: any framework/API/pattern name, "regex," "prop," "re-render," "handshake," "self-declared," "URL state," or a bare component name.
+- Head the two Functions sub-lists **"✓ Works already" / "✕ Not there yet"** (Thai: "✓ ทำงานได้แล้ว" / "✕ ยังไม่มี"), not "✓ Supported" / "✕ Missing" — the former reads as what happened when you used it, the latter reads like a spec-compliance checklist.
+
+### Never wire a script-triggered print or download button
+
+A "Download as PDF" or "Print" button whose `onclick` calls `window.print()` (or attempts any file save) looks reasonable and is broken in this environment: the published Artifact runs inside a sandboxed frame that silently blocks script-triggered print and download calls — no console error, the click just does nothing. Confirmed by testing: clicking such a button did nothing at all, while the viewer's own `Ctrl+P` / `Cmd+P` keyboard shortcut opened the print dialog correctly, because that command comes from the browser itself, not the sandboxed page's script.
+
+Don't build the button. Instead, ship `@media print` CSS in every report so a viewer's own Ctrl+P/Cmd+P produces something worth saving: hide `.toc` and the lightbox, prevent a story card or epic from splitting across a page break, and force `print-color-adjust: exact` (plus its `-webkit-` prefix) so status badges and readiness colors don't print as plain black text. `report-template.html` ships this block already — keep it, and never add a button on top of it that promises a click will do something it can't.
+
 ## What drives a gap, even without a number
 
 You're not scoring effort, but every ✕ and △ (in Components, Functions, or a §05 risk) should still say *why it matters*, in the "Why this matters" callout or the risk's one-liner — not just that it's missing. Signal to weight in that reasoning, roughly in order of how much a reader should care:
@@ -84,4 +98,4 @@ If no such design-system MCP exists for this system, fall back to the generic Fi
 
 ## Functions readiness
 
-Separate from Components — this is about business logic, not UI. "✓ รองรับแล้ว" is behavior the prototype's own interactions demonstrate working (you clicked it, it validated, it did the right thing). "✕ ยังขาด" is behavior the Acceptance Criteria requires but the prototype doesn't implement — including anything the UX Rationale explicitly calls out as a known gap ("ยังเป็นช่องว่างที่ build นี้ยังไม่ได้ทำ" is a direct quote worth watching for — the prototype's own annotations often say this plainly).
+Separate from Components — this is about business logic, not UI. "✓ ทำงานได้แล้ว" is behavior the prototype's own interactions demonstrate working (you clicked it, it validated, it did the right thing) — described in plain, user-visible terms, per "Readiness Detail and Functions are for the same non-technical reader as everything else" above. "✕ ยังไม่มี" is behavior the Acceptance Criteria requires but the prototype doesn't implement — including anything the UX Rationale explicitly calls out as a known gap ("ยังเป็นช่องว่างที่ build นี้ยังไม่ได้ทำ" is a direct quote worth watching for — the prototype's own annotations often say this plainly).
