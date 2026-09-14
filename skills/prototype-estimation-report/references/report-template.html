@@ -218,6 +218,22 @@
   .lightbox img{width:100%; height:100%; object-fit:contain; border-radius:10px; box-shadow:0 20px 60px -20px rgba(0,0,0,.6); background:var(--surface);}
   .lightbox-cap{color:#f2f4f0; font-size:13px; max-width:80vw; text-align:center;}
   .lightbox-hint{color:#9aa89e; font-size:11px;}
+
+  /* Lets a viewer's own Ctrl+P / Cmd+P produce a clean PDF. Never add a button whose onclick
+     calls window.print() or attempts a file download — the published Artifact runs in a sandbox
+     that silently blocks script-triggered print/download (no console error, the click just does
+     nothing); only the browser's own keyboard shortcut works. See estimation-logic.md's "Never
+     wire a script-triggered print or download button". */
+  @media print{
+    .toc, .lightbox{display:none !important;}
+    .cover, footer{margin-left:0 !important;}
+    .shell{grid-template-columns:1fr !important; padding:0 !important;}
+    body{background:#fff;}
+    *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    details.story{break-inside:avoid;}
+    .epic{break-inside:avoid-page;}
+    section{break-inside:avoid-page;}
+  }
 </style>
 
 <div class="cover">
@@ -347,9 +363,10 @@
 
             <div><h5>Readiness Detail</h5>
               <div class="row-list">
-                <div class="row-item"><div class="mark ok">✓</div><div>{{what's reusable as-is}}</div></div>
-                <div class="row-item"><div class="mark mid">△</div><div>{{what needs verification or extension}}</div></div>
-                <div class="row-item"><div class="mark no">✕</div><div>{{what's genuinely missing, and why it matters}}</div></div>
+                <!-- Same non-technical reader as the rest of the report — never re-list component names here (that's what Components below is for). Say what it means in plain terms: "the cards and buttons on this screen all have ready-made pieces to build from" not "Card Container and Button map to CDS." See estimation-logic.md's "Readiness Detail and Functions are for the same non-technical reader as everything else". -->
+                <div class="row-item"><div class="mark ok">✓</div><div>{{what's ready to build from as-is, described in plain terms — no component names}}</div></div>
+                <div class="row-item"><div class="mark mid">△</div><div>{{what has something close to start from but needs extra work, described in plain terms}}</div></div>
+                <div class="row-item"><div class="mark no">✕</div><div>{{what has nothing ready-made at all and why it matters, described in plain terms}}</div></div>
               </div>
             </div>
 
@@ -365,10 +382,11 @@
             </div>
 
             <div class="comp-block"><h5>Functions · {{FUNCTIONS_READY}}%</h5>
-              <div class="sub">✓ รองรับแล้ว</div>
-              <div class="comp-line">{{business logic already working in the prototype}}</div>
-              <div class="sub">✕ ยังขาด</div>
-              <div class="comp-line">{{business logic the story needs but the prototype doesn't implement}}</div>
+              <!-- Describe what a person SEES happen, never the implementation — no framework/API/pattern names, no "regex," "prop," "re-render," "handshake," "self-declared," "URL state," or a bare component name. "Typing in the search box filters the list immediately" not "live search-filter with URL state." -->
+              <div class="sub">✓ ทำงานได้แล้ว</div>
+              <div class="comp-line">{{business logic already working in the prototype, in plain user-visible terms}}</div>
+              <div class="sub">✕ ยังไม่มี</div>
+              <div class="comp-line">{{business logic the story needs but the prototype doesn't implement, in plain user-visible terms}}</div>
             </div>
 
             <div class="why"><b>Why this matters —</b> {{one or two sentences: what actually drives the gap here — missing modals, validation complexity, compliance risk, icon/asset gaps, etc. No week numbers or complexity labels — just the reasoning, so whoever schedules the work can weigh it themselves.}}</div>
