@@ -18,6 +18,17 @@
     4. See references/estimation-logic.md for how to actually fill in the
        Estimate / Components / Functions content — this file only defines
        the shape, not the judgment calls.
+    5. Every {{...}} placeholder that says "never use annotation/Design
+       Review/etc." is not decorative — this report's own visible text goes
+       to Product/Compliance/Dev readers who don't know this team's internal
+       process vocabulary. Say how scope was sourced in plain language,
+       once, in the top summary — see estimation-logic.md's "Writing so a
+       non-technical reader understands it".
+    6. Every <details class="story"> ships open by default. Keep it that
+       way — a collapsed story hides its content from anyone skimming the
+       published report. Every shot-card <img> carries both src (small
+       thumbnail) and data-zoom (larger image) so the lightbox at the
+       bottom of this file has something worth enlarging to.
 -->
 <title>{{REPORT_TITLE}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,12 +208,22 @@
 
   footer{max-width:760px; margin:60px auto 0 248px; padding-top:20px; border-top:1px solid var(--border); font-size:12.5px; color:var(--text-muted);}
   @media (max-width:880px){footer{margin-left:0;}}
+
+  /* click-to-enlarge lightbox for shot-card screenshots — see references/screenshot-capture.md step 5 for how to produce the data-zoom images this reads */
+  .shot-card img{cursor:zoom-in;}
+  .quote-label{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--warn); background:var(--warn-soft); padding:3px 9px; border-radius:99px; margin-bottom:6px;}
+  .lightbox{position:fixed; inset:0; background:rgba(8,12,9,.86); display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; padding:24px; z-index:100; cursor:zoom-out;}
+  .lightbox.open{display:flex;}
+  .lightbox-frame{width:min(92vw,1000px); height:80vh; display:flex; align-items:center; justify-content:center;}
+  .lightbox img{width:100%; height:100%; object-fit:contain; border-radius:10px; box-shadow:0 20px 60px -20px rgba(0,0,0,.6); background:var(--surface);}
+  .lightbox-cap{color:#f2f4f0; font-size:13px; max-width:80vw; text-align:center;}
+  .lightbox-hint{color:#9aa89e; font-size:11px;}
 </style>
 
 <div class="cover">
   <span class="eyebrow">Design Scope &amp; Readiness Report · Draft</span>
   <h1>{{PROTOTYPE_NAME}}</h1>
-  <p class="sub">สรุป scope, ความพร้อมของ component/function และความเสี่ยง จาก annotation ใน prototype (PRD / Acceptance Criteria / UX Rationale / Design System Evaluation) เทียบกับ {{DESIGN_SYSTEM_NAME}} — ไม่รวมตัวเลข effort/complexity เพราะเป็นดุลยพินิจที่ผันแปรสูง ให้ทีมประเมินเองจาก scope/readiness ด้านล่าง</p>
+  <p class="sub">สรุป scope, ความพร้อมของ component/function และความเสี่ยง จาก {{prototype ในที่นี้อ้างถึงยังไง — "สิ่งที่ prototype เขียนอธิบายไว้เอง" ถ้ามี requirement เขียนไว้ล่วงหน้า หรือ "การเข้าไปลองใช้งานจริง" ถ้าไม่มี — ห้ามใช้คำว่า annotation/Design Review/PRD/UX Rationale ตรงนี้ ดู estimation-logic.md}} เทียบกับ {{DESIGN_SYSTEM_NAME}} — ไม่รวมตัวเลข effort/complexity เพราะเป็นดุลยพินิจที่ผันแปรสูง ให้ทีมประเมินเองจาก scope/readiness ด้านล่าง</p>
   <div class="meta-row">
     <div><b>Prototype:</b> <a href="{{PROTOTYPE_ARTIFACT_URL}}" target="_blank" rel="noopener">{{PROTOTYPE_NAME}} ↗</a></div>
     <div><b>Design System:</b> <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}} ↗</a></div>
@@ -232,7 +253,7 @@
         <div class="stat"><div class="v">{{MISSING_SCREENS}}</div><div class="l">Missing / Exceptional</div></div>
         <div class="stat accent"><div class="v">{{AVG_COMPONENTS_READY}}%</div><div class="l">Avg. Components Ready</div></div>
       </div>
-      <p class="draft-note">Draft — ตัวเลขเป็นประมาณการเบื้องต้นจาก prototype และ Design System Evaluation เท่านั้น ไม่มี effort/complexity เพราะเป็นดุลยพินิจ ให้ทีมที่เข้าใจ context จริงประเมินเวลาเอง</p>
+      <p class="draft-note">Draft — ตัวเลขเป็นประมาณการเบื้องต้นเท่านั้น ไม่มี effort/complexity เพราะเป็นดุลยพินิจ ให้ทีมที่เข้าใจ context จริงประเมินเวลาเอง</p>
     </section>
 
     <section id="s02">
@@ -286,19 +307,23 @@
         <div class="epic-head"><h4>EPIC · {{EPIC_NAME}}</h4><span class="tag">{{N_STORIES_IN_EPIC}} story</span></div>
         <p class="epic-overview">Epic overview: {{EPIC_OVERVIEW}}</p>
 
-        <details class="story">
+        <details class="story" open>
           <summary>
             <div class="s-left"><span class="caret">▶</span><span class="s-id">{{STORY_ID}}</span><span class="s-title">{{STORY_TITLE}}</span></div>
             <div class="s-right"><span class="chip readiness">{{COMPONENTS_READY}}% ready</span></div>
           </summary>
           <div class="story-body">
 
-            <div><h5>User Story</h5><div class="quote">{{USER_STORY_QUOTE — as-written in the prototype's own annotation, not paraphrased}}</div></div>
+            <div><h5>User Story</h5>
+              <!-- quote-label ONLY when this story has no real annotation to quote — see estimation-logic.md's "no annotation layer at all" fallback. Omit this span entirely when the quote below is literal, as-written prototype text. -->
+              <div class="quote-label">{{e.g. "AI-drafted from observed use" — omit this whole div for a literal, annotation-sourced quote}}</div>
+              <div class="quote">{{USER_STORY_QUOTE — ONLY the "As a … I want … so that …" sentence. No rationale, no cited evidence, no explanation before or inside it — put that in "Why this matters" below instead. As-written from the prototype's own annotation when one exists, not paraphrased.}}</div>
+            </div>
 
             <div><h5>Screens — {{N_EXISTING}} Existing · {{N_MISSING}} Missing</h5>
               <div class="shot-grid">
-                <!-- one <div class="shot-card"> per EXISTING screen this story touches -->
-                <div class="shot-card"><img src="{{BASE64_OR_ASSET_SRC}}" alt="{{SCREEN_ALT_TEXT}}"><div class="cap"><span class="mark ok">✓</span>{{SCREEN_LABEL}}</div></div>
+                <!-- one <div class="shot-card"> per EXISTING screen this story touches. data-zoom is the larger (~900px) image from screenshot-capture.md step 5 — the lightbox enlarges that, not a stretched copy of the small thumbnail. -->
+                <div class="shot-card"><img src="{{BASE64_OR_ASSET_SRC}}" data-zoom="{{BASE64_ZOOM_OR_ASSET_SRC}}" alt="{{SCREEN_ALT_TEXT}}"><div class="cap"><span class="mark ok">✓</span>{{SCREEN_LABEL}}</div></div>
                 <!-- one <div class="shot-ghost"> per MISSING/exceptional screen — NEVER a fabricated screenshot -->
                 <div class="shot-ghost"><div class="x">✕</div><span class="lbl">{{MISSING_SCREEN_LABEL}} — ยังไม่มีใน prototype</span></div>
               </div>
@@ -313,8 +338,9 @@
 
             <div><h5>Acceptance Criteria</h5>
               <div class="row-list">
-                <!-- ✓ = AC the prototype satisfies, ✕ = AC the annotation itself flags as unmet -->
+                <!-- Every line here is a real, testable statement about the product — never a note about how this report was made (say that once, in the top summary, not here). ✓ = you tried it and it worked. △ = a real, relevant limitation that matters but wasn't fully verified (e.g. the product's own copy states a caveat). ✕ = you tried it and it failed, or it requires something the product doesn't have. See estimation-logic.md's "Acceptance Criteria marks mean what they say". -->
                 <div class="row-item"><div class="mark ok">✓</div><div>{{AC_MET}}</div></div>
+                <div class="row-item"><div class="mark mid">△</div><div>{{AC_CAVEAT — a real limitation the product itself states or implies, not fully verified}}</div></div>
                 <div class="row-item"><div class="mark no">✕</div><div>{{AC_UNMET}} — {{why, e.g. "compliance blocker, ยังไม่ทำ"}}</div></div>
               </div>
             </div>
@@ -372,5 +398,30 @@
 </div>
 
 <footer>
-  Source: annotation ใน <a href="{{PROTOTYPE_ARTIFACT_URL}}" target="_blank" rel="noopener">{{PROTOTYPE_NAME}}</a> · Design tokens อ้างอิง <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}}</a> · Draft สำหรับทบทวนร่วมกับ Product / Compliance / Dev ก่อนสรุปเป็นตัวเลขทางการ
+  Source: {{how scope was sourced, in plain language — e.g. "requirement เอกสารของ {{PROTOTYPE_NAME}}" or "การเข้าไปลองใช้งาน {{PROTOTYPE_NAME}} จริง" — never "annotation"}} · Design tokens อ้างอิง <a href="{{DESIGN_SYSTEM_URL}}" target="_blank" rel="noopener">{{DESIGN_SYSTEM_NAME}}</a> · Draft สำหรับทบทวนร่วมกับ Product / Compliance / Dev ก่อนสรุปเป็นตัวเลขทางการ
 </footer>
+
+<!-- click-to-enlarge lightbox — one instance per report, reused by every shot-card image via its data-zoom attribute. See references/screenshot-capture.md step 5. -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-frame"><img id="lightbox-img" src="" alt=""></div>
+  <div class="lightbox-cap" id="lightbox-cap"></div>
+  <div class="lightbox-hint">คลิกที่ใดก็ได้ หรือกด Esc เพื่อปิด</div>
+</div>
+<script>
+  (function(){
+    var lb = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    var lbCap = document.getElementById('lightbox-cap');
+    document.querySelectorAll('.shot-card img').forEach(function(img){
+      img.addEventListener('click', function(){
+        lbImg.src = img.getAttribute('data-zoom') || img.getAttribute('src');
+        lbCap.textContent = img.getAttribute('alt') || '';
+        lb.classList.add('open');
+      });
+    });
+    lb.addEventListener('click', function(){ lb.classList.remove('open'); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') lb.classList.remove('open');
+    });
+  })();
+</script>
