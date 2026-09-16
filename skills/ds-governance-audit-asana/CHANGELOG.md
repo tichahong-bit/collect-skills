@@ -9,6 +9,28 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.2.0 (2026-09-16, MBDS whole-screen template check before Design System Gap)
+
+Requester pointed at `https://mbds-bbl.vercel.app/#/bbl/templates` and `#/bbl/patterns` as MBDS's
+own rule sources, parallel to what v2.1.0 just scoped `cds-consumer` to. Checked live via
+`mcp__mbds__get_rules`: MBDS ships 20 full **screen templates**, not just components — its own
+rulebook explicitly instructs "Step 0 — is the whole screen already built? Fetch
+`.../r/templates.json`" before composing one by hand. CDS has no equivalent (no whole-screen
+template layer), so this was previously entirely missing from Step 3's classification — an MBDS
+composed section that actually matched a shipped template could have been wrongly flagged as N
+separate component-level Gaps instead of "this screen already exists."
+
+Also confirmed live: `mbds-bbl.vercel.app` is a client-rendered JS app — its `#/...` pages are a
+human-readable mirror of the same data the `mbds` MCP tools and `.../r/*.json` endpoints already
+serve, not an independently fetchable source (the DOM has no real content, same lesson as `cds`'s
+own docs). Added an explicit warning against fetching those URLs directly.
+
+Step 3 now runs an MBDS-only whole-screen template check (`list_templates`/`get_template`) before
+the zero-category check, when the confirmed target is MBDS. Step 0's MBDS resource list and the
+Pipeline table updated to match. This is the MBDS-side counterpart to v2.1.0's CDS-only gate —
+different systems expose different governance surfaces, and this skill now uses whichever one the
+confirmed target actually has instead of forcing parity between them.
+
 ## v2.1.0 (2026-09-16, cds-consumer's DRIFT.md is CDS-only — gate Step 4 on target Design System)
 
 Requester flagged that `cds-consumer` (โย's repo) is scoped to CDS specifically — confirmed live:

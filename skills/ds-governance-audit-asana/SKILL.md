@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.1.0
+version: 2.2.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 11 documented versions, see CHANGELOG.md
+  status: stable — corrected across 12 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -70,7 +70,7 @@ orientation, not a summary to execute from.
 | 0 — Design System Identification | Resolve/confirm the target Design System before anything else |
 | 1 — Read the section | Detect: scan every node, find unbound/detached/raw-token candidates |
 | 2 — Resolve Feature name | Metadata: Platform/Squad/Feature against Context Knowledge |
-| 3 — Classify every finding | Existing DS Issue vs. Design System Gap |
+| 3 — Classify every finding | Existing DS Issue vs. Design System Gap (**MBDS**: check whole-screen templates first) |
 | 4 — Prior owner ruling | Check `cds-consumer`'s DRIFT.md before logging a new Gap — **CDS only**, skip (and say so) for MBDS/other |
 | 5 — Existing DS Issue | Figma annotation only, never Asana |
 | 6 — Design System Gap | Figma annotation + Asana task (6a enum values, 6b create, 6c dedupe) |
@@ -106,7 +106,12 @@ Resolve before Step 1 runs:
 **Predefined — Mobile Banking / MBDS** (use directly once the user says "MBDS" / "Mobile
 Banking", no need to ask for links again):
 
-- MBDS Web / Documentation — https://mbds-bbl.vercel.app/
+- MBDS Web / Documentation — https://mbds-bbl.vercel.app/ (including its `#/bbl/templates`,
+  `#/bbl/patterns` and other in-app sections) — **human-reading only.** It's a client-rendered JS
+  app; its DOM is not a useful source for the agent. Read the same data through the `mbds` MCP
+  tools (`get_rules`, `list_templates`/`get_template`, `search_components`, `list_families`, …) or
+  its JSON endpoints (`.../r/registry.json`, `.../r/templates.json`, `.../r/specs/<slug>.json`) —
+  never by fetching an `mbds-bbl.vercel.app` URL directly.
 - MBDS Component Library — https://www.figma.com/design/3uFwZN2v5lQPwxjPAkfglF/%F0%9F%92%A0-Component-Library-2023-Master-File?m=auto&node-id=37-8&t=QDeUXOWWkht4rJfm-1
 - MBDS Icon Library — https://www.figma.com/design/W6SBNHk0AQT0bkqYPu9cRx/%F0%9F%8D%80-Icon-Library?node-id=84-23301&t=JEgyl5SqGNiWRV3n-1
 - MBDS Illustration / Assets Library — https://www.figma.com/design/xlvvR9hPyrDkItHXsSHttZ/%F0%9F%8E%A8-Illustration---Assets-Library?node-id=5-31081&t=KkkhmCNVwG3s9iRV-1
@@ -326,6 +331,18 @@ the feature name for this screen?"* and never guess it.
   resemblance between two *separate* existing components is not proof a composed pattern is
   documented — if unsure whether a composition is real, ask the designer running the audit rather
   than assuming either way.
+
+**MBDS whole-screen template check — run this first, before the zero-category check below, only
+when the confirmed target is MBDS.** MBDS ships 20 full **screen templates**, not just components
+— something that looks like a hand-built custom composition may already be a shipped template in
+its entirety, which is a different (and much cheaper) finding than "N separate component-level
+gaps." Call `mcp__mbds__list_templates` (optionally `get_template` on a likely match) before
+concluding a composed section is a Gap. This has no CDS equivalent — `cds` doesn't ship whole-screen
+templates, so don't look for one there. **Read this data through the `mbds` MCP tools (or its JSON
+endpoints, e.g. `https://mbds-bbl.vercel.app/r/templates.json`), never by fetching a
+`https://mbds-bbl.vercel.app/#/...` URL directly** — that site is a client-rendered JS app and its
+DOM is not a useful source; the human-readable pages there (`#/bbl/templates`, `#/bbl/patterns`,
+etc.) mirror the exact same underlying data the MCP tools already serve.
 
 **Zero-category check — run this before the ambiguous-composition question above.** When a
 hand-built/raw node looks like it's standing in for a whole *kind* of asset (a chart, a map, a
@@ -580,6 +597,11 @@ yourself from inside this skill.
 
 ## Guardrails
 
+- Never fetch an `mbds-bbl.vercel.app` URL directly to read templates/patterns/rules — it's a
+  client-rendered JS app, the DOM isn't real data. Use the `mbds` MCP tools or its JSON endpoints
+  instead (Step 0, Step 3).
+- Never flag an MBDS composed section as a Gap without first checking `list_templates` for a
+  whole-screen match (Step 3) — CDS has no equivalent, don't skip this only for MBDS audits.
 - Never give a finding a different field set/label/order on one surface than another — the Figma
   annotation (Step 7), the Asana task body (Step 6b), the chat summary, and the JSON output contract
   all use §Unified Finding Schema's exact field names. Condense for Figma's panel, never rename.
