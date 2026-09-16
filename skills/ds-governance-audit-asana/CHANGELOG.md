@@ -9,6 +9,20 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v1.8.0 (2026-09-16, fetch cds-consumer's DRIFT.md live, not from a local checkout)
+
+Step 4's owner-ruling check ("has the owner already settled this as deliberate?") only ran if the
+`cds-consumer` repo happened to be checked out locally — silently skipped otherwise, and even when
+checked out, a clone can sit stale for weeks while `context/DRIFT.md` keeps changing upstream
+(`therealveldt/cds-consumer`, owned by a collaborator, private). Same class of staleness problem as
+v1.7.0's Design-System-defaulting issue: relying on whatever happens to be sitting on a local disk
+instead of the tracked source.
+
+Step 4 now fetches `context/DRIFT.md` live every run via `gh api
+repos/therealveldt/cds-consumer/contents/context/DRIFT.md` (confirmed working against the real
+private repo with an authenticated `gh` session) instead of requiring/trusting a local checkout.
+Reference table and guardrails updated to match.
+
 ## v1.7.0 (2026-09-16, multi-Design-System support — never assume CDS)
 
 Every "Core" reference in this skill (Step 1's instance check, Step 3's zero-category
