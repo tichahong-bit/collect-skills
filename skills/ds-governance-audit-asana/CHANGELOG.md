@@ -9,6 +9,35 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.0.0 (2026-09-16, one finding schema everywhere, explicit Pipeline index)
+
+Requester asked for the skill to "organize more systematically, and produce the same output format
+every time" — a real gap: the Figma annotation (Step 7) and the Asana task body (Step 6b) carried
+two *different, disconnected* field shapes for the same finding (Figma had `Status`/`Issue
+type`/`Impact`/`Why`; Asana had `Summary Reason`/`AI Recommend`/`Core System Recommendation`/
+`Source`), and the Figma Gap annotation never even carried the recommended solution at all — only
+Asana did. The chat summary had no fixed template either, and the JSON output contract only
+reported counts, not itemized findings, so it couldn't be cross-checked against the other two.
+
+Added **§Unified Finding Schema**: one field set per classification (Gap: `component` /
+`status`+`issue_type` / `summary_reason` / `ai_recommend` / `core_system_recommendation` /
+`origin`+`asana_task_url`; Existing DS Issue: `component` / `problem` / `fix`). The real,
+already-verified Notion/Asana "Component issue" row shape is the source of truth — Figma's
+annotation, the chat summary, and the JSON contract now mirror *its* field names (condensed for
+Figma's panel), rather than each surface inventing its own. Step 7's Figma Gap annotation now
+carries Summary Reason/AI Recommend/Core System Recommendation, same as Asana. The chat summary got
+a fixed per-finding template. The JSON output contract's `findings` is now an itemized array using
+the same field names, replacing the old counts-only object.
+
+Also added a **Pipeline** index (Step 0–8 in one table) right after Inputs, and gave Design System
+Identification an explicit **Step 0** label — it was previously a standalone section with no step
+number, ambiguous about exactly when it ran relative to Step 1.
+
+**Breaking, by design:** this changes what new Figma annotations and chat summaries look like going
+forward. Existing already-created annotations/tasks are not retroactively rewritten by this change —
+same precedent as v1.2.0 rewriting 3 live tasks by hand at the time; a future run does not need to
+touch old ones unless asked.
+
 ## v1.9.0 (2026-09-16, align Step 4's sync method with the rest of the project)
 
 v1.8.0 (below) fixed the right problem — Step 4 must never trust an unsynced local

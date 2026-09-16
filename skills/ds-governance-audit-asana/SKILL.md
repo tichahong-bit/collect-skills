@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.9.0
+version: 2.0.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 9 documented versions, see CHANGELOG.md
+  status: stable — corrected across 10 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -60,7 +60,28 @@ audits, it does not build). Optionally: a Project-level Design System reference,
 belongs to a project whose own library differs from Core. See §Design System Identification for
 how "Core" is resolved for this run — never assume it's CDS.
 
-## Design System Identification
+## Pipeline
+
+Run in this order. Every step's real detail lives at its own heading below — this is an index for
+orientation, not a summary to execute from.
+
+| Step | Does |
+|---|---|
+| 0 — Design System Identification | Resolve/confirm the target Design System before anything else |
+| 1 — Read the section | Detect: scan every node, find unbound/detached/raw-token candidates |
+| 2 — Resolve Feature name | Metadata: Platform/Squad/Feature against Context Knowledge |
+| 3 — Classify every finding | Existing DS Issue vs. Design System Gap |
+| 4 — Prior owner ruling | Check `cds-consumer`'s DRIFT.md before logging a new Gap |
+| 5 — Existing DS Issue | Figma annotation only, never Asana |
+| 6 — Design System Gap | Figma annotation + Asana task (6a enum values, 6b create, 6c dedupe) |
+| 7 — Annotation mechanics | How Step 5/6's annotation actually gets written — shared by both |
+| 8 — Knowledge growth | Confirm Step 2's Context Knowledge write landed |
+
+Every finding, regardless of which step produced it, is reported through the same fields — see
+§Unified Finding Schema before writing Step 6b, Step 7, the chat summary, or the JSON output
+contract. Do not invent a different field set for any one of those four surfaces.
+
+## Step 0 — Design System Identification
 
 **Never assume the target Design System is CDS.** Bangkok Bank runs more than one Design System
 (CDS, MBDS, and others) with different token grammars, component names, and rules — auditing
@@ -154,6 +175,37 @@ disagree, this table wins — update both together.
 - [`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer), `context/DRIFT.md`
   (Step 4) — synced to `~/design-system-repos/cds-consumer` before every read, never a stale local
   checkout
+
+## Unified Finding Schema
+
+**Every finding, once classified (Step 3), is reported through the same field set everywhere it
+appears** — the Figma annotation (Step 7), the Asana task body (Step 6b), the final chat summary,
+and the JSON output contract. Only verbosity changes per surface (Figma's annotation panel is
+short, Asana's `html_notes` is the full narrative, chat is prose) — the field **names and order**
+never do. This is deliberate: before this schema existed, Figma's annotation and Asana's task body
+carried different, disconnected shapes for the same finding, and the chat summary had no fixed
+shape at all — a reader moving between the three had to re-map fields by hand each time.
+
+**Design System Gap** — 4 fields, same as the real, already-verified Notion/Asana "Component
+issue" row shape (this skill mirrors that row outward, not the other way around):
+
+| Field | Meaning |
+|---|---|
+| `component` | Component/pattern name |
+| `status` / `issue_type` | Lifecycle status (Step 6b's `Issue Status`) and category (Component / Token / Pattern / Accessibility / Other) |
+| `summary_reason` | What was found + why neither Design System covers it (+ repeat-occurrence note if any) |
+| `ai_recommend` | Closest existing fragments + the actual suggested solution — never a placeholder |
+| `core_system_recommendation` | Why this should (or shouldn't yet) go to Core, or `"not applicable — single project only"` |
+| `origin` / `asana_task_url` | Figma frame/node link, and the Asana task's `permalink_url` once created |
+
+**Existing DS Issue** — 3 fields (no Asana task exists for this classification, so no
+`ai_recommend`/`core_system_recommendation`/Asana link):
+
+| Field | Meaning |
+|---|---|
+| `component` | The real Core/Project library component it should have used (name, status, version) |
+| `problem` | What's wrong — wrong variant / detached / raw token |
+| `fix` | What to use instead, concrete |
 
 ## Step 1 — Read the section like Figma's own "Check designs" feature
 
@@ -365,8 +417,9 @@ write-once at creation — a later Step 6c occurrence update to an existing row 
 field, since a repeat sighting doesn't reset another team's SLA clock.
 
 **Body format — use `html_notes`, not `notes`.** Match the real Notion "Component issue" row body:
-four narrative `h2` sections, not a flat field-order list. (`h3` isn't in Asana's allowed tag set,
-so section headers use `h2` instead of Notion's `###`.)
+four narrative `h2` sections, not a flat field-order list — this is §Unified Finding Schema's Gap
+shape (`summary_reason` / `ai_recommend` / `core_system_recommendation` / `origin`) written out in
+full. (`h3` isn't in Asana's allowed tag set, so section headers use `h2` instead of Notion's `###`.)
 
 ```html
 <body>
@@ -446,19 +499,22 @@ const ensureCategory = async (label, color) => {
 const gapCategory = await ensureCategory('Request Design system', 'blue');
 const issueCategory = await ensureCategory('Log Note', 'yellow');
 
-// Design System Gap
+// Design System Gap — same 4-field shape as Step 6b's Asana body (§Unified Finding Schema),
+// condensed to one line per field instead of a bulleted paragraph.
 node.annotations = [{
   categoryId: gapCategory.id,
   labelMarkdown:
     "**Design System Gap**\n" +
     "- **Status:** Issue Found\n" +
-    "- **Issue type:** <Component / Token / Pattern / Accessibility / Other>\n" +
-    "- **Impact:** <e.g. \"Project level only · 1 squad only\" or \"Hits N projects\">\n" +
-    "- **Why:** <specific reason neither Design System covers this — not generic>\n\n" +
+    "- **Issue Type:** <Component / Token / Pattern / Accessibility / Other>\n\n" +
+    "**Summary Reason:** <what was found + why neither Design System covers it — specific, not generic>\n" +
+    "**AI Recommend:** <the actual suggested solution — same text as the Asana task's AI Recommend, never a placeholder>\n" +
+    "**Core System Recommendation:** <why this should/shouldn't go to Core, or \"not applicable — single project only\">\n\n" +
     "🔗 [View issue in Asana](<task permalink_url>)",
 }];
 
-// Existing DS Issue (consolidated per container — see Step 1's consolidation rule)
+// Existing DS Issue (consolidated per container — see Step 1's consolidation rule).
+// 3-field shape (§Unified Finding Schema) — no Asana task exists for this classification.
 node.annotations = [{
   categoryId: issueCategory.id,
   labelMarkdown:
@@ -469,8 +525,9 @@ node.annotations = [{
 }];
 ```
 
-This is the exact format already in production use in this org — match it character-for-character,
-don't improvise a new shape.
+Every field above is the real content from §Unified Finding Schema, just condensed to fit an
+annotation panel — never drop a field to save space, and never invent a field name that doesn't
+also appear in Step 6b's Asana body for the same finding.
 
 Both directions of the link: the Asana task's `notes` link to the Figma node, and the Figma
 annotation links back to the Asana task's `permalink_url` once the task exists. Write the Asana task
@@ -485,13 +542,33 @@ here touches Notion.
 
 ## Final chat summary
 
-Per finding: classification + what was annotated + (for Gaps) the Asana task URL. When a finding's
-`Issue Type` is `Token` or `Accessibility`, mention — as a suggestion only, never an automatic call —
-that a deeper check (`figma-semantic-token-audit`, `claude-a11y-skill`) is available if there's real
-doubt. Never invoke those tools yourself from inside this skill.
+**Fixed template, same field names as §Unified Finding Schema — never substitute different labels
+or reorder them.** One block per finding, in Step 1's scan order:
+
+```
+🔵 Design System Gap — <component>
+- Status: <status> · Issue Type: <issue_type>
+- Summary Reason: <short>
+- AI Recommend: <short>
+- Core System Recommendation: <short, or "not applicable — single project only">
+- Figma: <node link> · Asana: <asana task permalink_url>
+
+🟡 Existing DS Issue — <component>
+- Problem: <short>
+- Fix: <short>
+- Figma: <node link>
+```
+
+After every finding is printed, mention once — as a suggestion only, never an automatic call —
+that a deeper check (`figma-semantic-token-audit`, `claude-a11y-skill`) is available for any finding
+whose `issue_type` is `Token` or `Accessibility`, if there's real doubt. Never invoke those tools
+yourself from inside this skill.
 
 ## Guardrails
 
+- Never give a finding a different field set/label/order on one surface than another — the Figma
+  annotation (Step 7), the Asana task body (Step 6b), the chat summary, and the JSON output contract
+  all use §Unified Finding Schema's exact field names. Condense for Figma's panel, never rename.
 - Never read `context/DRIFT.md` from an unsynced `cds-consumer` checkout — that repo belongs to a
   collaborator and updates independently; always `git pull` (or clone) it first (Step 4), so a stale
   local clone never causes a re-flag of something already settled.
@@ -520,11 +597,36 @@ doubt. Never invoke those tools yourself from inside this skill.
 
 ## Output contract
 
+`findings` is itemized, using §Unified Finding Schema's exact field names — the same fields as the
+Figma annotation, the Asana task body, and the chat summary. Don't also carry a separate
+`existing_issue`/`design_system_gap` count object; filter `findings` by `classification` for that.
+
 ```json
 {
   "ok": true,
   "screen": "<Figma section URL>",
-  "findings": {"existing_issue": 0, "design_system_gap": 0},
+  "findings": [
+    {
+      "node_id": "...",
+      "classification": "design_system_gap",
+      "component": "...",
+      "status": "Issue Found",
+      "issue_type": "Component",
+      "summary_reason": "...",
+      "ai_recommend": "...",
+      "core_system_recommendation": "...",
+      "origin": {"figma_url": "...", "node_name": "..."},
+      "asana_task_url": "..."
+    },
+    {
+      "node_id": "...",
+      "classification": "existing_issue",
+      "component": "...",
+      "problem": "...",
+      "fix": "...",
+      "origin": {"figma_url": "...", "node_name": "..."}
+    }
+  ],
   "asana_tasks_created": [],
   "asana_tasks_updated": [],
   "context_knowledge_updates": [],
