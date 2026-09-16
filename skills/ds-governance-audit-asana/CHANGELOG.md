@@ -9,6 +9,28 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v1.7.0 (2026-09-16, multi-Design-System support — never assume CDS)
+
+Every "Core" reference in this skill (Step 1's instance check, Step 3's zero-category
+`search_components` call) implicitly meant CDS, with no step that ever confirmed that with the
+user. Requester flagged this is wrong for MBDS (Mobile Banking) screens and any future Design
+System this org adds — auditing an MB screen against CDS produces findings that are actively
+wrong, not just incomplete.
+
+Added a new **Design System Identification** section (before Step 1): if the user already named a
+Design System (CDS / MBDS-Mobile Banking / a Figma library link), use it; if not, stop and ask
+with the 3-option question before auditing. Predefined MBDS resource links (web docs, component
+library, icon library, illustration/assets library, template library) are listed so MBDS runs
+don't need the user to re-supply links every time. Step 1 and Step 3's `search_components` call
+now read from the confirmed target's MCP server (`cds`/`mbds`/equivalent), never defaulting to
+`cds`.
+
+Also hardened Step 2's Figma-file-name parsing: the `[Project_Squad] Feature` convention had no
+documented fallback when a file's name didn't match it — added the explicit ask-the-user flow
+(Platform/Squad/Feature) for that case, a Platform-inference-from-Design-System shortcut (confirm
+before trusting an unclear mapping), and made explicit that Squad is optional (nickname accepted)
+while Feature is required and must never be guessed.
+
 ## v1.6.0 (2026-09-05, requester policy: no Notion dependency in this skill, at all)
 
 v1.5.0 (below, same day) had this skill mirror Context Knowledge into *both* Notion and the

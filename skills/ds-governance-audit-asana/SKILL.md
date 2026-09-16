@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.6.0
+version: 1.7.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 6 documented versions, see CHANGELOG.md
+  status: stable — corrected across 7 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -57,7 +57,50 @@ never run silently in the background.
 
 From the user: a Figma **Section URL** to audit (a finished screen/flow, already built — this skill
 audits, it does not build). Optionally: a Project-level Design System reference, if the screen
-belongs to a project whose own library differs from Core.
+belongs to a project whose own library differs from Core. See §Design System Identification for
+how "Core" is resolved for this run — never assume it's CDS.
+
+## Design System Identification
+
+**Never assume the target Design System is CDS.** Bangkok Bank runs more than one Design System
+(CDS, MBDS, and others) with different token grammars, component names, and rules — auditing
+against the wrong one produces findings that are actively wrong, not just incomplete. Every place
+below that says "Core" means this confirmed target, not CDS by default.
+
+Resolve before Step 1 runs:
+
+1. **User already named it** — `CDS` → CDS. `MBDS` / `Mobile Banking` → MBDS. A Figma Design
+   System / Component Library link → use that library as the target.
+2. **User did not name it** — stop and ask before starting the audit:
+
+   > Which Design System should I use for this audit?
+   >
+   > 1. CDS
+   > 2. Mobile Banking / MBDS
+   > 3. Other — please share the Design System / Figma library link
+
+   If the user picks **Other**, get the Figma Design System / Component Library link before
+   proceeding — do not guess a library from the screen's contents.
+
+**Predefined — Mobile Banking / MBDS** (use directly once the user says "MBDS" / "Mobile
+Banking", no need to ask for links again):
+
+- MBDS Web / Documentation — https://mbds-bbl.vercel.app/
+- MBDS Component Library — https://www.figma.com/design/3uFwZN2v5lQPwxjPAkfglF/%F0%9F%92%A0-Component-Library-2023-Master-File?m=auto&node-id=37-8&t=QDeUXOWWkht4rJfm-1
+- MBDS Icon Library — https://www.figma.com/design/W6SBNHk0AQT0bkqYPu9cRx/%F0%9F%8D%80-Icon-Library?node-id=84-23301&t=JEgyl5SqGNiWRV3n-1
+- MBDS Illustration / Assets Library — https://www.figma.com/design/xlvvR9hPyrDkItHXsSHttZ/%F0%9F%8E%A8-Illustration---Assets-Library?node-id=5-31081&t=KkkhmCNVwG3s9iRV-1
+- MBDS Template Library — https://www.figma.com/design/rGstoHOqDx5HvZHE8uKZm3/%F0%9F%93%97-Template-Library?node-id=0-1&t=bKw0yQ0qYtoMBihJ-1
+
+**Predefined — CDS** — use whatever this skill already points at (`cds` MCP tools); no separate
+link needed.
+
+**Confirmation rule.** A confirmed target is required before Step 1 starts. Never assume CDS by
+default, never use CDS components/guidance when the user asked for MBDS (or vice versa), and never
+judge a finding right/wrong against a Design System that hasn't been confirmed for this run. The
+confirmed target is the source of truth for **this audit only** — don't carry its component
+names/tokens/rules into a different audit unless the user explicitly asks for a comparative audit.
+This also decides which MCP server's `search_components` Step 3's zero-category check calls (`cds`,
+`mbds`, or the equivalent for whatever library was confirmed) — never default to `cds` there either.
 
 ## Reference — IDs used every run
 
@@ -115,7 +158,8 @@ disagree, this table wins — update both together.
 For every component-shaped node in the audited Section (`get_metadata` first for the tree, then
 `get_screenshot` for a visual pass), check three things:
 
-1. **Is it a real instance** of something published in Core or the relevant Project Design System?
+1. **Is it a real instance** of something published in the confirmed target Design System
+   (§Design System Identification) or the relevant Project Design System?
 2. **Is it detached** — visually resembles a real component/instance but is a plain frame/group?
 3. **Are its tokens actually bound**, or overridden with raw hex/px values? This includes **text
    style and font binding**, not just color/spacing — a hand-set `fontName`/`fontSize` with no
@@ -193,7 +237,29 @@ If the Figma file follows the `[<Project>_<Squad>] <Feature/epic name>` naming c
 companion doc's callout), parse `Project`/`Squad` from the filename verbatim — don't resolve a squad
 code into a guessed full name, and don't invent a Feature name that isn't in Context Knowledge or the
 filename. Pass the parsed `Squad` straight through as `squad` in the POST above — this is exactly the
-shape the dashboard's `squad` field expects.
+shape the dashboard's `squad` field expects. `Project` here doubles as **Platform** for governance
+purposes (e.g. `MB`, `CDS`) when it matches one — see below.
+
+**If the file name does not follow the convention, or Project/Squad/Feature can't be identified
+with confidence, stop and ask before continuing** — do not silently fall back to guessing:
+
+> I couldn't identify the project metadata from the Figma file name.
+>
+> Could you confirm:
+> - Platform: ?
+> - Squad: ? (optional)
+> - Feature: ?
+
+**Platform inference.** Platform can often be inferred from the confirmed target Design System
+(§Design System Identification) instead of asking outright: MBDS/Mobile Banking → `MB`, CDS →
+`CDS` (only if that's a real value the target field expects). If the mapping isn't clean, confirm
+with the user rather than guessing — *"I can infer the platform as MB from the MBDS Design System.
+Is that correct?"* — and use their confirmed answer as source of truth over the inferred one.
+
+**Squad is optional** — if missing and unparseable, ask *"What squad should I use? (Optional) If
+you don't have a squad name, you can provide your nickname instead"* and store whatever they give
+verbatim; never force a value. **Feature is required** — if missing and unparseable, ask *"What is
+the feature name for this screen?"* and never guess it.
 
 ## Step 3 — Classify every finding
 
@@ -209,9 +275,11 @@ shape the dashboard's `squad` field expects.
 
 **Zero-category check — run this before the ambiguous-composition question above.** When a
 hand-built/raw node looks like it's standing in for a whole *kind* of asset (a chart, a map, a
-signature pad — anything that isn't just "a component built wrong"), call `search_components` (cds,
-plus the project's own DS if one applies) for the category's generic name **and its obvious
-synonyms** — not just one term; a chart could be searched as `chart`, `donut`, `pie`, `graph`.
+signature pad — anything that isn't just "a component built wrong"), call `search_components` on
+the **confirmed target Design System's** MCP server (`cds`, `mbds`, or the equivalent — see
+§Design System Identification, never default to `cds`), plus the project's own DS if one applies,
+for the category's generic name **and its obvious synonyms** — not just one term; a chart could be
+searched as `chart`, `donut`, `pie`, `graph`.
 
 **If every synonym returns zero results, this is a confirmed Design System Gap immediately — do
 not ask the designer running the audit "mistake or intentional?"** That question only makes sense
@@ -411,6 +479,12 @@ doubt. Never invoke those tools yourself from inside this skill.
 
 ## Guardrails
 
+- Never assume the target Design System is CDS — resolve/confirm it first (§Design System
+  Identification), and never audit against a system the user hasn't confirmed for this run. This
+  also governs which MCP server's `search_components` Step 3's zero-category check calls.
+- Never guess Feature, or infer Platform without confirming an unclear mapping, when the Figma
+  file name doesn't follow the `[Project_Squad] Feature` convention (Step 2) — ask instead. Never
+  force a Squad value when the user has none (optional).
 - Never create an Asana task for an Existing DS Issue (Step 5) — annotation only, Asana stays
   untouched.
 - Never skip Step 6a — writing a `custom_fields` value for an enum option that doesn't exist yet
