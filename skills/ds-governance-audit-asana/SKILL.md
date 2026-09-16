@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 1.8.0
+version: 1.9.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 8 documented versions, see CHANGELOG.md
+  status: stable — corrected across 9 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -152,7 +152,8 @@ disagree, this table wins — update both together.
   [🗂 Project Component Inventory](https://app.asana.com/1/1153565613997788/project/1217568055044505)
 - DS Governance Log — [Context Knowledge](https://ds-governance-dashboard.vercel.app/context-knowledge) (`https://ds-governance-dashboard.vercel.app/api/features`, Step 2/8) — no Notion dependency
 - [`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer), `context/DRIFT.md`
-  (Step 4) — fetched live via `gh api`, not a local checkout
+  (Step 4) — synced to `~/design-system-repos/cds-consumer` before every read, never a stale local
+  checkout
 
 ## Step 1 — Read the section like Figma's own "Check designs" feature
 
@@ -297,17 +298,18 @@ screen is almost always a Gap already — don't reclassify it as an Issue withou
 Before logging a new Gap, check `context/DRIFT.md`'s "Settled — do not re-flag" table in
 [`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer) — an owner may have
 already ruled a difference deliberate. This repo is owned by a collaborator (โย) and updates on
-its own schedule, so **always fetch it live, never rely on a local checkout that can go stale**:
+its own schedule — **sync before every read, never trust whatever a local checkout already has on
+disk.** Same sync pattern this project uses everywhere else it reads this repo (see
+`ds-governance-prototype-asana`):
 
 ```bash
-gh api repos/therealveldt/cds-consumer/contents/context/DRIFT.md --jq '.content' | base64 -d
+git -C ~/design-system-repos/cds-consumer pull 2>/dev/null || git clone https://github.com/therealveldt/cds-consumer.git ~/design-system-repos/cds-consumer
 ```
 
-It's a private repo — this only works with a `gh` session that already has access (confirmed
-working: `gh auth status` shows a logged-in account with `repo` scope). If the fetch fails
-(no `gh` auth, no access, repo/path renamed), say so plainly in the summary and proceed without
-this check rather than blocking the audit on it — same as the prior local-checkout fallback, just
-sourced live instead of from whatever a local clone happened to have on disk.
+Then read `context/DRIFT.md` from that synced clone. It's a private repo — this only works with
+git credentials that already have access (confirmed: the clone at `~/design-system-repos/cds-consumer`
+exists and is up to date). If the sync fails (no access, repo/path renamed), say so plainly in the
+summary and proceed without this check rather than blocking the audit on it.
 
 ## Step 5 — Existing DS Issue: Figma annotation only, never Asana
 
@@ -490,8 +492,8 @@ doubt. Never invoke those tools yourself from inside this skill.
 
 ## Guardrails
 
-- Never check `context/DRIFT.md` from a local `cds-consumer` checkout — that repo belongs to a
-  collaborator and updates independently; always fetch it live via `gh api` (Step 4), so a stale
+- Never read `context/DRIFT.md` from an unsynced `cds-consumer` checkout — that repo belongs to a
+  collaborator and updates independently; always `git pull` (or clone) it first (Step 4), so a stale
   local clone never causes a re-flag of something already settled.
 - Never assume the target Design System is CDS — resolve/confirm it first (§Design System
   Identification), and never audit against a system the user hasn't confirmed for this run. This

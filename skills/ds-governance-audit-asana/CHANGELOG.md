@@ -9,6 +9,21 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v1.9.0 (2026-09-16, align Step 4's sync method with the rest of the project)
+
+v1.8.0 (below) fixed the right problem — Step 4 must never trust an unsynced local
+`cds-consumer` checkout — but picked a one-off `gh api` fetch, inconsistent with how every other
+skill in this repo already reads this same collaborator repo. `ds-governance-prototype-asana`
+already establishes the real convention: `git -C ~/design-system-repos/<repo> pull 2>/dev/null ||
+git clone <url> ~/design-system-repos/<repo>` before every read, for both `cds-consumer` (โย) and
+`agent-design-kit` (กัน). Both clones already exist locally at that exact path, git-tracked to the
+right remotes, already up to date — confirmed live.
+
+Switched Step 4 to the same `git pull`-or-clone pattern against
+`~/design-system-repos/cds-consumer`, then read `context/DRIFT.md` from the synced clone. Reference
+table and guardrail updated to match. This also means Step 4 no longer depends on `gh` CLI
+specifically — plain git credentials (already proven working) are enough.
+
 ## v1.8.0 (2026-09-16, fetch cds-consumer's DRIFT.md live, not from a local checkout)
 
 Step 4's owner-ruling check ("has the owner already settled this as deliberate?") only ran if the
