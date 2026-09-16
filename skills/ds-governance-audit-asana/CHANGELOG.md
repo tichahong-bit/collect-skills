@@ -9,6 +9,15 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.2.1 (2026-09-16, list the CDS Core Icon Library as a direct reference)
+
+Requester added the ⭐️ Core Icon Library (fileKey `2kq1XNzoBuxqyDEzP9IaZO`) alongside the Core
+Design Library under Step 0's CDS predefined resources — matches the same fileKey `cds-consumer`'s
+own `AGENTS.md` already names for icons ("Icons come from the icon library, never from anywhere
+else"). Previously Step 0 only pointed CDS at the `cds` MCP tools with no direct Figma links at
+all, unlike MBDS's fuller list — this closes that gap for the two libraries actually named
+elsewhere in this project.
+
 ## v2.2.0 (2026-09-16, MBDS whole-screen template check before Design System Gap)
 
 Requester pointed at `https://mbds-bbl.vercel.app/#/bbl/templates` and `#/bbl/patterns` as MBDS's

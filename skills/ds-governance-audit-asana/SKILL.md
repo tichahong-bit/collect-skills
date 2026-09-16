@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.2.0
+version: 2.2.1
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 12 documented versions, see CHANGELOG.md
+  status: stable — corrected across 13 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -117,8 +117,11 @@ Banking", no need to ask for links again):
 - MBDS Illustration / Assets Library — https://www.figma.com/design/xlvvR9hPyrDkItHXsSHttZ/%F0%9F%8E%A8-Illustration---Assets-Library?node-id=5-31081&t=KkkhmCNVwG3s9iRV-1
 - MBDS Template Library — https://www.figma.com/design/rGstoHOqDx5HvZHE8uKZm3/%F0%9F%93%97-Template-Library?node-id=0-1&t=bKw0yQ0qYtoMBihJ-1
 
-**Predefined — CDS** — use whatever this skill already points at (`cds` MCP tools); no separate
-link needed.
+**Predefined — CDS** — use the `cds` MCP tools for components/tokens; two libraries as direct
+references when needed:
+
+- ⭐️ Core Design Library — https://www.figma.com/design/ON8Azjo7wIi3P2oxnxKiBb/%E2%AD%90%EF%B8%8F-Core-Design-Library?m=auto&node-id=31-176&t=M0TIMeas2W6QrKwq-1
+- ⭐️ Core Icon Library — https://www.figma.com/design/2kq1XNzoBuxqyDEzP9IaZO/%E2%AD%90%EF%B8%8F-Core-Icon-Library?node-id=385-2&t=29fNJljFN1DgfOrz-1
 
 **Confirmation rule.** A confirmed target is required before Step 1 starts. Never assume CDS by
 default, never use CDS components/guidance when the user asked for MBDS (or vice versa), and never
