@@ -9,6 +9,23 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.1.0 (2026-09-16, cds-consumer's DRIFT.md is CDS-only — gate Step 4 on target Design System)
+
+Requester flagged that `cds-consumer` (โย's repo) is scoped to CDS specifically — confirmed live:
+its `AGENTS.md`/`context/DRIFT.md` are explicitly about `⭐️ Core Design Library` (fileKey
+`ON8Azjo7wIi3P2oxnxKiBb`). v1.9.0 made Step 4 sync this repo live, but never checked which Design
+System the audit was actually targeting before applying its rulings — after v1.7.0 added MBDS
+support, an MBDS audit could cite a CDS owner ruling as if it applied, which is wrong in a
+different way than stale data: it's the wrong system's authority entirely, not just old data from
+the right one.
+
+Step 4 now only runs when Step 0 confirmed the target Design System is CDS. For MBDS or another
+target, it's skipped outright, and the skip is stated plainly in the summary rather than silently
+omitted (an unmentioned skip reads as "nothing to check," not "this check doesn't apply"). Noted
+in Step 4, the Pipeline table, Reference, and guardrails that a future MBDS-equivalent
+drift/settled-rulings repo — if one is ever built — would need this step extended to read it, but
+none exists yet so none is assumed.
+
 ## v2.0.0 (2026-09-16, one finding schema everywhere, explicit Pipeline index)
 
 Requester asked for the skill to "organize more systematically, and produce the same output format

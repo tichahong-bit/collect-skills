@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.0.0
+version: 2.1.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 10 documented versions, see CHANGELOG.md
+  status: stable — corrected across 11 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -71,7 +71,7 @@ orientation, not a summary to execute from.
 | 1 — Read the section | Detect: scan every node, find unbound/detached/raw-token candidates |
 | 2 — Resolve Feature name | Metadata: Platform/Squad/Feature against Context Knowledge |
 | 3 — Classify every finding | Existing DS Issue vs. Design System Gap |
-| 4 — Prior owner ruling | Check `cds-consumer`'s DRIFT.md before logging a new Gap |
+| 4 — Prior owner ruling | Check `cds-consumer`'s DRIFT.md before logging a new Gap — **CDS only**, skip (and say so) for MBDS/other |
 | 5 — Existing DS Issue | Figma annotation only, never Asana |
 | 6 — Design System Gap | Figma annotation + Asana task (6a enum values, 6b create, 6c dedupe) |
 | 7 — Annotation mechanics | How Step 5/6's annotation actually gets written — shared by both |
@@ -173,8 +173,8 @@ disagree, this table wins — update both together.
   [🗂 Project Component Inventory](https://app.asana.com/1/1153565613997788/project/1217568055044505)
 - DS Governance Log — [Context Knowledge](https://ds-governance-dashboard.vercel.app/context-knowledge) (`https://ds-governance-dashboard.vercel.app/api/features`, Step 2/8) — no Notion dependency
 - [`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer), `context/DRIFT.md`
-  (Step 4) — synced to `~/design-system-repos/cds-consumer` before every read, never a stale local
-  checkout
+  (Step 4, **CDS-only** — synced to `~/design-system-repos/cds-consumer` before every read, never a
+  stale local checkout)
 
 ## Unified Finding Schema
 
@@ -347,21 +347,35 @@ screen is almost always a Gap already — don't reclassify it as an Issue withou
 
 ## Step 4 — Check for a prior owner ruling before flagging a Gap
 
-Before logging a new Gap, check `context/DRIFT.md`'s "Settled — do not re-flag" table in
-[`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer) — an owner may have
-already ruled a difference deliberate. This repo is owned by a collaborator (โย) and updates on
-its own schedule — **sync before every read, never trust whatever a local checkout already has on
-disk.** Same sync pattern this project uses everywhere else it reads this repo (see
-`ds-governance-prototype-asana`):
+**`cds-consumer` is a CDS-only repo — only run this step when Step 0 confirmed the target Design
+System is CDS.** Its `context/DRIFT.md` is scoped to `⭐️ Core Design Library` (fileKey
+`ON8Azjo7wIi3P2oxnxKiBb`) specifically — a ruling there ("this difference is intentional, don't
+re-flag it") is an owner decision about *that* library, and carries no authority over MBDS or any
+other Design System's components. Applying a CDS ruling to an MBDS finding isn't a stale-data
+problem the way an unsynced checkout is — it's citing the wrong system's authority entirely, which
+is worse than skipping the check.
 
-```bash
-git -C ~/design-system-repos/cds-consumer pull 2>/dev/null || git clone https://github.com/therealveldt/cds-consumer.git ~/design-system-repos/cds-consumer
-```
+- **Target is CDS** → check `context/DRIFT.md`'s "Settled — do not re-flag" table in
+  [`therealveldt/cds-consumer`](https://github.com/therealveldt/cds-consumer) — an owner may have
+  already ruled a difference deliberate. This repo is owned by a collaborator (โย) and updates on
+  its own schedule — **sync before every read, never trust whatever a local checkout already has on
+  disk.** Same sync pattern this project uses everywhere else it reads this repo (see
+  `ds-governance-prototype-asana`):
 
-Then read `context/DRIFT.md` from that synced clone. It's a private repo — this only works with
-git credentials that already have access (confirmed: the clone at `~/design-system-repos/cds-consumer`
-exists and is up to date). If the sync fails (no access, repo/path renamed), say so plainly in the
-summary and proceed without this check rather than blocking the audit on it.
+  ```bash
+  git -C ~/design-system-repos/cds-consumer pull 2>/dev/null || git clone https://github.com/therealveldt/cds-consumer.git ~/design-system-repos/cds-consumer
+  ```
+
+  Then read `context/DRIFT.md` from that synced clone. It's a private repo — this only works with
+  git credentials that already have access (confirmed: the clone at `~/design-system-repos/cds-consumer`
+  exists and is up to date). If the sync fails (no access, repo/path renamed), say so plainly in the
+  summary and proceed without this check rather than blocking the audit on it.
+- **Target is MBDS or another Design System** → skip this step outright, and say so plainly in the
+  summary ("prior-owner-ruling check not applicable — `cds-consumer` only covers CDS"). Do not
+  substitute a CDS ruling, and do not silently skip without mentioning it — an unmentioned skip
+  reads as "nothing to check" instead of "this check doesn't apply here." If that Design System
+  gains its own equivalent drift/settled-rulings repo in the future, this step should be extended
+  to read it the same way — it doesn't exist yet, so don't invent one.
 
 ## Step 5 — Existing DS Issue: Figma annotation only, never Asana
 
@@ -569,6 +583,10 @@ yourself from inside this skill.
 - Never give a finding a different field set/label/order on one surface than another — the Figma
   annotation (Step 7), the Asana task body (Step 6b), the chat summary, and the JSON output contract
   all use §Unified Finding Schema's exact field names. Condense for Figma's panel, never rename.
+- Never check `context/DRIFT.md` at all when the confirmed target Design System isn't CDS — that
+  repo's rulings are scoped to `⭐️ Core Design Library` only; citing them for an MBDS/other finding
+  is citing the wrong system's authority (Step 4). Say plainly in the summary that the check didn't
+  apply, don't just skip it silently.
 - Never read `context/DRIFT.md` from an unsynced `cds-consumer` checkout — that repo belongs to a
   collaborator and updates independently; always `git pull` (or clone) it first (Step 4), so a stale
   local clone never causes a re-flag of something already settled.
