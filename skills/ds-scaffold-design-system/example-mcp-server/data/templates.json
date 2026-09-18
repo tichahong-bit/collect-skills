@@ -1,0 +1,15 @@
+{
+  "designSystem": "sample-ds",
+  "note": "Optional layer — only include this file/tool pair if your design system ships whole-screen templates (the MBDS-style layer referenced in SKILL.md). Omit list_templates/get_template entirely if it doesn't; don't ship an always-empty stub.",
+  "templates": [
+    {
+      "slug": "settings-list-detail",
+      "name": "Settings — List/Detail",
+      "screens": ["settings-list", "settings-detail"],
+      "version": "1.0.0",
+      "docs": "https://sample-ds-yourorg.vercel.app/#/templates/settings-list-detail",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/templates/settings-list-detail.json",
+      "componentsUsed": ["text-field", "button-primary", "button-secondary"]
+    }
+  ]
+}

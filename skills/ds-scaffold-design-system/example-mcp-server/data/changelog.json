@@ -1,0 +1,25 @@
+{
+  "designSystem": "sample-ds",
+  "entries": [
+    {
+      "version": "1.4.0",
+      "date": "2026-09-10",
+      "summary": "Added text-field's helper-text error state; marked button-legacy-flat as retiring in favor of button-primary."
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-08-22",
+      "summary": "Added circular-loader as an internal-only building block (see registry.json guidance for why it's internal)."
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-08-01",
+      "summary": "Added the settings-list-detail whole-screen template."
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-07-15",
+      "summary": "Initial publish: button-primary, button-secondary, text-field."
+    }
+  ]
+}

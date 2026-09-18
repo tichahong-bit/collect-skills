@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "text-field",
+  "type": "registry:component",
+  "title": "Text Field",
+  "description": "Single-line text entry with label, helper text, and error states built in.",
+  "meta": {
+    "version": "3.0.1",
+    "status": "stable",
+    "category": "forms",
+    "tags": [
+      "input",
+      "form",
+      "text"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button-primary",
+  "type": "registry:component",
+  "title": "Primary Button",
+  "description": "The single highest-emphasis action per screen/section. Don't use more than one per view.",
+  "meta": {
+    "version": "2.1.0",
+    "status": "stable",
+    "category": "actions",
+    "tags": [
+      "cta",
+      "action",
+      "submit"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "designSystem": "sample-ds",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": 1,
+      "title": "Check the registry before hand-building",
+      "text": "Before writing any UI, call search_components (or list_components) for the thing you're about to build. Never hand-author markup/styling that merely renders close to a component this registry already ships — that's a defect regardless of visual similarity."
+    },
+    {
+      "id": 2,
+      "title": "Whole-screen templates outrank component composition",
+      "text": "If this design system ships a templates layer (list_templates/get_template), check it before assembling a screen component-by-component. A screen that already exists as a template is one finding ('use the template'), not N separate component-level findings."
+    },
+    {
+      "id": 3,
+      "title": "Patterns are a weaker claim than components",
+      "text": "If this design system ships a patterns layer (region-level, not full components), prefer a real component match over a pattern match when both apply. Cite a pattern only when no component covers the same need."
+    },
+    {
+      "id": 4,
+      "title": "Cite the exact source, never guess",
+      "text": "Every recommendation must name the real slug + registry version it came from (get_component's own fields). If an answer would be a guess rather than something confirmed against this live registry, say so explicitly and prompt for the real data to be pulled instead of presenting the guess as fact."
+    },
+    {
+      "id": 5,
+      "title": "Retiring components are never the recommended answer",
+      "text": "A component whose status is 'retiring' may still be looked up for reference, but must never be the answer handed back for new work without flagging its retiring status and pointing at its replacement (see get_component's replacedBy field, when set)."
+    }
+  ]
+}

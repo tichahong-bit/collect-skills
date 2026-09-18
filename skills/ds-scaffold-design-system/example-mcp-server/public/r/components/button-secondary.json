@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button-secondary",
+  "type": "registry:component",
+  "title": "Secondary Button",
+  "description": "Lower-emphasis action alongside a primary button (e.g. 'Cancel' next to 'Save').",
+  "meta": {
+    "version": "2.1.0",
+    "status": "stable",
+    "category": "actions",
+    "tags": [
+      "action"
+    ]
+  }
+}
