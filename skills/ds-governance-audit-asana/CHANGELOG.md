@@ -9,6 +9,23 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.3.0 (2026-09-18, Summary Reason / AI Recommend are unreadable — write Thai, plain sentences)
+
+A teammate tested the skill on a real screen (an Apple Pay button, no matching CDS component) and
+reported `Summary Reason`/`AI Recommend` were very hard to read. Root cause: Step 6b's `html_notes`
+template modeled each section with instructional fragments — e.g. `<li>Closest existing fragments
+named specifically.</li>` — written as a directive telling the agent what to cover, not as example
+prose. The agent was echoing that directive tone (and English) into the real Asana task/Figma
+comment a Thai-speaking DS Designer then had to read.
+
+Added a "Writing style" subsection to §Unified Finding Schema with an explicit rule (Thai, plain
+complete sentences, never this document's own instructional wording) and two full worked examples
+(one Gap, one Issue) grounded in the real Apple Pay test case. Field **labels** (`Summary Reason`,
+`AI Recommend`, etc.) stay English — that's the real Asana/Notion column convention, unchanged.
+Only the **content** under each label changed language/tone. Updated Step 6b's html template, Step
+7's Figma annotation template, the chat summary template, and the JSON output contract's field
+description to all point at the same worked example and rule, plus a new guardrail.
+
 ## v2.2.1 (2026-09-16, list the CDS Core Icon Library as a direct reference)
 
 Requester added the ⭐️ Core Icon Library (fileKey `2kq1XNzoBuxqyDEzP9IaZO`) alongside the Core

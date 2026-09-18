@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.2.1
+version: 2.3.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 13 documented versions, see CHANGELOG.md
+  status: stable — corrected across 14 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -214,6 +214,51 @@ issue" row shape (this skill mirrors that row outward, not the other way around)
 | `component` | The real Core/Project library component it should have used (name, status, version) |
 | `problem` | What's wrong — wrong variant / detached / raw token |
 | `fix` | What to use instead, concrete |
+
+### Writing style — every field's content
+
+**Write `summary_reason`, `ai_recommend`, `core_system_recommendation`, `problem`, and `fix` in
+Thai, as plain complete sentences a DS Designer can read once and understand — not a telegraphic
+bullet fragment, and never this document's own instructional wording echoed as if it were the
+actual finding.** A real user test on a real screen (see CHANGELOG.md v2.3.0) found the output
+unreadable: earlier versions of this file modeled these fields with fragments like "Closest
+existing fragments named specifically" — that's an instruction *to the agent* about what to
+include, not example prose to imitate. Writing something that reads like a directive instead of an
+explanation is exactly the failure to avoid. The reader is a Thai-speaking DS Designer opening a
+Figma comment or an Asana task, not another agent reading a prompt.
+
+Field **labels** (`Summary Reason`, `AI Recommend`, `Core System Recommendation`, `Component`,
+`Problem`, `Fix`, `Status`, `Issue Type`) stay in English — that's the real, already-published
+Asana/Notion column/header convention (§Reference), and changing it would desync new tasks from
+every existing one. Only the **content under each label** is Thai.
+
+**Worked example — Design System Gap** (a hand-drawn Apple Pay button, no matching component in
+Core):
+
+```
+Component: ปุ่ม Apple Pay
+Status: Issue Found · Issue Type: Component
+
+Summary Reason: หน้าจอนี้มีปุ่ม Apple Pay ที่วาดขึ้นเองจากกรอบเปล่าแล้วใส่โลโก้ Apple Pay ลงไป
+ไม่ได้ใช้ component ของ Design System เลย ตรวจสอบใน Core Design Library แล้วไม่มี component
+ปุ่มสำหรับช่องทางชำระเงินภายนอกแบบนี้อยู่จริง
+
+AI Recommend: แนะนำให้สร้าง component ปุ่มใหม่ชื่อ "External Payment Button" ที่ใส่โลโก้ผู้ให้บริการ
+(Apple Pay, Google Pay ฯลฯ) เป็น slot ได้ โดยใช้ padding และ radius ชุดเดียวกับปุ่มหลักที่มีอยู่แล้ว
+
+Core System Recommendation: ตอนนี้เจอแค่โปรเจกต์นี้โปรเจกต์เดียว ยังไม่ต้องส่งเข้า Core — ถ้ามี
+โปรเจกต์อื่นเจอปัญหาเดียวกันอีก ค่อยพิจารณาส่งเข้า Core ทีหลัง
+```
+
+**Worked example — Existing DS Issue** (a text field with a hand-set border color):
+
+```
+Component: Text Field (Core Design Library)
+
+Problem: ช่องกรอกเบอร์โทรใช้สีขอบเป็นค่าสีที่พิมพ์เอง ไม่ได้ผูกกับ token ของ Design System
+
+Fix: เปลี่ยนไปผูกกับตัวแปรสี Border/Neutral/Default ของ Core Design Library แทนค่าสีที่พิมพ์เอง
+```
 
 ## Step 1 — Read the section like Figma's own "Check designs" feature
 
@@ -455,6 +500,11 @@ four narrative `h2` sections, not a flat field-order list — this is §Unified 
 shape (`summary_reason` / `ai_recommend` / `core_system_recommendation` / `origin`) written out in
 full. (`h3` isn't in Asana's allowed tag set, so section headers use `h2` instead of Notion's `###`.)
 
+**The `<li>` bullets below describe what each section must cover — they are instructions to you,
+not text to copy into the task.** Write the actual sentences in Thai, in plain readable prose (see
+§Unified Finding Schema's "Writing style" worked example). A bullet like "Closest existing
+fragments named specifically" is a checklist item, never a literal sentence to paste.
+
 ```html
 <body>
 <h2>Summary Reason</h2>
@@ -534,16 +584,18 @@ const gapCategory = await ensureCategory('Request Design system', 'blue');
 const issueCategory = await ensureCategory('Log Note', 'yellow');
 
 // Design System Gap — same 4-field shape as Step 6b's Asana body (§Unified Finding Schema),
-// condensed to one line per field instead of a bulleted paragraph.
+// condensed to one line per field instead of a bulleted paragraph. Fill every <...> placeholder
+// with a plain Thai sentence (see the "Writing style" worked example) — not English, not a
+// fragment, and never this file's own instructional wording.
 node.annotations = [{
   categoryId: gapCategory.id,
   labelMarkdown:
     "**Design System Gap**\n" +
     "- **Status:** Issue Found\n" +
     "- **Issue Type:** <Component / Token / Pattern / Accessibility / Other>\n\n" +
-    "**Summary Reason:** <what was found + why neither Design System covers it — specific, not generic>\n" +
-    "**AI Recommend:** <the actual suggested solution — same text as the Asana task's AI Recommend, never a placeholder>\n" +
-    "**Core System Recommendation:** <why this should/shouldn't go to Core, or \"not applicable — single project only\">\n\n" +
+    "**Summary Reason:** <ภาษาไทย ประโยคเต็ม — สิ่งที่เจอ และทำไม Design System ยังไม่มีของรองรับ>\n" +
+    "**AI Recommend:** <ภาษาไทย ประโยคเต็ม — สิ่งที่แนะนำให้สร้าง/แก้ ตรงกับ AI Recommend ฝั่ง Asana เป๊ะ>\n" +
+    "**Core System Recommendation:** <ภาษาไทย ประโยคเต็ม ว่าควร/ไม่ควรส่งเข้า Core ตอนนี้ หรือ \"ยังไม่เกี่ยวข้อง — พบแค่โปรเจกต์เดียว\">\n\n" +
     "🔗 [View issue in Asana](<task permalink_url>)",
 }];
 
@@ -554,14 +606,15 @@ node.annotations = [{
   labelMarkdown:
     "**Existing DS Issue**\n" +
     "- **Component:** <Core/Project library — name (Status, Version)>\n" +
-    "- **Problem:** <what's wrong — wrong variant / detached / raw token>\n" +
-    "- **Fix:** <what to do instead, concrete>",
+    "- **Problem:** <ภาษาไทย ประโยคเต็ม — อะไรผิด: variant ผิด / detach / ใช้ค่าดิบแทน token>\n" +
+    "- **Fix:** <ภาษาไทย ประโยคเต็ม — ต้องใช้อะไรแทน ให้ระบุชัดเจน>",
 }];
 ```
 
 Every field above is the real content from §Unified Finding Schema, just condensed to fit an
 annotation panel — never drop a field to save space, and never invent a field name that doesn't
-also appear in Step 6b's Asana body for the same finding.
+also appear in Step 6b's Asana body for the same finding. `Component` can stay as the library's own
+English name (it's a proper noun, e.g. `Text Field`) — `Problem` and `Fix` are Thai sentences.
 
 Both directions of the link: the Asana task's `notes` link to the Figma node, and the Figma
 annotation links back to the Asana task's `permalink_url` once the task exists. Write the Asana task
@@ -582,16 +635,19 @@ or reorder them.** One block per finding, in Step 1's scan order:
 ```
 🔵 Design System Gap — <component>
 - Status: <status> · Issue Type: <issue_type>
-- Summary Reason: <short>
-- AI Recommend: <short>
-- Core System Recommendation: <short, or "not applicable — single project only">
+- Summary Reason: <ภาษาไทย, ประโยคเต็ม>
+- AI Recommend: <ภาษาไทย, ประโยคเต็ม>
+- Core System Recommendation: <ภาษาไทย, ประโยคเต็ม, or "ยังไม่เกี่ยวข้อง — พบแค่โปรเจกต์เดียว">
 - Figma: <node link> · Asana: <asana task permalink_url>
 
 🟡 Existing DS Issue — <component>
-- Problem: <short>
-- Fix: <short>
+- Problem: <ภาษาไทย, ประโยคเต็ม>
+- Fix: <ภาษาไทย, ประโยคเต็ม>
 - Figma: <node link>
 ```
+
+Same content as the Figma annotation and the Asana task, not a re-summary — copy the same Thai
+sentences through, don't write a third, different version of the same finding.
 
 After every finding is printed, mention once — as a suggestion only, never an automatic call —
 that a deeper check (`figma-semantic-token-audit`, `claude-a11y-skill`) is available for any finding
@@ -600,6 +656,9 @@ yourself from inside this skill.
 
 ## Guardrails
 
+- Never write `summary_reason`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` in
+  English, as a telegraphic fragment, or as this file's own instructional wording echoed verbatim
+  — Thai, plain complete sentences, for a human reader (§Unified Finding Schema's worked example).
 - Never fetch an `mbds-bbl.vercel.app` URL directly to read templates/patterns/rules — it's a
   client-rendered JS app, the DOM isn't real data. Use the `mbds` MCP tools or its JSON endpoints
   instead (Step 0, Step 3).
@@ -643,6 +702,8 @@ yourself from inside this skill.
 `findings` is itemized, using §Unified Finding Schema's exact field names — the same fields as the
 Figma annotation, the Asana task body, and the chat summary. Don't also carry a separate
 `existing_issue`/`design_system_gap` count object; filter `findings` by `classification` for that.
+`summary_reason`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` carry the exact same
+Thai sentences written to Figma and Asana for that finding — not a fourth, re-summarized version.
 
 ```json
 {
