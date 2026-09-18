@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.3.0
+version: 2.3.1
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 14 documented versions, see CHANGELOG.md
+  status: stable — corrected across 15 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -231,6 +231,28 @@ Field **labels** (`Summary Reason`, `AI Recommend`, `Core System Recommendation`
 `Problem`, `Fix`, `Status`, `Issue Type`) stay in English — that's the real, already-published
 Asana/Notion column/header convention (§Reference), and changing it would desync new tasks from
 every existing one. Only the **content under each label** is Thai.
+
+**Never write raw node IDs, hex color codes, or Figma key hashes into the sentence itself.** A real
+run on a real screen (the Apple Pay hero section, MBDS — see CHANGELOG.md v2.3.1) produced a
+finding like this — English, and packed with `147:24524`, `#F7F7F7`, `(key e8f2…)`, `(key 7d09…)`
+as if the reader were debugging the Figma file's data model rather than reading a design note:
+
+> Component: 🧱 Foundation paint style — Secondary/Secondary1 (#F7F7F7, published)
+> Problem: Raw token — base fill is a hard-coded #F7F7F7 SOLID with no paint style or variable (the
+> gradient layer above it is covered by the blue Gap note on 147:24526).
+> Fix: Apply the Secondary/Secondary1 paint style to fill[0] (same style sibling frame 118:32066
+> already uses).
+
+That's unreadable to the DS Designer this is written for. The node/hex/key detail is real and
+useful, but it belongs to *you* while investigating (Step 1) — the reader needs the plain
+conclusion: what it looks like, why it's wrong, what to do. If a node needs pointing at, describe
+it in plain terms ("กรอบพื้นหลังด้านหลังโลโก้" / "the background band behind the logo") — the
+Figma annotation is already attached to the right node, it doesn't need to restate the ID in
+prose. The corrected version of the same finding:
+
+> Component: 🧱 Foundation paint style — Secondary/Secondary1
+> Problem: พื้นหลังกรอบนี้ใส่สีเทาที่พิมพ์ค่าสีเอง ไม่ได้ผูกกับ paint style ของ Design System
+> Fix: เปลี่ยนไปใช้ paint style Secondary/Secondary1 แทน (เฟรมข้างๆ ใช้ style นี้อยู่แล้ว)
 
 **Worked example — Design System Gap** (a hand-drawn Apple Pay button, no matching component in
 Core):
@@ -659,6 +681,9 @@ yourself from inside this skill.
 - Never write `summary_reason`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` in
   English, as a telegraphic fragment, or as this file's own instructional wording echoed verbatim
   — Thai, plain complete sentences, for a human reader (§Unified Finding Schema's worked example).
+- Never weave a raw node ID, hex color, or Figma key hash into that prose — describe the location
+  and problem in plain terms instead. The annotation is already attached to the right node; the
+  sentence doesn't need to re-derive it (§Unified Finding Schema).
 - Never fetch an `mbds-bbl.vercel.app` URL directly to read templates/patterns/rules — it's a
   client-rendered JS app, the DOM isn't real data. Use the `mbds` MCP tools or its JSON endpoints
   instead (Step 0, Step 3).

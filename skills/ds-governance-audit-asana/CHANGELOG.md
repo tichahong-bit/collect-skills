@@ -9,6 +9,22 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.3.1 (2026-09-18, no raw node IDs / hex / key hashes in the human-facing prose either)
+
+After v2.3.0 shipped, pulled the actual annotations off the real test screen (Apple Pay hero
+section, `407:87388`, MBDS) via `figma_get_annotations` to check the fix against real evidence, not
+just the reported symptom. Found the deeper problem: even setting language aside, every finding was
+written like a Figma-data debugging report — `"fillStyleId is overridden from the main component's
+Foundation Neutral/Neutral1 (key e8f2…) to a same-named Neutral/Neutral1 under a different key
+(7d09…)"` — raw node IDs (`147:24524`), hex codes (`#F7F7F7`), and key hashes woven directly into
+the sentence as primary content. That's unreadable to a DS Designer regardless of language.
+
+Added an explicit "don't do this" excerpt (the real finding, lightly trimmed) directly beside the
+"do this instead" rewrite in §Unified Finding Schema's Writing style section, plus a rule: that
+detail belongs to the agent's own investigation (Step 1), not the reader — the annotation is
+already attached to the right node, so the prose doesn't need to re-derive its ID. New guardrail
+added to match.
+
 ## v2.3.0 (2026-09-18, Summary Reason / AI Recommend are unreadable — write Thai, plain sentences)
 
 A teammate tested the skill on a real screen (an Apple Pay button, no matching CDS component) and
