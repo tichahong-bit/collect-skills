@@ -1,6 +1,6 @@
 ---
 name: ds-governance-audit-asana
-version: 2.3.1
+version: 2.4.0
 description: >-
   Audits a Figma screen against the Core Design System and the relevant project's design system,
   classifies every finding as an Existing DS Issue (self-fixable, existing assets already cover it)
@@ -13,7 +13,7 @@ description: >-
   from the Notion-backed sibling's own copy. See CHANGELOG.md for the full defect/correction history
   behind every rule below.
 metadata:
-  status: stable — corrected across 15 documented versions, see CHANGELOG.md
+  status: stable — corrected across 16 documented versions, see CHANGELOG.md
   mode: mixed
   category: workflow-meta
   derived_from: ds-governance-audit-notion v1.11.0
@@ -73,7 +73,7 @@ orientation, not a summary to execute from.
 | 3 — Classify every finding | Existing DS Issue vs. Design System Gap (**MBDS**: check whole-screen templates first) |
 | 4 — Prior owner ruling | Check `cds-consumer`'s DRIFT.md before logging a new Gap — **CDS only**, skip (and say so) for MBDS/other |
 | 5 — Existing DS Issue | Figma annotation only, never Asana |
-| 6 — Design System Gap | Figma annotation + Asana task (6a enum values, 6b create, 6c dedupe) |
+| 6 — Design System Gap | Figma annotation + Asana task (6a enum values, 6b create, 6c dedupe/impact) |
 | 7 — Annotation mechanics | How Step 5/6's annotation actually gets written — shared by both |
 | 8 — Knowledge growth | Confirm Step 2's Context Knowledge write landed |
 
@@ -194,16 +194,17 @@ never do. This is deliberate: before this schema existed, Figma's annotation and
 carried different, disconnected shapes for the same finding, and the chat summary had no fixed
 shape at all — a reader moving between the three had to re-map fields by hand each time.
 
-**Design System Gap** — 4 fields, same as the real, already-verified Notion/Asana "Component
+**Design System Gap** — 6 fields, same as the real, already-verified Notion/Asana "Component
 issue" row shape (this skill mirrors that row outward, not the other way around):
 
 | Field | Meaning |
 |---|---|
 | `component` | Component/pattern name |
 | `status` / `issue_type` | Lifecycle status (Step 6b's `Issue Status`) and category (Component / Token / Pattern / Accessibility / Other) |
-| `summary_reason` | What was found + why neither Design System covers it (+ repeat-occurrence note if any) |
+| `impact` | The Gap's actual blast radius, as a short factual line — how many projects/squads have hit it so far (Step 6c's search result), e.g. `"Project level only · 1 squad only"` or `"Cross-project — found in 3 projects so far"`. A fact, not a recommendation — `core_system_recommendation` below is the decision built on top of this fact, never restate it there. |
+| `why` | What was found + why neither Design System covers it, in one scannable paragraph (+ repeat-occurrence note if any) |
 | `ai_recommend` | Closest existing fragments + the actual suggested solution — never a placeholder |
-| `core_system_recommendation` | Why this should (or shouldn't yet) go to Core, or `"not applicable — single project only"` |
+| `core_system_recommendation` | Whether this should (or shouldn't yet) go to Core, reasoned from `impact` above — or `"not applicable — single project only"` |
 | `origin` / `asana_task_url` | Figma frame/node link, and the Asana task's `permalink_url` once created |
 
 **Existing DS Issue** — 3 fields (no Asana task exists for this classification, so no
@@ -217,7 +218,7 @@ issue" row shape (this skill mirrors that row outward, not the other way around)
 
 ### Writing style — every field's content
 
-**Write `summary_reason`, `ai_recommend`, `core_system_recommendation`, `problem`, and `fix` in
+**Write `impact`, `why`, `ai_recommend`, `core_system_recommendation`, `problem`, and `fix` in
 Thai, as plain complete sentences a DS Designer can read once and understand — not a telegraphic
 bullet fragment, and never this document's own instructional wording echoed as if it were the
 actual finding.** A real user test on a real screen (see CHANGELOG.md v2.3.0) found the output
@@ -227,10 +228,15 @@ include, not example prose to imitate. Writing something that reads like a direc
 explanation is exactly the failure to avoid. The reader is a Thai-speaking DS Designer opening a
 Figma comment or an Asana task, not another agent reading a prompt.
 
-Field **labels** (`Summary Reason`, `AI Recommend`, `Core System Recommendation`, `Component`,
+`impact` and `why` in particular should stay as short as the worked example below — one line and
+one paragraph respectively, not a multi-paragraph essay. They exist so a reader can judge severity
+and root cause at a glance; `ai_recommend`/`core_system_recommendation` are where the fuller
+reasoning belongs.
+
+Field **labels** (`Impact`, `Why`, `AI Recommend`, `Core System Recommendation`, `Component`,
 `Problem`, `Fix`, `Status`, `Issue Type`) stay in English — that's the real, already-published
 Asana/Notion column/header convention (§Reference), and changing it would desync new tasks from
-every existing one. Only the **content under each label** is Thai.
+every existing one. Only the **content** under each label is Thai.
 
 **Never write raw node IDs, hex color codes, or Figma key hashes into the sentence itself.** A real
 run on a real screen (the Apple Pay hero section, MBDS — see CHANGELOG.md v2.3.1) produced a
@@ -254,22 +260,23 @@ prose. The corrected version of the same finding:
 > Problem: พื้นหลังกรอบนี้ใส่สีเทาที่พิมพ์ค่าสีเอง ไม่ได้ผูกกับ paint style ของ Design System
 > Fix: เปลี่ยนไปใช้ paint style Secondary/Secondary1 แทน (เฟรมข้างๆ ใช้ style นี้อยู่แล้ว)
 
-**Worked example — Design System Gap** (a hand-drawn Apple Pay button, no matching component in
-Core):
+**Worked example — Design System Gap** (a hand-drawn donut chart, no matching component in Core):
 
 ```
-Component: ปุ่ม Apple Pay
+Component: กราฟโดนัทแสดงสัดส่วนพอร์ตการลงทุน
 Status: Issue Found · Issue Type: Component
 
-Summary Reason: หน้าจอนี้มีปุ่ม Apple Pay ที่วาดขึ้นเองจากกรอบเปล่าแล้วใส่โลโก้ Apple Pay ลงไป
-ไม่ได้ใช้ component ของ Design System เลย ตรวจสอบใน Core Design Library แล้วไม่มี component
-ปุ่มสำหรับช่องทางชำระเงินภายนอกแบบนี้อยู่จริง
+Impact: พบแค่โปรเจกต์นี้โปรเจกต์เดียว · 1 squad เท่านั้น
 
-AI Recommend: แนะนำให้สร้าง component ปุ่มใหม่ชื่อ "External Payment Button" ที่ใส่โลโก้ผู้ให้บริการ
-(Apple Pay, Google Pay ฯลฯ) เป็น slot ได้ โดยใช้ padding และ radius ชุดเดียวกับปุ่มหลักที่มีอยู่แล้ว
+Why: cds ไม่มี component กราฟข้อมูล/data-visualization อยู่เลยแม้แต่ตัวเดียว (ค้นด้วยคำว่า
+chart, donut, pie ได้ผลลัพธ์ 0 จาก 71 sets ทั้งหมด) — กราฟโดนัทตัวนี้จึงวาดขึ้นเองทั้งหมด
+ไม่มี component ให้ผูกด้วย
 
-Core System Recommendation: ตอนนี้เจอแค่โปรเจกต์นี้โปรเจกต์เดียว ยังไม่ต้องส่งเข้า Core — ถ้ามี
-โปรเจกต์อื่นเจอปัญหาเดียวกันอีก ค่อยพิจารณาส่งเข้า Core ทีหลัง
+AI Recommend: แนะนำให้ Core DS สร้าง component กราฟโดนัท/กราฟวงกลมใหม่ ที่รับค่าเป็นรายการ
+{ป้ายกำกับ, ค่า, สี} แล้วผูกกับ token สีและตัวอักษรที่มีอยู่แล้ว
+
+Core System Recommendation: ตอนนี้เจอแค่โปรเจกต์เดียวตามที่ระบุใน Impact ยังไม่ต้องส่งเข้า
+Core — ถ้ามีโปรเจกต์อื่นเจอปัญหาเดียวกันอีก ค่อยพิจารณาส่งเข้า Core ทีหลัง
 ```
 
 **Worked example — Existing DS Issue** (a text field with a hand-set border color):
@@ -518,8 +525,8 @@ write-once at creation — a later Step 6c occurrence update to an existing row 
 field, since a repeat sighting doesn't reset another team's SLA clock.
 
 **Body format — use `html_notes`, not `notes`.** Match the real Notion "Component issue" row body:
-four narrative `h2` sections, not a flat field-order list — this is §Unified Finding Schema's Gap
-shape (`summary_reason` / `ai_recommend` / `core_system_recommendation` / `origin`) written out in
+five narrative `h2` sections, not a flat field-order list — this is §Unified Finding Schema's Gap
+shape (`impact` / `why` / `ai_recommend` / `core_system_recommendation` / `origin`) written out in
 full. (`h3` isn't in Asana's allowed tag set, so section headers use `h2` instead of Notion's `###`.)
 
 **The `<li>` bullets below describe what each section must cover — they are instructions to you,
@@ -529,7 +536,13 @@ fragments named specifically" is a checklist item, never a literal sentence to p
 
 ```html
 <body>
-<h2>Summary Reason</h2>
+<h2>Impact</h2>
+<ul>
+  <li>State the Gap's actual blast radius as a short fact, straight from Step 6c's search — how many
+      projects/squads have hit this so far. E.g. "Project level only · 1 squad only" or
+      "Cross-project — found in N projects so far: <list>." A fact, not a recommendation.</li>
+</ul>
+<h2>Why</h2>
 <ul>
   <li>What was found — node id(s), where, what it looks like. Specific, not generic.</li>
   <li>Why neither Design System covers this — name the closest existing fragments and say exactly
@@ -545,10 +558,10 @@ fragments named specifically" is a checklist item, never a literal sentence to p
 </ul>
 <h2>Core System Recommendation</h2>
 <ul>
-  <li><strong>Why this should go to Core:</strong> concrete reasoning, referencing actual occurrence
-      count / project count if there's more than one.</li>
-  <li><strong>Why not yet / why not at all:</strong> the counter-argument — usually "Related Project
-      has 1 entry so far, stays project-specific until a second project logs the same gap," or the
+  <li><strong>Why this should go to Core:</strong> concrete reasoning, built on the Impact section
+      above (occurrence/project count) — don't restate the raw numbers, reason from them.</li>
+  <li><strong>Why not yet / why not at all:</strong> the counter-argument — usually "Impact shows 1
+      entry so far, stays project-specific until a second project logs the same gap," or the
       human-decision gate this row is waiting on.</li>
 </ul>
 <hr/>
@@ -563,10 +576,10 @@ fragments named specifically" is a checklist item, never a literal sentence to p
 ```
 
 If a finding's Gap classification came from an explicit user instruction rather than an independent
-audit judgment call, say so plainly inside Summary Reason (e.g. "this row was called a Gap on
-explicit user request, not from an independent audit pass") — never present a forced/demo
-classification with the same confidence as a genuine finding. This mirrors the mock-data-transparency
-rule applied everywhere else in this project.
+audit judgment call, say so plainly inside Why (e.g. "this row was called a Gap on explicit user
+request, not from an independent audit pass") — never present a forced/demo classification with the
+same confidence as a genuine finding. This mirrors the mock-data-transparency rule applied
+everywhere else in this project.
 
 ### 6c — Occurrence / impact check
 
@@ -578,6 +591,12 @@ a separate Core escalation board — a second occurrence in a *different* `Relat
 still the same task, just with both project values added to the multi-select and `Occurrence Count`
 incremented. State plainly in the summary that cross-project matching here is name-based/best-effort,
 same caveat the sibling `ds-governance-audit` skill states for its own escalation check.
+
+**This search's result is also the source of the `impact` field** (§Unified Finding Schema) — write
+its plain-fact summary once here (e.g. `"Project level only · 1 squad only"` when nothing else
+matched, or `"Cross-project — found in N projects so far: <names>"` when it did) and reuse that exact
+line in the Figma annotation (Step 7), the Asana `Impact` section (Step 6b), and the chat summary —
+don't recompute or reword it three times.
 
 **Never touch `Submitted Date` or `due_on` on an occurrence update** — those are write-once at
 creation (Step 6b).
@@ -605,19 +624,21 @@ const ensureCategory = async (label, color) => {
 const gapCategory = await ensureCategory('Request Design system', 'blue');
 const issueCategory = await ensureCategory('Log Note', 'yellow');
 
-// Design System Gap — same 4-field shape as Step 6b's Asana body (§Unified Finding Schema),
+// Design System Gap — same 6-field shape as Step 6b's Asana body (§Unified Finding Schema),
 // condensed to one line per field instead of a bulleted paragraph. Fill every <...> placeholder
 // with a plain Thai sentence (see the "Writing style" worked example) — not English, not a
-// fragment, and never this file's own instructional wording.
+// fragment, and never this file's own instructional wording. `Impact` and `Why` come first —
+// they're what a reader should be able to judge severity and root cause from at a glance.
 node.annotations = [{
   categoryId: gapCategory.id,
   labelMarkdown:
     "**Design System Gap**\n" +
     "- **Status:** Issue Found\n" +
-    "- **Issue Type:** <Component / Token / Pattern / Accessibility / Other>\n\n" +
-    "**Summary Reason:** <ภาษาไทย ประโยคเต็ม — สิ่งที่เจอ และทำไม Design System ยังไม่มีของรองรับ>\n" +
+    "- **Issue Type:** <Component / Token / Pattern / Accessibility / Other>\n" +
+    "- **Impact:** <Step 6c's plain-fact line — e.g. \"Project level only · 1 squad only\">\n\n" +
+    "**Why:** <ภาษาไทย ประโยคสั้น กระชับ — สิ่งที่เจอ และทำไม Design System ยังไม่มีของรองรับ>\n" +
     "**AI Recommend:** <ภาษาไทย ประโยคเต็ม — สิ่งที่แนะนำให้สร้าง/แก้ ตรงกับ AI Recommend ฝั่ง Asana เป๊ะ>\n" +
-    "**Core System Recommendation:** <ภาษาไทย ประโยคเต็ม ว่าควร/ไม่ควรส่งเข้า Core ตอนนี้ หรือ \"ยังไม่เกี่ยวข้อง — พบแค่โปรเจกต์เดียว\">\n\n" +
+    "**Core System Recommendation:** <ภาษาไทย ประโยคเต็ม ว่าควร/ไม่ควรส่งเข้า Core ตอนนี้ โดยอ้างอิง Impact ด้านบน หรือ \"ยังไม่เกี่ยวข้อง — พบแค่โปรเจกต์เดียว\">\n\n" +
     "🔗 [View issue in Asana](<task permalink_url>)",
 }];
 
@@ -657,7 +678,8 @@ or reorder them.** One block per finding, in Step 1's scan order:
 ```
 🔵 Design System Gap — <component>
 - Status: <status> · Issue Type: <issue_type>
-- Summary Reason: <ภาษาไทย, ประโยคเต็ม>
+- Impact: <Step 6c's plain-fact line>
+- Why: <ภาษาไทย, ประโยคสั้น กระชับ>
 - AI Recommend: <ภาษาไทย, ประโยคเต็ม>
 - Core System Recommendation: <ภาษาไทย, ประโยคเต็ม, or "ยังไม่เกี่ยวข้อง — พบแค่โปรเจกต์เดียว">
 - Figma: <node link> · Asana: <asana task permalink_url>
@@ -678,9 +700,10 @@ yourself from inside this skill.
 
 ## Guardrails
 
-- Never write `summary_reason`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` in
+- Never write `impact`/`why`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` in
   English, as a telegraphic fragment, or as this file's own instructional wording echoed verbatim
   — Thai, plain complete sentences, for a human reader (§Unified Finding Schema's worked example).
+  `impact` and `why` stay especially short — one line and one paragraph, never a longer essay.
 - Never weave a raw node ID, hex color, or Figma key hash into that prose — describe the location
   and problem in plain terms instead. The annotation is already attached to the right node; the
   sentence doesn't need to re-derive it (§Unified Finding Schema).
@@ -719,16 +742,16 @@ yourself from inside this skill.
 - Never write a Design System Gap's own narrative page anywhere — the only Context Knowledge write
   this skill ever does is Step 2/8's Feature-name backfill/create (dashboard, not Notion); nothing
   else about a Gap gets narrative content written to any knowledge page.
-- Never fabricate an Occurrence Count or Impact line without actually searching the Component issue
-  project first (Step 6c).
+- Never fabricate an `Occurrence Count` or `Impact` line without actually searching the Component
+  issue project first (Step 6c) — `impact` is that search's real result, not a guess.
 
 ## Output contract
 
 `findings` is itemized, using §Unified Finding Schema's exact field names — the same fields as the
 Figma annotation, the Asana task body, and the chat summary. Don't also carry a separate
 `existing_issue`/`design_system_gap` count object; filter `findings` by `classification` for that.
-`summary_reason`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` carry the exact same
-Thai sentences written to Figma and Asana for that finding — not a fourth, re-summarized version.
+`impact`/`why`/`ai_recommend`/`core_system_recommendation`/`problem`/`fix` carry the exact same Thai
+sentences written to Figma and Asana for that finding — not a fourth, re-summarized version.
 
 ```json
 {
@@ -741,7 +764,8 @@ Thai sentences written to Figma and Asana for that finding — not a fourth, re-
       "component": "...",
       "status": "Issue Found",
       "issue_type": "Component",
-      "summary_reason": "...",
+      "impact": "...",
+      "why": "...",
       "ai_recommend": "...",
       "core_system_recommendation": "...",
       "origin": {"figma_url": "...", "node_name": "..."},
