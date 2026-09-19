@@ -9,6 +9,44 @@ only covers what changed *in this Asana-backed variant*, from its own v1.0.0 onw
 
 ---
 
+## v2.4.0 (2026-09-19, bring back Impact/Why — v2.0.0 dropped them without a replacement)
+
+Requester compared two live annotations on the same file (`[StaffPortal_ABC] Dashboard`) — node
+`164:6081` (current, post-v2.0.0 shape: Status/Issue Type/Summary Reason/AI Recommend/Core System
+Recommendation) against node `164:3337` (an older annotation, pre-v2.0.0 shape: Status/Issue
+Type/**Impact**/**Why**) — and asked for the older shape back. It states the Gap's actual blast
+radius in one line (`Impact: Project level only · 1 squad only`) and the root cause in one
+scannable paragraph (`Why: cds has no ... component at all (0 of 71 sets match ...) — this donut
+is hand-built with no component to bind to`), neither of which the current shape surfaces
+explicitly — `Summary Reason` mixes "what was found" and "why" together in a longer narrative, and
+nothing in the schema ever stated the finding's scope at all.
+
+v2.0.0's own changelog entry already names the old shape (`Status`/`Issue type`/`Impact`/`Why`) as
+what Figma carried before that version replaced it wholesale with Asana's 4-field shape — done to
+fix two real problems: Figma and Asana disagreed on field names, and Figma never carried the
+recommended fix at all. A straight revert to the old shape would reopen both of those. This
+version merges the two instead of picking one: `impact` and `why` are restored as real fields in
+§Unified Finding Schema — a superset of the old shape, not a swap — `why` replaces `summary_reason`
+as the label everywhere (same underlying instruction: what was found, why neither Design System
+covers it; just renamed to match, and tightened toward the one-paragraph scannable style node
+`164:3337` demonstrates instead of a longer narrative). `impact` is a genuinely new field, sourced
+from Step 6c's occurrence/cross-project search — that search already existed and already fed
+`Occurrence Count`/`Suggest to add in Core System?`, and the guardrail against fabricating an
+"Impact line" has existed since v2.0.0, but nothing ever actually wrote one until now. `ai_recommend`
+and `core_system_recommendation` stay — dropping them again would reopen the exact gap v2.0.0
+closed — with `core_system_recommendation`'s reasoning now pointing at `impact`'s stated scope
+instead of restating the same numbers.
+
+Updated: §Unified Finding Schema (table + worked example), Step 6b's `html_notes` template (new
+`Impact` `h2`, `Summary Reason` `h2` renamed to `Why`), Step 6c (now states explicitly that its
+search result is what `impact`'s content is drawn from), Step 7's Figma annotation template, the
+chat summary template, the JSON output contract (`why` replaces `summary_reason`, `impact` added),
+and the guardrail bullet naming the old field list.
+
+**Breaking, by design, same precedent as v2.0.0:** existing already-created annotations/tasks
+(including node `164:6081`) are not retroactively rewritten by this change — a future run does not
+need to touch old ones unless asked.
+
 ## v2.3.1 (2026-09-18, no raw node IDs / hex / key hashes in the human-facing prose either)
 
 After v2.3.0 shipped, pulled the actual annotations off the real test screen (Apple Pay hero
@@ -118,6 +156,10 @@ number, ambiguous about exactly when it ran relative to Step 1.
 forward. Existing already-created annotations/tasks are not retroactively rewritten by this change —
 same precedent as v1.2.0 rewriting 3 live tasks by hand at the time; a future run does not need to
 touch old ones unless asked.
+
+**Correction, v2.4.0 (2026-09-19):** dropping `Impact`/`Why` here without a replacement turned out
+to be a real regression, not a pure improvement — see v2.4.0 above. Both are now back as real
+fields, merged with what this version added rather than reverting it.
 
 ## v1.9.0 (2026-09-16, align Step 4's sync method with the rest of the project)
 
