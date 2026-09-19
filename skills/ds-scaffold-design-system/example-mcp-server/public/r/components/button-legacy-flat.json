@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button-legacy-flat",
+  "type": "registry:component",
+  "title": "Flat Button (legacy)",
+  "description": "Do not use for new work — kept only so existing screens keep rendering until migrated.",
+  "meta": {
+    "version": "1.0.3",
+    "status": "retiring",
+    "category": "actions",
+    "tags": [
+      "action",
+      "legacy"
+    ]
+  }
+}

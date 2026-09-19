@@ -1,0 +1,30 @@
+# sample-ds
+
+> Example design system registry, scaffolded by the ds-scaffold-design-system
+> skill. Read this file first to see which MCP tools this server exposes —
+> never scrape this site's rendered `#/...` pages for data, they're a
+> human-readable mirror of the same registry these tools serve live.
+
+MCP endpoint: POST /api/mcp (this example ships a stdio server for local
+testing — see README.md for the HTTP swap needed to deploy this shape).
+
+## Tools
+
+- `get_rules()` — foundational rules; read once per run before anything else.
+- `list_families()` — component families (grouped variants).
+- `list_components({ category?, includeInternal? })` — full/filtered roster.
+- `search_components({ query, includeInternal? })` — free-text search; pass
+  `includeInternal: true` before concluding nothing matches.
+- `get_component({ slug })` — one component's full record + usage guidance.
+- `check_coverage({ name })` — quick check for a registry equivalent; a
+  `false` here is not final, cross-check with `search_components`.
+- `get_changelog({ since? })` — live version history, newest first.
+- `list_templates()` / `get_template({ slug })` — whole-screen templates
+  (present only because this example's `data/templates.json` has entries;
+  omit both from your own `llms.txt` if your design system has no
+  whole-screen layer).
+
+## Static registry (install-time)
+
+`/r/registry.json`, `/r/components/<slug>.json` — shadcn-registry-compatible;
+install a component with `npx shadcn@latest add <this-site>/r/components/<slug>.json`.

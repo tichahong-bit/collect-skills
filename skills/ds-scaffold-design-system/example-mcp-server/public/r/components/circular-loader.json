@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "circular-loader",
+  "type": "registry:component",
+  "title": "Circular Loader",
+  "description": "Internal-only building block used inside other components (e.g. button loading state). Not meant to be composed directly in product screens — that's why plain check_coverage misses it; search_components(includeInternal: true) surfaces it.",
+  "meta": {
+    "version": "1.2.0",
+    "status": "stable",
+    "category": "feedback",
+    "tags": [
+      "loading",
+      "spinner",
+      "internal-only"
+    ]
+  }
+}

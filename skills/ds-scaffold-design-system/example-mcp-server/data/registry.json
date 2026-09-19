@@ -1,0 +1,95 @@
+{
+  "designSystem": "sample-ds",
+  "registryVersion": "1.4.0",
+  "families": [
+    { "key": "button", "name": "Button", "members": ["button-primary", "button-secondary", "button-ghost"] },
+    { "key": "form-input", "name": "Form Input", "members": ["text-field", "select-field", "checkbox"] }
+  ],
+  "components": [
+    {
+      "slug": "button-primary",
+      "name": "Primary Button",
+      "family": "button",
+      "category": "actions",
+      "version": "2.1.0",
+      "status": "stable",
+      "internal": false,
+      "tags": ["cta", "action", "submit"],
+      "docs": "https://sample-ds-yourorg.vercel.app/#/components/button-primary",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/components/button-primary.json",
+      "guidance": {
+        "usage": "The single highest-emphasis action per screen/section. Don't use more than one per view.",
+        "doNotUse": "For destructive actions — use button-destructive (not yet in this example registry) instead."
+      },
+      "replacedBy": null
+    },
+    {
+      "slug": "button-secondary",
+      "name": "Secondary Button",
+      "family": "button",
+      "category": "actions",
+      "version": "2.1.0",
+      "status": "stable",
+      "internal": false,
+      "tags": ["action"],
+      "docs": "https://sample-ds-yourorg.vercel.app/#/components/button-secondary",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/components/button-secondary.json",
+      "guidance": {
+        "usage": "Lower-emphasis action alongside a primary button (e.g. 'Cancel' next to 'Save').",
+        "doNotUse": null
+      },
+      "replacedBy": null
+    },
+    {
+      "slug": "button-legacy-flat",
+      "name": "Flat Button (legacy)",
+      "family": "button",
+      "category": "actions",
+      "version": "1.0.3",
+      "status": "retiring",
+      "internal": false,
+      "tags": ["action", "legacy"],
+      "docs": "https://sample-ds-yourorg.vercel.app/#/components/button-legacy-flat",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/components/button-legacy-flat.json",
+      "guidance": {
+        "usage": "Do not use for new work — kept only so existing screens keep rendering until migrated.",
+        "doNotUse": "Any new screen. Use button-primary or button-secondary instead."
+      },
+      "replacedBy": "button-primary"
+    },
+    {
+      "slug": "text-field",
+      "name": "Text Field",
+      "family": "form-input",
+      "category": "forms",
+      "version": "3.0.1",
+      "status": "stable",
+      "internal": false,
+      "tags": ["input", "form", "text"],
+      "docs": "https://sample-ds-yourorg.vercel.app/#/components/text-field",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/components/text-field.json",
+      "guidance": {
+        "usage": "Single-line text entry with label, helper text, and error states built in.",
+        "doNotUse": null
+      },
+      "replacedBy": null
+    },
+    {
+      "slug": "circular-loader",
+      "name": "Circular Loader",
+      "family": null,
+      "category": "feedback",
+      "version": "1.2.0",
+      "status": "stable",
+      "internal": true,
+      "tags": ["loading", "spinner", "internal-only"],
+      "docs": "https://sample-ds-yourorg.vercel.app/#/components/circular-loader",
+      "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/components/circular-loader.json",
+      "guidance": {
+        "usage": "Internal-only building block used inside other components (e.g. button loading state). Not meant to be composed directly in product screens — that's why plain check_coverage misses it; search_components(includeInternal: true) surfaces it.",
+        "doNotUse": "Directly in a product screen — use a component that embeds it (e.g. a button's loading variant) instead."
+      },
+      "replacedBy": null
+    }
+  ]
+}

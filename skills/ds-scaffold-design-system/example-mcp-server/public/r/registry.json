@@ -1,0 +1,37 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "sample-ds",
+  "homepage": "https://sample-ds-yourorg.vercel.app",
+  "items": [
+    {
+      "name": "button-primary",
+      "type": "registry:component",
+      "title": "Primary Button",
+      "description": "The single highest-emphasis action per screen/section. Don't use more than one per view."
+    },
+    {
+      "name": "button-secondary",
+      "type": "registry:component",
+      "title": "Secondary Button",
+      "description": "Lower-emphasis action alongside a primary button (e.g. 'Cancel' next to 'Save')."
+    },
+    {
+      "name": "button-legacy-flat",
+      "type": "registry:component",
+      "title": "Flat Button (legacy)",
+      "description": "Do not use for new work — kept only so existing screens keep rendering until migrated."
+    },
+    {
+      "name": "text-field",
+      "type": "registry:component",
+      "title": "Text Field",
+      "description": "Single-line text entry with label, helper text, and error states built in."
+    },
+    {
+      "name": "circular-loader",
+      "type": "registry:component",
+      "title": "Circular Loader",
+      "description": "Internal-only building block used inside other components (e.g. button loading state). Not meant to be composed directly in product screens — that's why plain check_coverage misses it; search_components(includeInternal: true) surfaces it."
+    }
+  ]
+}
