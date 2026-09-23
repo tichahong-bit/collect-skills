@@ -247,6 +247,28 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.35.0 — switchers only when the requester asks to compare (2026-09-23)
+
+**Requester correction, Fund transfer risk-check build (MB, MBDS mode 2).** The requester named
+one Tone guide (MB Writing Style Guide V2) and one Branding guide (Master Brand BETA). Under
+v1.19.0's rule ("one named guide + the system baseline = two states → switcher") the prototype
+shipped a Tone switcher (Plain ↔ MB V2) and a Branding switcher (MBDS baseline ↔ Master Brand).
+Building the "Plain" side meant writing a full set of deliberately rule-breaking copy that nobody
+asked for. The requester: "อยากให้เวลาไม่มีการ compare ก็ไม่ต้องมี toggle, ถ้า user อยากให้ compare
+ถึงจะมี".
+
+Rule now (reverses v1.19.0):
+- A switcher exists **only** when the requester explicitly asks to compare that dimension (two or
+  more named options), or asks for the control by name (the Language switcher in this build was
+  requested, so it stayed).
+- One named guide/DS/theme is applied directly. No invented baseline state is added to give a
+  control two sides.
+- A requirement-state selector (here: the AC1 outcomes No risk / Risk / Unable to check) is not a
+  design comparison and may stay; label it as a requirement state.
+
+Fixed in the live artifact (Version 4): the Tone and Branding switchers were removed, all "plain"
+copy was deleted, and Master Brand left-alignment is now applied unconditionally.
+
 ## v1.34.0 — Exit returns to the pill; chrome is one vertical column (2026-09-23)
 
 **Real defect, Fund transfer risk-check build (MB, MBDS mode 2).** Two things the requester

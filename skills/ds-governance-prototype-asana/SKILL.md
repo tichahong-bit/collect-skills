@@ -1,6 +1,6 @@
 ---
 name: ds-governance-prototype-asana
-version: 1.34.0
+version: 1.35.0
 description: Turns a written requirement into a DS-aware prototype with a presentation mode. Asana-backed sibling of ds-governance-prototype-notion. Core Design System (cds-bbl) is always the base; the project layer follows one of three explicit modes (Core only / reuse an existing project DS / compose a new project layer) the requester picks, never inferred. Before building, Step 2c decides the solution direction from real research/rationale — Step 3 implements that decision, not requirement text directly. In active use, corrected across 10+ real builds as of 2026-09-05 — see CHANGELOG.md for the full defect history behind every rule below.
 metadata:
   status: in active use — corrected across 10+ documented real runs, see CHANGELOG.md
@@ -52,20 +52,23 @@ the Asana-backed path as the team migrates knowledge sources over.
      means "content only, redraw the layout."
   Build the option as a genuinely different information architecture, never the same grid
   recolored. This is opt-in — don't add a second layout speculatively.
-- **Compare request** (optional) — naming **two** project/theme links means a specific
-  side-by-side decision is in mind; the panel's prose should say so ("built to compare X vs. Y").
-  Does not gate whether the switcher *control* exists (see "Live switchers" below) — only whether
-  the panel frames it as a requested comparison.
+- **Compare request** (optional) — **the only thing that creates a switcher.** A dimension gets a
+  live switcher only when the requester explicitly asks to compare it (names two or more options,
+  or says "compare"/"สลับดู"/"เทียบ" for it). The panel's prose then says so ("built to compare X
+  vs. Y"). No compare request → no switcher for that dimension (see "Switchers only on request"
+  below).
 - **Tone of voice guide(s)** (required whenever there's real copy to write) — named guide(s) from
-  the Copy Writing Guideline index. Naming one still gets a switcher (vs. plain baseline); naming
-  two marks it a requested comparison. Ask if none named — never guess or blend guides.
+  the Copy Writing Guideline index. **One named guide = applied directly, no switcher, no "plain"
+  baseline state.** Two named as a comparison = a Tone switcher. Ask if none named — never guess
+  or blend guides.
 - **Branding guide(s)** (required whenever there's a real branding decision) — same rule as Tone:
-  one still gets a switcher (vs. CDS/no-guide baseline); two marks a comparison. Ask if none named.
+  one named guide is applied directly with no switcher; two named as a comparison get a Branding
+  switcher. Ask if none named.
 - **Priority note** (optional, defaults on) — the requirement always wins over DS completeness; a
   missing component is never a reason to stop, only to placeholder-and-flag (Step 3).
-- **No switcher possible** — a switcher only appears for a dimension with more than one real named
-  state. A dimension with genuinely one state (nothing named, nothing to fall back to) simply has
-  no switcher for this build — don't fabricate a second option.
+- **No compare, no switcher** — a switcher appears only for a dimension the requester asked to
+  compare (or a control they asked for by name, e.g. "Thai + English switcher"). Never add a
+  baseline state (plain copy, no-guide branding, Core-only DS) just so a control has two sides.
 
 ## Knowledge sources (Asana + live sites — this skill does not read Notion)
 
@@ -384,8 +387,8 @@ words and the same two-panel split so a reviewer who has seen one build recogniz
   DS's large emphasized label style + a `chevron-up`/`chevron-down` toggle,
   `aria-label="Collapse panel"`/`"Expand panel"`) — a drag started on the header must not swallow
   the chevron's click:
-  - **"Prototype Settings"** — every live switcher this build has (see "Live switchers, not gated
-    compares" below). Header toggles the whole panel; individual switchers inside don't collapse.
+  - **"Prototype Settings"** — every switcher the requester asked for (see "Switchers only on
+    request" below). Header toggles the whole panel; individual switchers inside don't collapse.
   - **"Design Review"** — the per-screen sectioned content (see "Panel section order" below).
     Each section inside is *also* independently collapsible (its own title + open/toggle state),
     nested one level under the panel's own collapse toggle.
@@ -406,27 +409,31 @@ words and the same two-panel split so a reviewer who has seen one build recogniz
   `ToggleSwitch`, active side emphasized — not a heavier paired-card affordance unless the
   requester's own reference specifically shows cards or the content needs more than a label.
 
-### Live switchers, not gated compares
+### Switchers only on request
 
-A switcher exists for a dimension whenever it has more than one real named state — **one named
-guide plus the system's own baseline already counts as two states.** The old rule requiring an
-explicit two-name comparison now only governs whether the panel's *prose* frames it as a requested
-comparison, not whether the control exists.
+**A switcher exists only when the requester asked for it** — either an explicit compare of two or
+more named options for that dimension, or a control they asked for by name (e.g. a Language
+switcher). One named guide/DS/theme is simply *applied* — no switcher, and no invented baseline
+state (plain copy, no-guide branding) to make a second side. This reverses v1.19.0's "one named
+guide + baseline = two states" rule (v1.35.0, requester correction — see CHANGELOG).
+
+Not a comparison, so allowed without a request: a **requirement-state selector** that lets the
+reviewer reach states the requirement itself defines (e.g. an AC's "No risk / Risk / Unable to
+check" outcomes) — label it as such, never as a design compare.
 
 | Switcher | States | Mechanism |
 |---|---|---|
-| **Design System** | Core alone / named existing project DS (mode 2) / Core + composed layer (mode 3), plus a second project-layer link if given | Real token swap (e.g. `data-ds` attribute driving a second CSS token block) on top of the same Core base — same screens/content, different project layer. Never a second copy of the prototype. **"Same screens/content" is literal: a genuine gap's freehand mock (Step 3, point 2) renders identically in every state of this switcher — this control is never wired to show/hide it.** |
-| **Branding** | No guide (CDS/Core baseline) + every named guide (often one) | Swaps branding-driven visual identity per the active guide's rules. A needed color/token the DS doesn't have yet gets invented and tagged `Design System Gap` — never presented as if from the DS. **Exception:** an explicit "exactly ONE Branding Theme, no other choices" instruction removes the switcher entirely (state, control, and any CSS/token scope for the retired option) — a control pointed permanently one way is still a visible second "choice." |
-| **Tone of Voice** | Plain/ungoverned copy + every named guide | Swaps **every real piece of on-screen language**, comprehensively (see "Tone of Voice coverage" below) — not just long-form prose. **Every state must be in the same language** — the switcher shows a *feeling* difference (formal/casual); mixing languages shows a language switch instead. Pick the screen's natural language and write every state in it, even if a named guide's own examples lean toward a different language. A dedicated **Language** switcher (Thai/English UI copy) is separate and independent — don't cross the two into one combinatorial control unless specifically asked. |
-| **Design Option** | `Original` + `Option 1`/`Option A` — a genuinely different information architecture, never a relayout of the same grid | **Only when explicitly requested** — genuinely gated, unlike the three above, since a second full layout is real design work. Swaps which component tree renders; the DS Evaluation table reflects whichever option is selected. See "Design Option scope" below. |
+| **Design System** | Only when the requester asks to compare two DS setups (e.g. Core alone vs. a project DS, or two project-layer links) | Real token swap (e.g. `data-ds` attribute driving a second CSS token block) on top of the same Core base — same screens/content, different project layer. Never a second copy of the prototype. **"Same screens/content" is literal: a genuine gap's freehand mock (Step 3, point 2) renders identically in every state of this switcher — this control is never wired to show/hide it.** |
+| **Branding** | Only the guides named for comparison (2+) | Swaps branding-driven visual identity per the active guide's rules. A needed color/token the DS doesn't have yet gets invented and tagged `Design System Gap` — never presented as if from the DS. With one guide there is no switcher at all (no state, no control, no CSS/token scope for a retired option) — a control pointed permanently one way is still a visible second "choice." |
+| **Tone of Voice** | Only the guides named for comparison (2+) — never an invented "plain" state | Swaps **every real piece of on-screen language**, comprehensively (see "Tone of Voice coverage" below) — not just long-form prose. **Every state must be in the same language** — the switcher shows a *feeling* difference (formal/casual); mixing languages shows a language switch instead. Pick the screen's natural language and write every state in it, even if a named guide's own examples lean toward a different language. A dedicated **Language** switcher (Thai/English UI copy) is separate and independent — don't cross the two into one combinatorial control unless specifically asked. |
+| **Design Option** | `Original` + `Option 1`/`Option A` — a genuinely different information architecture, never a relayout of the same grid | **Only when explicitly requested** (same gate as every other switcher) — a second full layout is real design work. Swaps which component tree renders; the DS Evaluation table reflects whichever option is selected. See "Design Option scope" below. |
 
-A dimension with genuinely one state (nothing named, nothing to fall back to) simply has no
-switcher for this build — don't fabricate a second state. When two sources were explicitly named
-as a comparison (Expected input's "Compare request"), the panel's prose for that dimension says so
-plainly rather than reading as open-ended exploration — the only thing that rule still decides.
+A dimension nobody asked to compare has no switcher — don't fabricate a second state. When a
+switcher does exist, the panel's prose for that dimension says plainly that it was built to compare
+the named options.
 
-**Tone of Voice coverage — default to comprehensive, not just prose.** The point of this switcher
-is for a reviewer to toggle it and *see* the two guides read differently, everywhere, immediately —
+**Tone of Voice coverage — default to comprehensive, not just prose.** Applies whenever a Tone
+switcher was requested. The point of this switcher is for a reviewer to toggle it and *see* the two guides read differently, everywhere, immediately —
 not to hunt for the two or three sentences long enough to carry a worked example. Default scope is
 **every real piece of language on the screen**: nav/sidebar labels, page/section titles and
 subtitles, stat/KPI card **titles and labels** (not their numeric values), table column headers that
@@ -552,7 +559,7 @@ The rest are **per screen** — re-render fully from that screen's own data on e
 
 4. **Branding** (its own section, directly above Design System Evaluation) — for every real
    branding decision, cite the specific rule from the *named* guide(s) — never a vague "on-brand."
-   Swaps with the Branding switcher. No guide named → say so plainly, don't assert compliance with
+   Swaps with the Branding switcher if a Branding compare was requested. No guide named → say so plainly, don't assert compliance with
    nothing to check against. **A source guide can be honest about its own gaps — reflect that,
    don't paper over it** (a workshop deck may itself mark sections "Under development" as of its
    authoring date — say so for whatever pillar it affects rather than presenting it as settled).
@@ -609,7 +616,7 @@ The rest are **per screen** — re-render fully from that screen's own data on e
    here too, not just long-form prose), stating the wording chosen and citing the specific rule from
    the *named* tone-of-voice guide — never a vague "per guidelines." A screen with only 1-2 rows here
    despite having many labeled nav items/stat cards is a sign coverage was left too narrow, not that
-   the screen "didn't have much copy." Swaps with the Tone switcher; no guide named → say so plainly.
+   the screen "didn't have much copy." Swaps with the Tone switcher if a Tone compare was requested; no guide named → say so plainly.
    **Link to the named guide's actual Asana detail page** — same discipline as Research Insight/UX
    Rationale.
 
@@ -644,12 +651,12 @@ source file anywhere) can't be patched in place, however small the fix looks:
 
 - Which DS composition mode was used (name it if reused) and whether it had to be asked; which
   tone-of-voice/branding guide(s) were used, if either applied.
-- Which live switchers actually appear in the chrome and each one's states — confirm explicitly
-  when a dimension has none, so it's clear that's because it genuinely had one state, not an
-  oversight. If a Design Option switcher was built: its scope (screen-scoped/system-wide), what's
+- Which live switchers actually appear in the chrome and each one's states, and which request
+  created each one — confirm explicitly that every dimension without a compare request has no
+  switcher. If a Design Option switcher was built: its scope (screen-scoped/system-wide), what's
   actually different structurally (not just "it's different"), and whether it carries a distinct
   DS token identity or interaction mechanism, not just a different layout. Name which dimensions
-  were framed as a requested comparison vs. an open exploration switcher.
+  were framed as a requested comparison (every switcher should be).
 - If implementation ran via a background fork: confirm its "done"/"verified" claims were
   independently re-checked from the orchestrating session (real computed styles/DOM measurements,
   simulated interaction, console check), not just relayed — name anything verification
@@ -662,8 +669,8 @@ source file anywhere) can't be patched in place, however small the fix looks:
   standing in), each with a source link — for any genuinely sparse section (Research/UX Rationale/
   Branding), confirm the underlying source was freshly re-read this run and is actually sparse
   upstream, not assumed broken.
-- If a Branding/Tone dimension has an explicit single-theme instruction: confirm no switcher
-  control exists for it at all. If a Copywriting card claims a tone/language difference: confirm
+- If a Branding/Tone dimension had one named guide (no compare): confirm no switcher control or
+  baseline state exists for it at all. If a Copywriting card claims a tone/language difference: confirm
   the cited example is the literal text the live component renders under that state.
 - Whether UX Rationale had real Design Knowledge content to cite per screen, or was honest about
   finding nothing — don't let this read as "done" if most cards just say "no rationale found."
