@@ -247,6 +247,31 @@ already-built single-file bundle (short variable names reused across unrelated c
 edits unsafe; each round had to trace exact scope with `@babel/parser` before touching a string).
 Building tone coverage in from the start avoids that entirely.
 
+## v1.34.0 — Exit returns to the pill; chrome is one vertical column (2026-09-23)
+
+**Real defect, Fund transfer risk-check build (MB, MBDS mode 2).** Two things the requester
+rejected on the published prototype:
+
+1. **Exit made the chrome vanish.** v1.26.0's wording ("Exit Presentation removes the chrome
+   entirely") was followed literally: after Exit only a faint 🎭 at 40% opacity was left in the
+   bottom-left corner, which read as "gone for good". The requester: "ฉันไม่เคยมี exit presentation
+   ที่กดแล้วหายไปตลอดการ". The reference build (Staff portal) never did this — its Exit button
+   returns to the collapsed `🎭 Presentation Mode` pill. Rule now: Exit → pill, always; no
+   separate minimize control duplicating it.
+2. **Panels were laid out side by side** (and, below 1024px, a responsive fallback stacked them
+   in a different order). The requester pointed to the Staff portal artifact as the standard.
+   Measured off that artifact's source: one fixed column, `flex-direction:column`,
+   `align-items:flex-end`, gap 12, `max-height:calc(100vh - 48px)` — Exit bar → Prototype Settings
+   (380 wide, body ≤260px) → Design Review (380 wide, ≤`calc(100vh - 160px)`, header draggable).
+   No breakpoint changes that order.
+
+Also: the collapsed pill is now the dark `surface-neutral-primary-inverse` pill labeled
+`🎭 Presentation Mode` (as the reference draws it), not a white pill with only the emoji + grip.
+
+**How to avoid repeating it:** when the requester names a reference build, read that artifact's
+source for the chrome before building — the literal spec lives there, and paraphrased wording in
+this file can drift from it.
+
 ## v1.33.0 — `cib-bbl.vercel.app` wired as a real MCP server, not scraped HTML (2026-09-14)
 
 Source 1b was reading `cib-bbl.vercel.app` by fetching its search/insights HTML pages and opening
