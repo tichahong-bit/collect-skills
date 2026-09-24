@@ -1,0 +1,1028 @@
+<title>จัดหมวด Component</title>
+<meta name="description" content="Card sort และ Tree test สำหรับทีม UI เพื่อหาโครง IA ของ design system portal">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F3F4F7; --surface:#FFFFFF; --surface-2:#F8F9FB; --line:#DCE0E8; --line-strong:#C3C9D6;
+  --ink:#1B2130; --muted:#5B6475; --faint:#8A92A3;
+  --accent:#3453D1; --accent-ink:#FFFFFF; --accent-soft:#E7ECFD; --accent-line:#B9C6F6;
+  --good:#1E8E5A; --good-soft:#E3F4EB; --warn:#B96F0E; --warn-soft:#FBF0DE; --bad:#C0392B; --bad-soft:#FBE7E4;
+  --card-shadow:0 1px 0 rgba(27,33,48,.06),0 1px 3px rgba(27,33,48,.08);
+  --r:10px;
+  --sans:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#11141B; --surface:#1A1E28; --surface-2:#151922; --line:#2B3140; --line-strong:#3A4152;
+    --ink:#E8EBF1; --muted:#A0A8B8; --faint:#737C8E;
+    --accent:#7F97FF; --accent-ink:#0F1320; --accent-soft:#232C4B; --accent-line:#3C4B80;
+    --good:#4CC38A; --good-soft:#15301F; --warn:#E3A54B; --warn-soft:#33260F; --bad:#F07A6C; --bad-soft:#3A1B17;
+    --card-shadow:0 1px 0 rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#11141B; --surface:#1A1E28; --surface-2:#151922; --line:#2B3140; --line-strong:#3A4152;
+  --ink:#E8EBF1; --muted:#A0A8B8; --faint:#737C8E;
+  --accent:#7F97FF; --accent-ink:#0F1320; --accent-soft:#232C4B; --accent-line:#3C4B80;
+  --good:#4CC38A; --good-soft:#15301F; --warn:#E3A54B; --warn-soft:#33260F; --bad:#F07A6C; --bad-soft:#3A1B17;
+  --card-shadow:0 1px 0 rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{font-family:var(--sans);color:var(--ink);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:0 48px}
+h1,h2,h3{line-height:1.3;text-wrap:balance;margin:0}
+h1{font-size:1.6rem;font-weight:700}
+h2{font-size:1.2rem;font-weight:600}
+h3{font-size:1rem;font-weight:600}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(8px);margin-inline:-16px;padding:12px 16px 0;border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-weight:700;font-size:1.05rem}
+.who{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.who img{width:22px;height:22px;border-radius:50%}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:8px}
+.tab{border:0;background:none;padding:10px 14px;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-left:6px;vertical-align:middle}
+
+main{padding-top:24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.btn{border:1px solid var(--line-strong);background:var(--surface);padding:9px 16px;border-radius:8px;font-weight:500}
+.btn:hover{border-color:var(--accent-line)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;padding:2px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.pill.good{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.pill.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.notice{padding:12px 14px;border-radius:8px;background:var(--warn-soft);color:var(--ink);font-size:.9rem}
+.notice.info{background:var(--accent-soft)}
+
+/* landing */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.lede{font-size:1.05rem;color:var(--muted);max-width:62ch}
+.method{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.method .meta{display:flex;gap:8px;flex-wrap:wrap}
+.steps{margin:0;padding-left:1.2em;color:var(--muted);font-size:.9rem}
+.minicards{display:flex;flex-wrap:wrap;gap:6px}
+.mini{font-size:.78rem;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2)}
+
+/* card sort */
+.cs-layout{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.cs-layout{grid-template-columns:1fr}}
+.pile{position:sticky;top:120px;max-height:calc(100vh - 140px);overflow:auto}
+@media (max-width:860px){.pile{position:static;max-height:none}}
+.zone{border:1.5px dashed var(--line-strong);border-radius:var(--r);padding:12px;background:var(--surface-2);min-height:64px;transition:background .15s,border-color .15s}
+.zone.target{border-color:var(--accent);background:var(--accent-soft)}
+.zone.can-drop{border-color:var(--accent-line)}
+.cards{display:flex;flex-wrap:wrap;gap:8px}
+.card{position:relative;display:flex;flex-direction:column;gap:2px;width:100%;max-width:200px;flex:1 1 150px;text-align:left;padding:9px 11px 9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:var(--card-shadow);user-select:none;touch-action:manipulation}
+.card:hover{border-color:var(--accent-line)}
+.card[aria-pressed="true"]{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:0}
+.card .nm{font-weight:600;font-size:.9rem;line-height:1.3}
+.card .ds{font-size:.76rem;color:var(--muted);line-height:1.35}
+.card .no{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:.65rem;color:var(--faint)}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.group{display:flex;flex-direction:column;gap:8px}
+.group-head{display:flex;gap:6px;align-items:center}
+.group-head input{flex:1;min-width:0;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;background:var(--surface);font-weight:600}
+.group-head input.invalid{border-color:var(--bad)}
+.icon-btn{border:0;background:none;color:var(--muted);padding:4px 6px;border-radius:6px}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.group .count{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.zone .cards .card{max-width:none;flex:1 1 140px}
+.unsure-zone{border-style:solid;background:var(--warn-soft);border-color:transparent}
+.hint{font-size:.85rem;color:var(--muted)}
+.bar{position:sticky;bottom:0;margin-top:16px;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 -4px 16px rgba(0,0,0,.05)}
+
+/* tree test */
+.tt{max-width:760px;margin:0 auto}
+.task{padding:16px 18px;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent-line)}
+.task .q{font-size:1.08rem;font-weight:500}
+.tree{list-style:none;margin:0;padding:0}
+.tree ul{list-style:none;margin:0;padding-left:22px;border-left:1px solid var(--line);margin-left:11px}
+.node{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:6px;font-size:.95rem}
+.node:hover{background:var(--surface-2)}
+.node .chev{width:14px;display:inline-block;color:var(--muted);transition:transform .15s;font-family:var(--mono)}
+.node[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.node.leaf .chev{visibility:hidden}
+.node.cat{font-weight:600}
+.node.chosen{background:var(--accent);color:var(--accent-ink)}
+.progress{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.survey label{display:flex;gap:8px;align-items:center;padding:4px 0}
+textarea{width:100%;min-height:90px;border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface)}
+
+/* results */
+.lock{max-width:380px;margin:40px auto;text-align:center}
+.pin{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.pin input{width:52px;height:60px;text-align:center;font-size:1.6rem;font-family:var(--mono);border:1px solid var(--line-strong);border-radius:10px;background:var(--surface)}
+.pin.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.pin.shake{animation:none}*{transition:none!important}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.kpi .v{font-family:var(--mono);font-size:1.6rem;font-weight:500}
+.kpi .l{font-size:.82rem;color:var(--muted)}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap}
+.subtab{border:1px solid var(--line);background:var(--surface);padding:6px 14px;border-radius:999px;font-size:.88rem;color:var(--muted)}
+.subtab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.scroll{overflow-x:auto}
+table.data{border-collapse:collapse;width:100%;font-size:.88rem}
+table.data th,table.data td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.data th{font-weight:600;color:var(--muted);font-size:.8rem;white-space:nowrap}
+table.data td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.best{background:var(--good-soft)}
+.meter{display:flex;align-items:center;gap:8px;min-width:120px}
+.meter .track{flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+.meter .track i{display:block;height:100%;background:var(--accent)}
+.meter.good .track i{background:var(--good)}
+.meter.warn .track i{background:var(--warn)}
+.meter.bad .track i{background:var(--bad)}
+.cluster{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.cluster-names{display:flex;flex-wrap:wrap;gap:6px}
+.tagname{font-size:.8rem;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--ink)}
+.tagname b{font-family:var(--mono);font-weight:500;color:var(--muted);margin-left:4px}
+.matrix{border-collapse:collapse;font-size:.7rem}
+.matrix td{width:16px;height:16px;padding:0;border:1px solid var(--surface)}
+.matrix th{font-weight:500;color:var(--muted);white-space:nowrap;padding:0 6px 0 0;text-align:right;font-size:.72rem}
+.matrix thead th{writing-mode:vertical-rl;transform:rotate(180deg);text-align:left;padding:6px 0 0;height:120px}
+details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--surface)}
+details summary{cursor:pointer;font-weight:500}
+.range{display:flex;align-items:center;gap:10px}
+.range input{width:180px}
+.avatar{width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:6px}
+.ia-map{display:flex;flex-direction:column;align-items:stretch}
+.ia-root{align-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;margin-bottom:26px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.ia-root svg{width:40px;height:40px;fill:var(--faint)}
+.ia-root::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:26px;background:var(--ink)}
+.ia-cols{display:flex;gap:18px;align-items:flex-start;padding-top:22px;min-width:max-content;position:relative}
+.ia-cols::before{content:"";position:absolute;top:0;left:94px;right:94px;height:2px;background:var(--ink)}
+.ia-col{width:188px;flex:0 0 188px;display:flex;flex-direction:column;position:relative}
+.ia-col::before{content:"";position:absolute;left:50%;top:-22px;width:2px;height:22px;background:var(--ink)}
+.ia-head{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;min-height:48px;padding:8px 10px;background:#4FBFE0;color:#fff}
+.ia-head b{font-size:.9rem;font-weight:600}
+.ia-head span{font-size:.68rem;opacity:.92;line-height:1.3}
+.ia-items{display:flex;flex-direction:column;gap:12px;position:relative;padding:18px 0 0 26px}
+.ia-items::before{content:"";position:absolute;left:12px;top:0;bottom:var(--tail,20px);width:2px;background:var(--ink)}
+.ia-item,.ia-sub{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;min-height:40px;padding:7px 10px;background:var(--c,#2F3A74);color:var(--ct,#fff);font-size:.82rem;line-height:1.3}
+.ia-item::before,.ia-sub::before{content:"";position:absolute;left:-14px;top:50%;width:10px;height:2px;background:var(--ink)}
+.ia-item::after,.ia-sub::after{content:"";position:absolute;left:-5px;top:calc(50% - 4px);border:4px solid transparent;border-left:5px solid var(--ink);border-right:0}
+.ia-sub{font-weight:600}
+.ia-subitems{display:flex;flex-direction:column;gap:10px;position:relative;padding:10px 0 0 24px;margin-left:0}
+.ia-subitems::before{content:"";position:absolute;left:10px;top:0;bottom:20px;width:2px;background:var(--ink)}
+.ia-item.lvl3{background:color-mix(in srgb,var(--c) 22%,var(--surface));color:var(--ink);outline:1.5px dashed var(--c);outline-offset:-1.5px}
+.ia-item small{font-size:.66rem;opacity:.9;line-height:1.25}
+.ia-badge{position:absolute;top:-8px;right:-6px;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--surface);border:1.5px solid;line-height:1.4}
+.ia-badge.moved{color:var(--bad);border-color:var(--bad)}
+.ia-badge.link{color:var(--accent);border-color:var(--accent)}
+.ia-badge.weak{color:var(--warn);border-color:var(--warn)}
+.ia-tree{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ia-tree .ia-tree{padding-left:18px;margin:6px 0 4px 8px;border-left:1px solid var(--line);flex-direction:row;flex-wrap:wrap;gap:6px}
+.ia-tree li{min-width:0}
+.ia-tree .ia-tree:has(> li > .ia-cat){flex-direction:column;flex-wrap:nowrap}
+.ia-cat{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-weight:600;padding:4px 0}
+.ia-meta{font-weight:400;font-size:.78rem;color:var(--muted)}
+.ia-leaf{display:inline-flex;flex-direction:column;gap:2px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:.86rem;max-width:320px}
+.ia-leaf.moved{border-color:var(--bad);background:var(--bad-soft)}
+.ia-leaf.link{border-color:var(--accent);background:var(--accent-soft);border-style:dashed}
+.ia-leaf.weak{border-color:var(--warn);background:var(--warn-soft)}
+.ia-note{font-size:.74rem;color:var(--muted)}
+.ia-dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;border:1px solid}
+.ia-dot.moved{background:var(--bad-soft);border-color:var(--bad)}
+.ia-dot.link{background:var(--accent-soft);border-color:var(--accent);border-style:dashed}
+.ia-dot.weak{background:var(--warn-soft);border-color:var(--warn)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:.9rem;z-index:50}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand"><b>จัดหมวด Component</b><span class="muted small">IA lab · design system portal</span></div>
+      <div class="who" id="who"><span class="muted small">กำลังเชื่อมต่อ…</span></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="ส่วนของหน้า">
+      <button class="tab" role="tab" id="tab-home" data-view="home" aria-selected="true">หน้าแรก</button>
+      <button class="tab" role="tab" id="tab-cs" data-view="cs" aria-selected="false">1 · Card sort</button>
+      <button class="tab" role="tab" id="tab-tt" data-view="tt" aria-selected="false">2 · Tree test</button>
+      <button class="tab" role="tab" id="tab-res" data-view="res" aria-selected="false">ผลลัพธ์</button>
+    </nav>
+  </header>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ======================= CONFIG ======================= */
+/* รายการการ์ด: วิเคราะห์จาก eBay Evo, Carbon, Astryx, Material 2, SGDS + flow ธนาคาร */
+const CARDS = [
+  ["button","Button","ปุ่มกดสั่งงาน เช่น ยืนยัน, ถัดไป"],
+  ["icon-button","Icon button","ปุ่มที่มีแค่ไอคอน เช่น ปิด, แชร์"],
+  ["link","Link","ข้อความที่กดแล้วไปหน้าอื่น"],
+  ["segmented","Segmented control","ปุ่มเลือก 1 จากกลุ่มที่อยู่ติดกัน"],
+  ["text-field","Text field","ช่องกรอกข้อความบรรทัดเดียว"],
+  ["text-area","Text area","ช่องกรอกข้อความหลายบรรทัด"],
+  ["select","Select / Dropdown","เลือก 1 ตัวเลือกจากรายการที่ซ่อนไว้"],
+  ["combobox","Combobox","พิมพ์ค้นแล้วเลือกจากรายการ"],
+  ["checkbox","Checkbox","ติ๊กเลือกได้หลายข้อ"],
+  ["radio","Radio button","เลือกได้ข้อเดียวจากตัวเลือกที่เห็นทั้งหมด"],
+  ["switch","Switch","เปิด/ปิดค่าทันที"],
+  ["stepper-input","Number stepper","ปุ่ม − / + ปรับจำนวน"],
+  ["date-picker","Date picker","เลือกวันที่จากปฏิทิน"],
+  ["file-upload","File upload","แนบไฟล์หรือรูป"],
+  ["search","Search field","ช่องค้นหา"],
+  ["pin","PIN / OTP input","ช่องกรอกรหัสทีละหลัก"],
+  ["tabs","Tabs","สลับเนื้อหาในหน้าเดียวกัน"],
+  ["top-bar","Top app bar","แถบบนสุด มีชื่อหน้า ปุ่มย้อนกลับ"],
+  ["bottom-nav","Bottom navigation","เมนูหลักด้านล่างจอ"],
+  ["side-nav","Side navigation","เมนูด้านข้าง (เว็บ/แท็บเล็ต)"],
+  ["breadcrumb","Breadcrumb","บอกตำแหน่ง หน้าแรก › หมวด › หน้านี้"],
+  ["pagination","Pagination","เลขหน้า 1 2 3 …"],
+  ["stepper","Stepper","แสดงขั้นตอน 1 → 2 → 3"],
+  ["toast","Toast","ข้อความแจ้งสั้น ๆ แล้วหายไปเอง"],
+  ["alert","Alert / Banner","กล่องแจ้งเตือนที่อยู่ในหน้า"],
+  ["progress","Progress bar","แถบความคืบหน้า"],
+  ["spinner","Spinner","วงกลมหมุนขณะโหลด"],
+  ["skeleton","Skeleton","โครงสีเทาแทนเนื้อหาที่กำลังโหลด"],
+  ["badge","Badge","ตัวเลข/จุดแจ้งเตือนบนไอคอน"],
+  ["modal","Modal / Dialog","หน้าต่างที่ขึ้นทับหน้าจอ"],
+  ["bottom-sheet","Bottom sheet","แผงที่เลื่อนขึ้นจากด้านล่าง"],
+  ["tooltip","Tooltip","ข้อความช่วยเหลือเล็ก ๆ เมื่อชี้หรือแตะ"],
+  ["popover","Popover","กล่องเล็กลอยขึ้นมา มีเนื้อหาหรือปุ่มได้"],
+  ["overflow","Overflow menu","เมนู ⋯ รวมคำสั่งเพิ่มเติม"],
+  ["card","Card","กล่องรวมเนื้อหาของเรื่องหนึ่ง"],
+  ["list-item","List item","แถวในรายการ เช่น รายการเดินบัญชี"],
+  ["table","Table","ตารางข้อมูล"],
+  ["accordion","Accordion","หัวข้อที่กดเพื่อกางหรือพับ"],
+  ["chip","Tag / Chip","ป้ายสั้น ๆ หรือตัวกรองที่กดได้"],
+  ["avatar","Avatar","รูปหรือตัวอักษรย่อของคน"],
+  ["divider","Divider","เส้นคั่น"],
+  ["carousel","Carousel","ภาพหรือการ์ดที่เลื่อนซ้าย-ขวา"],
+  ["form","Form layout","การจัดวางฟอร์มหลายช่องในหน้าเดียว"],
+  ["login","Login","หน้าหรือส่วนเข้าสู่ระบบ"],
+  ["filter","Filter & sort","ตัวกรองและการเรียงรายการ"],
+  ["empty","Empty state","หน้าตาเมื่อยังไม่มีข้อมูล"],
+  ["confirm","Confirmation","การยืนยันก่อนทำรายการสำคัญ"],
+  ["error","Error / Offline","หน้าตาเมื่อเกิดข้อผิดพลาดหรือไม่มีเน็ต"],
+  ["onboarding","Onboarding","แนะนำการใช้งานครั้งแรก"],
+  ["hero","Hero banner","แบนเนอร์หลักด้านบนหน้า"],
+  ["transfer","Money transfer","flow โอนเงินตั้งแต่ต้นจนจบ"],
+  ["otp-flow","OTP verification","flow ยืนยันตัวตนด้วยรหัส OTP"]
+].map(([id,name,desc],i)=>({id,name,desc,no:i+1}));
+const CARD_BY_ID = Object.fromEntries(CARDS.map(c=>[c.id,c]));
+const CARD_BY_NAME = Object.fromEntries(CARDS.map(c=>[c.name,c]));
+
+const L = n => ({n}); const C = (n, ...c) => ({n, c});
+const PATTERNS_A = [ C("Forms", L("Form layout"), L("Login"), L("Filter & sort")), C("States & feedback", L("Empty state"), L("Confirmation"), L("Error / Offline")), C("Onboarding & marketing", L("Onboarding"), L("Hero banner")) ];
+const FLOWS = C("Common flows", L("Money transfer"), L("OTP verification"));
+const TREES = {
+  A: { label:"A · จัดตามหน้าที่", desc:"Component แบ่ง 6 หมวดตามหน้าที่ แยก Pattern และ Flow",
+    root:[
+      C("Components",
+        C("Actions", L("Button"), L("Icon button"), L("Link"), L("Segmented control")),
+        C("Inputs & selection", L("Text field"), L("Text area"), L("Select / Dropdown"), L("Combobox"), L("Checkbox"), L("Radio button"), L("Switch"), L("Number stepper"), L("Date picker"), L("File upload"), L("Search field"), L("PIN / OTP input")),
+        C("Navigation", L("Tabs"), L("Top app bar"), L("Bottom navigation"), L("Side navigation"), L("Breadcrumb"), L("Pagination"), L("Stepper")),
+        C("Feedback & status", L("Toast"), L("Alert / Banner"), L("Progress bar"), L("Spinner"), L("Skeleton"), L("Badge")),
+        C("Overlays", L("Modal / Dialog"), L("Bottom sheet"), L("Tooltip"), L("Popover"), L("Overflow menu")),
+        C("Content & data display", L("Card"), L("List item"), L("Table"), L("Accordion"), L("Tag / Chip"), L("Avatar"), L("Divider"), L("Carousel"))
+      ),
+      C("Patterns", ...PATTERNS_A), FLOWS ]},
+  B: { label:"B · แยก basic กับ composite", desc:"แบ่งตามความซับซ้อน: ชิ้นเดี่ยว กับชิ้นที่ประกอบจากหลายชิ้น",
+    root:[
+      C("Basic components",
+        C("Controls", L("Button"), L("Icon button"), L("Link"), L("Checkbox"), L("Radio button"), L("Switch")),
+        C("Input fields", L("Text field"), L("Text area"), L("Select / Dropdown"), L("Search field"), L("Number stepper"), L("PIN / OTP input")),
+        C("Indicators & display", L("Badge"), L("Tag / Chip"), L("Avatar"), L("Divider"), L("Spinner"), L("Progress bar"), L("Skeleton"), L("Tooltip"))
+      ),
+      C("Composite components",
+        C("Navigation", L("Tabs"), L("Top app bar"), L("Bottom navigation"), L("Side navigation"), L("Breadcrumb"), L("Pagination"), L("Stepper"), L("Segmented control")),
+        C("Complex inputs", L("Combobox"), L("Date picker"), L("File upload")),
+        C("Containers", L("Card"), L("List item"), L("Table"), L("Accordion"), L("Carousel")),
+        C("Overlays", L("Modal / Dialog"), L("Bottom sheet"), L("Popover"), L("Overflow menu")),
+        C("Messages", L("Toast"), L("Alert / Banner"))
+      ),
+      C("Patterns", ...PATTERNS_A), FLOWS ]},
+  C: { label:"C · แบบ SGDS (Components / Blocks)", desc:"Component เรียง A–Z ไม่แบ่งหมวด แยก Blocks และ Flows",
+    root:[
+      C("Components", ...CARDS.slice(0,42).map(c=>c.name).sort((a,b)=>a.localeCompare(b)).map(L)),
+      C("Blocks", C("Form blocks", L("Form layout"), L("Login"), L("Filter & sort")), C("Feedback blocks", L("Empty state"), L("Confirmation"), L("Error / Offline")), C("Marketing blocks", L("Onboarding"), L("Hero banner"))),
+      C("Flows & templates", L("Money transfer"), L("OTP verification")) ]}
+};
+const TASKS = [
+  {id:"t0", warm:true, q:"คุณต้องการปุ่มให้ผู้ใช้กด “ยืนยันการโอน” จะไปหาที่ไหน?", a:["Button"]},
+  {id:"t1", q:"ก่อนลบรายชื่อผู้รับโอน ต้องมีหน้าต่างเด้งขึ้นมาถามว่า “แน่ใจไหม?” จะไปหาที่ไหน?", a:["Modal / Dialog","Confirmation"]},
+  {id:"t2", q:"หน้ารายการโปรดของผู้ใช้ใหม่ยังไม่มีข้อมูลเลย อยากรู้ว่าควรแสดงอะไรแทน จะไปดูที่ไหน?", a:["Empty state"]},
+  {id:"t3", q:"ต้องมีช่องให้ผู้ใช้กรอกรหัส 6 หลักที่ได้จาก SMS จะไปหาที่ไหน?", a:["PIN / OTP input","OTP verification"]},
+  {id:"t4", q:"ต้องให้ผู้ใช้เลือกประเภทบัญชี 1 อย่างจาก 8 แบบ โดยไม่กินพื้นที่หน้าจอ จะไปหาที่ไหน?", a:["Select / Dropdown"]},
+  {id:"t5", q:"หลังกดบันทึก อยากให้มีข้อความสั้น ๆ ว่า “บันทึกแล้ว” ขึ้นมาแล้วหายไปเอง จะไปหาที่ไหน?", a:["Toast"]},
+  {id:"t6", q:"ต้องมีเมนูหลัก 4–5 ปุ่มติดอยู่ด้านล่างจอตลอดเวลา จะไปหาที่ไหน?", a:["Bottom navigation"]},
+  {id:"t7", q:"อยากให้ผู้ใช้ปัดดูรูปโปรโมชันทีละรูป ซ้าย-ขวา จะไปหาที่ไหน?", a:["Carousel"]},
+  {id:"t8", q:"อยากบอกผู้ใช้ว่าตอนนี้อยู่ขั้นที่ 2 จากทั้งหมด 4 ขั้นของการสมัคร จะไปหาที่ไหน?", a:["Stepper"]},
+  {id:"t9", q:"เมื่อผู้ใช้แตะไอคอน ⓘ อยากให้มีข้อความอธิบายสั้น ๆ ขึ้นมา จะไปหาที่ไหน?", a:["Tooltip","Popover"]},
+  {id:"t10", q:"อยากให้ผู้ใช้เลือกดูเฉพาะรายการเดินบัญชีของเดือนนี้ หรือเฉพาะเงินเข้า จะไปดูแนวทางที่ไหน?", a:["Filter & sort"]}
+];
+const PASSCODE = "0000";
+
+/* ---------- Task → ผลลัพธ์ → สิ่งที่ทำกับ portal ----------
+   ctx: { v:version, n, success, direct, skip, chosen:{name:count}, first:{top:count}, share(name), firstShare(top) } */
+const GUIDE = {
+  t0:{ why:"ข้ออุ่นเครื่อง ให้คุ้นกับวิธีกดเมนู และใช้คัดคนที่ไม่ตั้งใจตอบ",
+    rules:[ c=> c.success<90 && ["warn","มีคนตอบข้อง่ายผิด","ดูรายชื่อคนที่ตอบผิดข้อนี้ในแท็บผู้ตอบ ถ้าตอบผิดหลายข้อแบบไม่มีเหตุผล พิจารณาตัดข้อมูลของคนนั้นออก"] ] },
+  t1:{ why:"เส้นแบ่ง component (Modal) กับ pattern (Confirmation) — คนไปหาของชิ้นเดียว หรือไปหาวิธีใช้",
+    rules:[
+      c=> c.share("Modal / Dialog")>=30 && c.share("Confirmation")>=30 && ["info","คนหาทั้งสองที่พอ ๆ กัน","ทำลิงก์ข้ามกัน: หน้า Modal มีลิงก์ไป pattern Confirmation และหน้า Confirmation บอกว่าใช้ Modal (ให้ของอยู่ได้สองที่)"],
+      c=> c.share("Modal / Dialog")>=60 && ["info","คนส่วนใหญ่ไปหา Modal (component)","ใส่แนวทางการยืนยันไว้ในหน้า Modal ด้วย เพราะคนจะเริ่มหาจาก component ก่อน"],
+      c=> c.share("Confirmation")>=60 && ["good","คนส่วนใหญ่หา pattern เจอ","หมวด pattern ใช้ได้ เก็บ Confirmation ไว้เป็น pattern และลิงก์ไปที่ Modal"],
+      c=> c.success<50 && ["bad","หาไม่เจอทั้งสองที่",`ชื่อหมวดที่ Modal อยู่ (${c.v==="C"?"Components":"Overlays"}) สื่อไม่ได้ ลองเปลี่ยนชื่อหมวด หรือเพิ่มคำอธิบายใต้ชื่อหมวด`] ] },
+  t2:{ why:"หา pattern เจอมั้ย — “สถานะหน้าว่าง” คนไปหาใน pattern หรือหลงไปใน component",
+    rules:[
+      c=> c.success<50 && c.firstShare(c.v==="C"?"Components":(c.v==="B"?"Basic components":"Components"))>=40 && ["bad","คนไปหาใน component ไม่ได้มองหมวด pattern","ทำให้ Empty state เจอได้จากฝั่ง component ด้วย (เช่น หัวข้อ “สถานะ” ในหน้า List/Table/Card) หรือเปลี่ยนชื่อหมวด Patterns ให้สื่อกว่านี้"],
+      c=> c.success>=75 && ["good","หมวด pattern หาเจอ","เก็บ Empty state และ state อื่นไว้ในหมวด pattern ได้"] ] },
+  t3:{ why:"เส้นแบ่ง component (ช่องกรอกรหัส) กับ flow (OTP ทั้งขั้นตอน)",
+    rules:[
+      c=> c.share("OTP verification")>=50 && ["info","คนส่วนใหญ่ไปหา flow","Common flows เป็นทางเข้าหลัก ในหน้า flow OTP ต้องมีลิงก์ไปที่ component PIN / OTP input"],
+      c=> c.share("PIN / OTP input")>=50 && ["info","คนส่วนใหญ่ไปหา component","ในหน้า PIN / OTP input ต้องมีลิงก์ไปที่ flow OTP verification"],
+      c=> c.success<50 && ["bad","หาไม่เจอทั้งสองที่","ชื่อ “Common flows” หรือหมวด input ไม่สื่อ ลองเปลี่ยนชื่อ และใส่คำเรียกอื่นในระบบค้นหา (OTP, รหัส, PIN)"] ] },
+  t4:{ why:"ชื่อหมวด input ชัดมั้ย และ dropdown ถูกมองเป็นของพื้นฐานหรือไม่",
+    rules:[
+      c=> (c.share("Radio button")+c.share("Combobox"))>=25 && ["warn","คนสับสนระหว่าง Select / Radio / Combobox","หน้า Select ต้องมีตัวช่วยเลือก: < 5 ตัวเลือกใช้ Radio, 5 ถึงราว 15 ใช้ Select, เกินนั้นใช้ Combobox"],
+      c=> c.success<60 && c.v==="B" && ["bad","เมนู B หา Select ยาก","การแยก Basic / Composite ทำให้ช่องกรอกกระจายหลายที่ ควรรวม input ทั้งหมดไว้หมวดเดียว"] ] },
+  t5:{ why:"หมวด feedback — A รวมไว้ที่ Feedback ส่วน B แยกไปเป็น Messages ใน composite",
+    rules:[
+      c=> c.share("Alert / Banner")>=25 && ["warn","คนสับสน Toast กับ Alert / Banner","ใส่ตารางเทียบ “Toast vs Banner” ในทั้งสองหน้า"],
+      c=> c.v==="B" && c.success<60 && ["bad","เมนู B หา Toast ยาก","การแยก Messages ไปไว้ใน composite ไม่ตรงกับที่คนคิด ควรรวมของที่เป็น feedback ไว้หมวดเดียว"] ] },
+  t6:{ why:"Navigation นับเป็นอะไร — B จัดไว้ใน composite",
+    rules:[
+      c=> c.v==="B" && c.success<60 && ["bad","เมนู B หาเมนูนำทางยาก","ให้ Navigation เป็นหมวดระดับบนของตัวเอง ไม่ซ้อนอยู่ใต้ composite"],
+      c=> c.v==="C" && c.direct<60 && ["warn","เรียง A–Z แล้วคนลังเล","ถ้าใช้ list A–Z ต้องมีตัวกรองตามหมวดหรือช่องค้นหาช่วย"] ] },
+  t7:{ why:"ชื่อหมวดของเนื้อหา — “Content & data display” กับ “Containers” ชื่อไหนสื่อกว่า",
+    rules:[
+      c=> c.success<60 && ["bad","หา Carousel ยาก",`ดูว่าคลิกแรกไปหมวดไหน (${c.topFirst||"—"}) แล้วพิจารณาย้าย Carousel ไปที่นั่น หรือเปลี่ยนชื่อหมวดเนื้อหา`] ] },
+  t8:{ why:"ชื่อที่ชนกันโดยตั้งใจ — Stepper / Number stepper / Progress bar",
+    rules:[
+      c=> c.share("Number stepper")>=20 && ["bad","คนสับสน Stepper กับ Number stepper","เปลี่ยนชื่อให้ไม่ชนกัน เช่น “Step indicator” กับ “Quantity stepper” และใส่คำเรียกอื่นในระบบค้นหา"],
+      c=> c.share("Progress bar")>=20 && ["warn","คนมอง Stepper เป็น feedback","ทำลิงก์ข้ามระหว่าง Stepper กับ Progress bar หรือย้าย Stepper ไปอยู่หมวด feedback"] ] },
+  t9:{ why:"ของที่ถูกแยกคนละหมวด — B เอา Tooltip ไว้ใน Basic แต่ Popover อยู่ใน Composite",
+    rules:[
+      c=> c.v==="B" && c.firstShare("Composite components")>=50 && ["warn","คนมอง Tooltip เป็น overlay","ย้าย Tooltip ไปอยู่กับ Overlays ไม่ใช่ Basic"],
+      c=> c.share("Tooltip")>=30 && c.share("Popover")>=30 && ["info","คนใช้ Tooltip และ Popover แทนกัน","ใส่ตารางเทียบ “Tooltip vs Popover” (มีปุ่ม/เนื้อหายาวได้หรือไม่) ในทั้งสองหน้า"] ] },
+  t10:{ why:"ชื่อหมวดของ pattern — Filter ถูกจัดไว้ใต้ “Forms”",
+    rules:[
+      c=> c.share("Tag / Chip")>=25 && ["warn","คนมองตัวกรองเป็น component (Chip)","ในหน้า Tag / Chip ใส่ลิงก์ไป pattern Filter & sort"],
+      c=> c.success<60 && ["bad","หา Filter & sort ยาก","หมวด “Forms” ไม่สื่อว่ามีตัวกรอง ลองแยกหมวด “ข้อมูลและรายการ” หรือเปลี่ยนชื่อ"] ] }
+};
+
+document.documentElement.lang="th";
+/* ======================= STATE ======================= */
+let db=null, userNs=null, downloadsNs=null, uid=null, me=null, isOwner=false;
+let myDoc={}; let connecting=true; let dbError=null;
+let view=(()=>{try{return sessionStorage.getItem("ia-view")||"home"}catch(e){return "home"}})();
+const $ = (s,el=document)=>el.querySelector(s);
+const h = (tag, attrs={}, ...kids)=>{ const el=document.createElement(tag); for(const [k,v] of Object.entries(attrs||{})){ if(v==null||v===false) continue; if(k==="class") el.className=v; else if(k==="text") el.textContent=v; else if(k.startsWith("on")) el.addEventListener(k.slice(2),v); else el.setAttribute(k,v===true?"":v);} for(const k of kids.flat()){ if(k==null||k===false) continue; el.append(k.nodeType?k:document.createTextNode(String(k))); } return el; };
+function toast(msg){ const t=h("div",{class:"toast",role:"status",text:msg}); document.body.append(t); setTimeout(()=>t.remove(),2600); }
+const pct = (a,b)=> b? Math.round(a*100/b) : 0;
+const median = arr => { if(!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2? s[m] : (s[m-1]+s[m])/2; };
+const fmtSec = ms => ms==null? "—" : (ms/1000).toFixed(1)+" วิ";
+const store = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} } };
+
+/* ======================= CONNECT ======================= */
+(async function connect(){
+  try{
+    [db, userNs, downloadsNs] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("downloads")]);
+    if(userNs){ me = await userNs.me(); uid = me.id; isOwner = me.isOwner; }
+    if(db && uid){
+      const snap = await db.doc("responses/"+uid).get();
+      if(snap.exists) myDoc = JSON.parse(JSON.stringify(snap.data()));
+    }
+  }catch(e){ dbError = e; }
+  connecting=false; renderWho(); render();
+})();
+function renderWho(){
+  const w=$("#who"); w.textContent="";
+  if(connecting){ w.append(h("span",{class:"muted small",text:"กำลังเชื่อมต่อ…"})); return; }
+  if(!db||!uid){ w.append(h("span",{class:"pill warn",text:"บันทึกคำตอบไม่ได้ในหน้านี้"})); return; }
+  w.append(h("img",{src:me.avatarUrl,alt:""}), h("span",{text:(me.name||"คุณ")}));
+}
+async function saveMyDoc(){
+  if(!db||!uid) throw {code:"no_db"};
+  myDoc.uid=uid; myDoc.updatedAt=new Date().toISOString();
+  const nm=(typeof currentName==="function"? currentName() : "") || myDoc.displayName || "";
+  myDoc.displayName = nm.slice(0,60);
+  await db.doc("responses/"+uid).set(myDoc);
+}
+
+/* ======================= ROUTER ======================= */
+function setView(v){ view=v; try{sessionStorage.setItem("ia-view",v)}catch(e){} render(); window.scrollTo({top:0}); }
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+function render(){
+  document.querySelectorAll(".tab").forEach(b=>{ b.setAttribute("aria-selected", b.dataset.view===view); const d=b.querySelector(".dot"); if(d) d.remove(); if((b.dataset.view==="cs"&&myDoc.cardsort)||(b.dataset.view==="tt"&&myDoc.treetest)) b.append(h("span",{class:"dot",title:"ทำแล้ว"})); });
+  const v=$("#view"); v.textContent="";
+  if(resUnsub && view!=="res"){ resUnsub(); resUnsub=null; }
+  ({home:renderHome, cs:renderCardSort, tt:renderTreeTest, res:renderResults})[view](v);
+}
+
+/* ======================= HOME ======================= */
+let displayName = store.get("ia-name","");
+function currentName(){ return (displayName||"").trim(); }
+function nameField(){
+  const inp=h("input",{type:"text",id:"ia-name",maxlength:"60",placeholder:"เช่น กัส (UI)",value: displayName || myDoc.displayName || (me&&me.name) || ""});
+  if(!displayName && inp.value){ displayName=inp.value; }
+  inp.addEventListener("input",()=>{ displayName=inp.value; store.set("ia-name",displayName); document.querySelectorAll("[data-needs-name]").forEach(b=>b.disabled=!currentName()||!db||!uid); $("#name-hint").textContent = currentName()? "" : "กรอกชื่อก่อนเริ่มทำแบบทดสอบ"; });
+  return h("div",{class:"panel stack",style:"gap:8px"},
+    h("label",{for:"ia-name",class:"eyebrow",text:"ชื่อของคุณ"}),
+    inp,
+    h("p",{class:"small muted",text:"ใช้แสดงในหน้าผลลัพธ์ให้เจ้าของแบบทดสอบเห็นเท่านั้น คนอื่นในทีมมองไม่เห็นคำตอบของคุณ"}),
+    h("p",{class:"small",id:"name-hint",style:"color:var(--bad);min-height:1.2em",text: currentName()||inp.value? "" : "กรอกชื่อก่อนเริ่มทำแบบทดสอบ"}));
+}
+function renderHome(v){
+  const blocked = !connecting && (!db||!uid);
+  if(!displayName && myDoc.displayName) displayName=myDoc.displayName;
+  v.append(h("section",{class:"hero"},
+    h("div",{class:"stack"},
+      h("span",{class:"eyebrow",text:"ช่วยทีมจัดหมวด design system portal"}),
+      h("h1",{text:"ถ้าคุณต้องหา component สักตัว คุณจะไปหาที่ไหน?"}),
+      h("p",{class:"lede",text:"เรากำลังวางโครงเมนูของ portal ใหม่ อยากรู้ว่าทีม UI คิดและค้นหาของยังไง ไม่มีคำตอบถูกหรือผิด ตอบตามที่คุณคิดจริง ๆ ได้เลย"}),
+      h("p",{class:"muted small",text:`รายการ ${CARDS.length} ชิ้นวิเคราะห์จาก design system ที่ทีมศึกษา: eBay Evo, Carbon (IBM), Astryx (Meta), Material Design 2, SGDS และ flow ของธนาคาร`}),
+      blocked? h("div",{class:"notice",text:"หน้านี้บันทึกคำตอบของคุณไม่ได้ ลองเปิดจากลิงก์ที่ได้รับขณะเข้าสู่ระบบ claude.ai ด้วยบัญชีองค์กร หรือขอสิทธิ์ “Can interact” จากเจ้าของลิงก์"}) : null
+    ),
+    h("div",{class:"stack"},
+      nameField(),
+      methodCard("1","Card sort","ประมาณ 10–15 นาที","จัดการ์ด component เป็นกลุ่มตามที่คุณเข้าใจ แล้วตั้งชื่อกลุ่มเอง",
+        ["เลือกการ์ด แล้วกดกลุ่มที่อยากใส่ (หรือลากวางบนคอมพิวเตอร์)","สร้างกลุ่มได้ไม่จำกัด ตั้งชื่อตามที่คุณเรียก","ถ้าไม่แน่ใจ ใส่กอง “ไม่แน่ใจ” ได้"], myDoc.cardsort, ()=>setView("cs")),
+      methodCard("2","Tree test","ประมาณ 5 นาที",`ลองหาของ ${TASKS.length} ข้อในเมนูที่ร่างไว้ ระบบจะสุ่มเมนูให้ 1 แบบ`,
+        ["อ่านโจทย์ แล้วกดไล่เมนูไปจนเจอของที่คิดว่าใช่","ถ้าหาไม่เจอ กดข้ามได้","ท้ายสุดมีคำถามสั้น ๆ 1 ข้อ"], myDoc.treetest, ()=>setView("tt"))
+    )
+  ));
+}
+function methodCard(no,title,time,desc,steps,done,go){
+  return h("article",{class:"method"},
+    h("div",{class:"row",style:"justify-content:space-between"}, h("h2",{text:`${no} · ${title}`}), done? h("span",{class:"pill good",text:"ทำแล้ว ✓"}) : h("span",{class:"pill",text:time})),
+    h("p",{text:desc}),
+    h("ol",{class:"steps"}, steps.map(s=>h("li",{text:s}))),
+    h("div",{}, h("button",{class:"btn "+(done?"":"primary"),"data-needs-name":done?null:"1",disabled:(!done&&(!currentName()||!db||!uid))?true:null,onclick:go,text: done? "ดู / ทำใหม่":"เริ่ม "+title}))
+  );
+}
+
+/* ======================= CARD SORT ======================= */
+let cs = null; let csSelected=null; let csStart=null;
+function csInit(){
+  const draft = store.get("ia-cs-draft",null);
+  if(draft && draft.groups) { cs=draft; }
+  else cs = { pile: CARDS.map(c=>c.id).sort(()=>Math.random()-.5), groups: [], unsure: [] };
+  csStart = cs.startedAt || Date.now(); cs.startedAt=csStart;
+}
+function csSaveDraft(){ store.set("ia-cs-draft",cs); }
+function csMove(cardId, dest){ // dest: "pile" | "unsure" | groupIndex
+  cs.pile=cs.pile.filter(x=>x!==cardId); cs.unsure=cs.unsure.filter(x=>x!==cardId); cs.groups.forEach(g=>g.cards=g.cards.filter(x=>x!==cardId));
+  if(dest==="pile") cs.pile.unshift(cardId); else if(dest==="unsure") cs.unsure.push(cardId); else cs.groups[dest].cards.push(cardId);
+  csSelected=null; csSaveDraft(); renderCsBody();
+}
+function renderCardSort(v){
+  if(myDoc.cardsort && !csRedo){
+    v.append(h("section",{class:"panel stack",style:"max-width:640px;margin:0 auto"},
+      h("span",{class:"pill good",text:"ส่งคำตอบแล้ว ✓"}),
+      h("h1",{text:"ขอบคุณ! Card sort ของคุณถูกบันทึกแล้ว"}),
+      h("p",{class:"muted",text:`คุณจัดไว้ ${myDoc.cardsort.groups.length} กลุ่ม · ไม่แน่ใจ ${myDoc.cardsort.unsure.length} ใบ`}),
+      h("div",{class:"row"}, h("button",{class:"btn primary",onclick:()=>setView("tt"),text:"ไปทำ Tree test ต่อ"}), h("button",{class:"btn",onclick:()=>{csRedo=true; store.set("ia-cs-draft",null); cs=null; render();},text:"ทำใหม่ (ทับคำตอบเดิม)"}))
+    )); return;
+  }
+  if(!cs) csInit();
+  v.append(h("div",{class:"stack"},
+    h("div",{class:"stack",style:"gap:6px"}, h("h1",{text:"จัดการ์ดเป็นกลุ่มตามที่คุณเข้าใจ"}), h("p",{class:"muted",text:"คิดว่าถ้าคุณเป็นคนเปิด portal หาของ คุณอยากให้ของไหนอยู่ด้วยกัน แล้วตั้งชื่อกลุ่มตามคำที่คุณใช้จริง"})),
+    h("div",{id:"cs-body"})
+  ));
+  renderCsBody();
+}
+let csRedo=false;
+function cardEl(id, where){
+  const c=CARD_BY_ID[id];
+  const el=h("button",{class:"card",type:"button",draggable:"true","aria-pressed":csSelected===id?"true":"false","data-id":id},
+    h("span",{class:"no",text:String(c.no).padStart(2,"0")}), h("span",{class:"nm",text:c.name}), h("span",{class:"ds",text:c.desc}));
+  el.addEventListener("click",e=>{ e.stopPropagation(); csSelected = csSelected===id? null : id; renderCsBody(); });
+  el.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",id); e.dataTransfer.effectAllowed="move"; });
+  return el;
+}
+function dropZone(el, dest){
+  el.addEventListener("dragover",e=>{ e.preventDefault(); el.classList.add("target"); });
+  el.addEventListener("dragleave",()=>el.classList.remove("target"));
+  el.addEventListener("drop",e=>{ e.preventDefault(); el.classList.remove("target"); const id=e.dataTransfer.getData("text/plain"); if(id) csMove(id,dest); });
+  el.addEventListener("click",()=>{ if(csSelected) csMove(csSelected,dest); });
+  if(csSelected) el.classList.add("can-drop");
+}
+function renderCsBody(){
+  const body=$("#cs-body"); if(!body) return; body.textContent="";
+  const pileZone=h("div",{class:"zone"}, h("div",{class:"cards"}, cs.pile.map(id=>cardEl(id,"pile"))));
+  if(!cs.pile.length) pileZone.append(h("p",{class:"hint",text:"จัดครบทุกใบแล้ว 🎉 ตรวจชื่อกลุ่มแล้วกดส่งได้เลย"}));
+  dropZone(pileZone,"pile");
+  const left=h("aside",{class:"pile stack"},
+    h("div",{class:"row",style:"justify-content:space-between"}, h("h3",{text:"การ์ดที่ยังไม่ได้จัด"}), h("span",{class:"pill mono",text:`${cs.pile.length} / ${CARDS.length}`})),
+    h("p",{class:"hint",text: csSelected? `เลือก “${CARD_BY_ID[csSelected].name}” อยู่ กดกลุ่มที่อยากใส่ได้เลย` : "กดการ์ดเพื่อเลือก แล้วกดกลุ่มปลายทาง หรือลากวาง"}),
+    pileZone);
+  const groupsEl=h("div",{class:"groups"});
+  cs.groups.forEach((g,i)=>{
+    const input=h("input",{type:"text",id:"g-name-"+g.key,value:g.name,placeholder:"ตั้งชื่อกลุ่ม…","aria-label":"ชื่อกลุ่ม"});
+    input.addEventListener("click",e=>e.stopPropagation());
+    input.addEventListener("input",()=>{ g.name=input.value; input.classList.toggle("invalid",!g.name.trim()); csSaveDraft(); updateSubmit(); });
+    const del=h("button",{class:"icon-btn",title:"ลบกลุ่ม (การ์ดกลับไปกองกลาง)","aria-label":"ลบกลุ่ม",text:"✕"});
+    del.addEventListener("click",e=>{ e.stopPropagation(); cs.pile.unshift(...g.cards); cs.groups.splice(i,1); csSaveDraft(); renderCsBody(); });
+    const zone=h("div",{class:"zone group"},
+      h("div",{class:"group-head"}, input, h("span",{class:"count",text:g.cards.length}), del),
+      g.cards.length? h("div",{class:"cards"}, g.cards.map(id=>cardEl(id,i))) : h("p",{class:"hint",text:"วางการ์ดที่นี่"}));
+    dropZone(zone,i); groupsEl.append(zone);
+  });
+  const addBtn=h("button",{class:"zone",style:"display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent);cursor:pointer",text:"+ สร้างกลุ่มใหม่"});
+  addBtn.addEventListener("click",()=>{ const key=Math.random().toString(36).slice(2,8); cs.groups.push({key,name:"",cards:[]}); if(csSelected){ const id=csSelected; csMove(id,cs.groups.length-1); } else { csSaveDraft(); renderCsBody(); } setTimeout(()=>{ const inp=document.getElementById("g-name-"+key); inp&&inp.focus(); },0); });
+  groupsEl.append(addBtn);
+  const unsureZone=h("div",{class:"zone unsure-zone group"},
+    h("div",{class:"group-head"}, h("h3",{text:"ไม่แน่ใจ / ไม่รู้จะไว้ไหน"}), h("span",{class:"count",text:cs.unsure.length})),
+    cs.unsure.length? h("div",{class:"cards"}, cs.unsure.map(id=>cardEl(id,"unsure"))) : h("p",{class:"hint",text:"ใส่การ์ดที่ไม่รู้จักหรือไม่แน่ใจว่าควรอยู่กลุ่มไหน"}));
+  dropZone(unsureZone,"unsure");
+  const right=h("section",{class:"stack"}, h("div",{class:"row",style:"justify-content:space-between"}, h("h3",{text:`กลุ่มของคุณ (${cs.groups.length})`}), h("span",{class:"hint",text:"แนะนำ 5–10 กลุ่ม แต่จัดตามที่คุณคิดได้เลย"})), groupsEl, unsureZone);
+  body.append(h("div",{class:"cs-layout"}, left, right));
+  const submit=h("button",{class:"btn primary",id:"cs-submit",text:"ส่งคำตอบ"});
+  submit.addEventListener("click",submitCardSort);
+  body.append(h("div",{class:"bar"}, h("span",{class:"hint",id:"cs-status"}), h("div",{class:"row"}, h("button",{class:"btn ghost",text:"เริ่มใหม่",onclick:()=>{ store.set("ia-cs-draft",null); cs=null; csInit(); renderCsBody(); }}), submit)));
+  updateSubmit();
+}
+function updateSubmit(){
+  const s=$("#cs-submit"), st=$("#cs-status"); if(!s) return;
+  const unnamed=cs.groups.filter(g=>g.cards.length && !g.name.trim()).length;
+  let msg="";
+  if(cs.pile.length) msg=`เหลืออีก ${cs.pile.length} ใบที่ยังไม่ได้จัด`;
+  else if(unnamed) msg=`มี ${unnamed} กลุ่มที่ยังไม่ได้ตั้งชื่อ`;
+  else if(!cs.groups.some(g=>g.cards.length)) msg="ยังไม่มีกลุ่ม";
+  else msg="พร้อมส่งแล้ว";
+  st.textContent=msg; s.disabled = msg!=="พร้อมส่งแล้ว" || !db || !uid;
+}
+async function submitCardSort(){
+  const s=$("#cs-submit"); s.disabled=true; s.textContent="กำลังบันทึก…";
+  const groups = cs.groups.filter(g=>g.cards.length).map(g=>({name:g.name.trim(), cards:[...g.cards]}));
+  myDoc.cardsort = { groups, unsure:[...cs.unsure], timeMs: Date.now()-csStart, submittedAt:new Date().toISOString() };
+  try{ await saveMyDoc(); store.set("ia-cs-draft",null); cs=null; csRedo=false; toast("บันทึก Card sort แล้ว ขอบคุณครับ/ค่ะ"); render(); }
+  catch(e){ s.disabled=false; s.textContent="ส่งคำตอบ"; toast(e.code==="invalid_argument"?"บัญชีนี้ไม่มีสิทธิ์บันทึก ขอสิทธิ์ “Can interact” จากเจ้าของลิงก์":"บันทึกไม่สำเร็จ ลองกดส่งอีกครั้ง"); delete myDoc.cardsort; }
+}
+
+/* ======================= TREE TEST ======================= */
+let tt=null;
+function flatten(nodes, parent=null, depth=0, out=[]){ nodes.forEach((n,i)=>{ const id=(parent?parent.id+"/":"")+i; const node={id,n:n.n,parent,depth,leaf:!n.c}; out.push(node); if(n.c){ node.children=[]; const kids=flatten(n.c,node,depth+1,[]); node.children=kids.filter(k=>k.parent===node); out.push(...kids);} }); return out; }
+function treeIndex(version){ const all=flatten(TREES[version].root); return {all, roots:all.filter(x=>!x.parent)}; }
+function ancestors(node){ const a=[]; let p=node.parent; while(p){ a.push(p.id); p=p.parent; } return a; }
+function ttStart(){
+  const version = myDoc.treeVersion || ["A","B","C"][Math.floor(Math.random()*3)];
+  myDoc.treeVersion = version;
+  const rest = TASKS.filter(t=>!t.warm).sort(()=>Math.random()-.5);
+  tt = { version, order:[TASKS[0], ...rest], i:0, results:[], idx:treeIndex(version), didCardSortFirst: !!myDoc.cardsort, startedAt:Date.now() };
+  ttResetTask();
+}
+function ttResetTask(){ tt.open=new Set(); tt.opened=[]; tt.clicks=[]; tt.chosen=null; tt.taskStart=Date.now(); tt.firstTop=null; }
+function renderTreeTest(v){
+  if(myDoc.treetest && !ttRedo){
+    v.append(h("section",{class:"panel stack",style:"max-width:640px;margin:0 auto"},
+      h("span",{class:"pill good",text:"ส่งคำตอบแล้ว ✓"}), h("h1",{text:"ขอบคุณ! Tree test ของคุณถูกบันทึกแล้ว"}),
+      h("p",{class:"muted",text:`ตอบครบ ${myDoc.treetest.results.length} ข้อ`}),
+      h("div",{class:"row"}, h("button",{class:"btn",onclick:()=>{ttRedo=true; tt=null; render();},text:"ทำใหม่ (ทับคำตอบเดิม)"}), !myDoc.cardsort? h("button",{class:"btn primary",onclick:()=>setView("cs"),text:"ไปทำ Card sort"}) : null)
+    )); return;
+  }
+  if(!tt){
+    v.append(h("section",{class:"tt stack"},
+      h("h1",{text:"ลองหาของในเมนูที่ร่างไว้"}),
+      h("p",{class:"muted",text:`จะมีโจทย์ ${TASKS.length} ข้อ ให้กดไล่เมนูไปจนเจอสิ่งที่คุณคิดว่าใช้แก้โจทย์นั้นได้ เมนูเป็นแค่ข้อความ ไม่มีรูป ระบบสุ่มเมนูให้คุณ 1 แบบจาก 3 แบบ`}),
+      h("ul",{class:"steps"}, h("li",{text:"ไม่ต้องรีบ แต่ไม่ต้องคิดนาน ตอบตามที่คิดว่าจะไปหาจริง ๆ"}), h("li",{text:"กดหมวดเพื่อกาง กดอีกครั้งเพื่อพับ"}), h("li",{text:"เมื่อเจอแล้ว เลือกรายการนั้น แล้วกด “เจอแล้ว อยู่ตรงนี้”"})),
+      myDoc.cardsort? null : h("div",{class:"notice info",text:"ถ้าคุณยังไม่ได้ทำ Card sort แนะนำให้ทำ Tree test ก่อนก็ได้ ระบบจะบันทึกลำดับไว้แยกผล"}),
+      (currentName()||myDoc.displayName)? null : h("div",{class:"notice row",style:"justify-content:space-between"}, h("span",{text:"ยังไม่ได้กรอกชื่อ กลับไปกรอกที่หน้าแรกก่อน"}), h("button",{class:"btn",onclick:()=>setView("home"),text:"ไปหน้าแรก"})),
+      h("div",{}, h("button",{class:"btn primary",disabled:(!db||!uid||!(currentName()||myDoc.displayName))?true:null,onclick:()=>{ ttStart(); render(); },text:"เริ่ม Tree test"}))
+    )); return;
+  }
+  if(tt.i>=tt.order.length){ renderSurvey(v); return; }
+  const task=tt.order[tt.i];
+  const wrap=h("section",{class:"tt stack"});
+  wrap.append(
+    h("div",{class:"row",style:"justify-content:space-between"}, h("span",{class:"eyebrow",text:`ข้อ ${tt.i+1} / ${tt.order.length}${task.warm?" · ข้ออุ่นเครื่อง":""}`}), h("span",{class:"pill",text:"เมนูแบบ "+tt.version})),
+    h("div",{class:"progress"}, h("i",{style:`width:${pct(tt.i,tt.order.length)}%`})),
+    h("div",{class:"task"}, h("p",{class:"q",text:task.q})),
+    h("div",{class:"panel",style:"padding:10px"}, treeEl(tt.idx.roots)),
+    h("div",{class:"row",style:"justify-content:space-between"},
+      h("button",{class:"btn ghost",onclick:()=>ttAnswer(null),text:"หาไม่เจอ / ข้ามข้อนี้"}),
+      h("button",{class:"btn primary",disabled:tt.chosen?null:true,onclick:()=>ttAnswer(tt.chosen),text: tt.chosen? `เจอแล้ว อยู่ที่ “${tt.chosen.n}”` : "เลือกรายการในเมนูก่อน"}))
+  );
+  v.append(wrap);
+}
+function treeEl(nodes){
+  const ul=h("ul",{class:"tree",role:"tree"});
+  nodes.forEach(node=>{
+    const li=h("li",{role:"treeitem"});
+    const btn=h("button",{class:"node "+(node.leaf?"leaf":"cat")+(tt.chosen===node?" chosen":""),type:"button","aria-expanded":node.leaf?null:String(tt.open.has(node.id))}, h("span",{class:"chev",text:"›"}), h("span",{text:node.n}));
+    btn.addEventListener("click",()=>{
+      if(!tt.firstTop){ let r=node; while(r.parent) r=r.parent; tt.firstTop=r.n; }
+      tt.clicks.push(node.n);
+      if(node.leaf){ tt.chosen = tt.chosen===node? null : node; }
+      else { if(tt.open.has(node.id)){ tt.open.delete(node.id); tt.collapsed=true; } else { tt.open.add(node.id); tt.opened.push(node.id); } }
+      render();
+    });
+    li.append(btn);
+    if(!node.leaf && tt.open.has(node.id)) li.append(treeEl(node.children));
+    ul.append(li);
+  });
+  return ul;
+}
+function ttAnswer(node){
+  const task=tt.order[tt.i];
+  let direct=null, success=false, path=null;
+  if(node){ const anc=new Set(ancestors(node)); direct = tt.opened.every(id=>anc.has(id)); success = task.a.includes(node.n);
+    path=[]; let p=node; while(p){ path.unshift(p.n); p=p.parent; } }
+  tt.results.push({ taskId:task.id, warm:!!task.warm, chosen: node? node.n : null, path, success, direct, skipped:!node, timeMs: Date.now()-tt.taskStart, firstTop: tt.firstTop, clicks: tt.clicks.slice(0,40) });
+  tt.i++; ttResetTask(); render(); window.scrollTo({top:0});
+}
+let ttRedo=false;
+function renderSurvey(v){
+  const cats = tt.idx.all.filter(n=>!n.leaf).map(n=>n.n);
+  const uniq=[...new Set(cats)];
+  const form=h("form",{class:"tt stack survey"});
+  form.append(h("h1",{text:"คำถามสุดท้าย"}), h("p",{class:"muted",text:"ชื่อหมวดไหนในเมนูที่คุณเข้าใจยาก หรือไม่แน่ใจว่าข้างในมีอะไร (เลือกได้หลายข้อ หรือไม่เลือกก็ได้)"}));
+  const box=h("div",{class:"panel",style:"columns:2 220px"});
+  uniq.forEach((c,i)=>box.append(h("label",{}, h("input",{type:"checkbox",id:"hard-"+i,value:c}), h("span",{text:c}))));
+  form.append(box, h("label",{for:"tt-comment",class:"small muted",text:"ความเห็นเพิ่มเติม (ถ้ามี) เช่น ชื่อที่คุณอยากให้ใช้แทน"}), h("textarea",{id:"tt-comment",placeholder:"เช่น “Overlays” เข้าใจยาก อยากให้เรียกว่า “หน้าต่างลอย”"}));
+  const btn=h("button",{class:"btn primary",type:"submit",text:"ส่งคำตอบ"});
+  form.append(h("div",{},btn));
+  form.addEventListener("submit",async e=>{
+    e.preventDefault(); btn.disabled=true; btn.textContent="กำลังบันทึก…";
+    const hard=[...form.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);
+    myDoc.treetest={ version:tt.version, results:tt.results, survey:{hardLabels:hard, comment:$("#tt-comment").value.trim().slice(0,2000)}, didCardSortFirst:tt.didCardSortFirst, timeMs:Date.now()-tt.startedAt, submittedAt:new Date().toISOString() };
+    try{ await saveMyDoc(); tt=null; ttRedo=false; toast("บันทึก Tree test แล้ว ขอบคุณครับ/ค่ะ"); render(); }
+    catch(err){ btn.disabled=false; btn.textContent="ส่งคำตอบ"; delete myDoc.treetest; toast(err.code==="invalid_argument"?"บัญชีนี้ไม่มีสิทธิ์บันทึก ขอสิทธิ์ “Can interact” จากเจ้าของลิงก์":"บันทึกไม่สำเร็จ ลองกดส่งอีกครั้ง"); }
+  });
+  v.append(form);
+}
+
+/* ======================= RESULTS ======================= */
+let resUnlocked = (()=>{ try{ return sessionStorage.getItem("ia-unlocked")==="1" }catch(e){ return false } })();
+let resDocs=null, resUnsub=null, resTab="overview", clusterT=0.5;
+function renderResults(v){
+  if(!resUnlocked){ renderLock(v); return; }
+  if(!db){ v.append(h("div",{class:"notice",text:"หน้านี้เชื่อมต่อฐานข้อมูลไม่ได้"})); return; }
+  if(!resUnsub){ resUnsub = db.collection("responses").onSnapshot(s=>{ resDocs=s.docs.map(d=>d.data()); if(view==="res") drawResults(); }, e=>{ resDocs=[]; dbError=e; if(view==="res") drawResults(); }); }
+  v.append(h("div",{id:"res"})); drawResults();
+}
+function renderLock(v){
+  const inputs=[0,1,2,3].map(i=>h("input",{inputmode:"numeric",maxlength:"1",id:"pin-"+i,"aria-label":`รหัสหลักที่ ${i+1}`,autocomplete:"off"}));
+  const pin=h("div",{class:"pin"},inputs);
+  const check=()=>{ const code=inputs.map(x=>x.value).join(""); if(code.length<4) return; if(code===PASSCODE){ resUnlocked=true; try{sessionStorage.setItem("ia-unlocked","1")}catch(e){} render(); } else { pin.classList.remove("shake"); void pin.offsetWidth; pin.classList.add("shake"); inputs.forEach(x=>x.value=""); inputs[0].focus(); $("#pin-msg").textContent="รหัสไม่ถูกต้อง"; } };
+  inputs.forEach((inp,i)=>{ inp.addEventListener("input",()=>{ inp.value=inp.value.replace(/\D/g,"").slice(-1); if(inp.value&&i<3) inputs[i+1].focus(); check(); }); inp.addEventListener("keydown",e=>{ if(e.key==="Backspace"&&!inp.value&&i>0) inputs[i-1].focus(); }); });
+  v.append(h("section",{class:"lock panel stack"}, h("span",{class:"eyebrow",text:"สำหรับผู้ดูแล"}), h("h2",{text:"ใส่รหัสเพื่อดูผลลัพธ์"}), pin, h("p",{class:"small",id:"pin-msg",style:"color:var(--bad);min-height:1.4em"}), h("p",{class:"small muted",text:"ผลลัพธ์แสดงเฉพาะบัญชีเจ้าของหรือผู้แก้ไขหน้านี้"})));
+  setTimeout(()=>inputs[0].focus(),0);
+}
+let resGen=0;
+async function drawResults(){
+  const gen=++resGen;
+  const box=$("#res"); if(!box) return; box.textContent="";
+  if(resDocs===null){ box.append(h("p",{class:"muted",text:"กำลังโหลดผลลัพธ์…"})); return; }
+  const docs=resDocs;
+  const csDocs=docs.filter(d=>d.cardsort), ttDocs=docs.filter(d=>d.treetest);
+  const canSee = isOwner || (userNs && await userNs.canEdit());
+  if(gen!==resGen) return;
+  box.append(h("div",{class:"row",style:"justify-content:space-between;margin-bottom:12px"}, h("h1",{text:"ผลลัพธ์"}), h("div",{class:"row"}, h("button",{class:"btn",onclick:exportCsv,text:"ส่งออก CSV"}), h("button",{class:"btn ghost",onclick:()=>{resUnlocked=false; try{sessionStorage.removeItem("ia-unlocked")}catch(e){} if(resUnsub){resUnsub();resUnsub=null;} render();},text:"ล็อก"}))));
+  if(!docs.length){ box.append(h("div",{class:"notice "+(canSee?"info":""),text: canSee? "ยังไม่มีใครส่งคำตอบ ส่งลิงก์ให้ทีม (ตั้งสิทธิ์ “Can interact”) แล้วผลจะขึ้นที่นี่ทันที" : "บัญชีนี้ไม่เห็นคำตอบของคนอื่น ผลลัพธ์เปิดดูได้เฉพาะเจ้าของหรือผู้แก้ไขหน้านี้"})); if(resTab!=="ia"){ resTab="ia"; } }
+  const byV={A:[],B:[],C:[]}; ttDocs.forEach(d=>byV[d.treetest.version]?.push(d));
+  box.append(h("div",{class:"kpis"},
+    kpi(docs.length,"คนที่ตอบ"), kpi(csDocs.length,"Card sort"), kpi(ttDocs.length,"Tree test"), kpi(`${byV.A.length} / ${byV.B.length} / ${byV.C.length}`,"Tree test แยกเมนู A / B / C")));
+  const tabs=[["overview","ภาพรวม"],["ia","IA จากผลลัพธ์"],["cs","Card sort"],["tt","Tree test"],["people","ผู้ตอบ"]];
+  box.append(h("div",{class:"subtabs",style:"margin:18px 0"}, tabs.map(([k,l])=>h("button",{class:"subtab","aria-selected":String(resTab===k),onclick:()=>{resTab=k; drawResults();},text:l}))));
+  const pane=h("div",{class:"stack"}); box.append(pane);
+  if(resTab==="overview") drawOverview(pane, csDocs, ttDocs, byV);
+  if(resTab==="ia") drawIA(pane, csDocs, byV);
+  if(resTab==="cs") drawCs(pane, csDocs);
+  if(resTab==="tt") drawTt(pane, byV);
+  if(resTab==="people") drawPeople(pane, docs);
+}
+const kpi=(v,l)=>h("div",{class:"kpi"}, h("div",{class:"v",text:v}), h("div",{class:"l",text:l}));
+function meter(p, cls){ return h("div",{class:"meter "+(cls||(p>=75?"good":p>=50?"warn":"bad"))}, h("span",{class:"track"}, h("i",{style:`width:${p}%`})), h("span",{class:"mono small",text:p+"%"})); }
+function ttStats(list){ // list of docs for one version
+  const rows=TASKS.map(t=>{ const rs=list.map(d=>d.treetest.results.find(r=>r.taskId===t.id)).filter(Boolean); const answered=rs.filter(r=>!r.skipped);
+    return { task:t, n:rs.length, success:pct(rs.filter(r=>r.success).length, rs.length), direct:pct(answered.filter(r=>r.direct).length, answered.length||0), skip:pct(rs.filter(r=>r.skipped).length, rs.length), med:median(rs.map(r=>r.timeMs)), rs }; });
+  const scored=rows.filter(r=>!r.task.warm);
+  const all=scored.flatMap(r=>r.rs);
+  return { rows, overall:{ success:pct(all.filter(r=>r.success).length, all.length), direct:pct(all.filter(r=>!r.skipped&&r.direct).length, all.filter(r=>!r.skipped).length), med:median(all.map(r=>r.timeMs)), n:list.length } };
+}
+const MIN_N = 3;
+function guideFor(task, v, row){
+  const g=GUIDE[task.id]; if(!g||!row.n) return [];
+  const chosen={}, first={}; row.rs.forEach(r=>{ if(r.chosen) chosen[r.chosen]=(chosen[r.chosen]||0)+1; if(r.firstTop) first[r.firstTop]=(first[r.firstTop]||0)+1; });
+  const topFirst=Object.entries(first).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  const c={ v, n:row.n, success:row.success, direct:row.direct, skip:row.skip, chosen, first, topFirst, share:nm=>pct(chosen[nm]||0,row.n), firstShare:t=>pct(first[t]||0,row.n) };
+  const out=g.rules.map(f=>{ try{ return f(c) }catch(e){ return null } }).filter(Boolean);
+  if(row.skip>=30) out.push(["warn","มีคนกดข้ามเยอะ","ของชิ้นนี้หาไม่เจอในหลายหมวด ต้องมีทางเข้าอื่น เช่น ช่องค้นหาที่รู้จักคำเรียกอื่น"]);
+  if(!out.length) out.push(row.success>=75? ["good","ผ่าน","โครงส่วนนี้ใช้ได้ ไม่ต้องแก้"] : ["info","ยังไม่ชัด","ดูคำตอบที่คนเลือกและคลิกแรกด้านล่างประกอบ"]);
+  return out.map(([lvl,title,act])=>({lvl,title,act,small:row.n<MIN_N}));
+}
+function guideEl(items){
+  const col={good:"var(--good)",warn:"var(--warn)",bad:"var(--bad)",info:"var(--accent)"};
+  return h("ul",{class:"stack",style:"gap:6px;list-style:none;padding:0;margin:0"}, items.map(it=>h("li",{style:`border-left:3px solid ${col[it.lvl]};padding:4px 10px`},
+    h("div",{class:"small",style:"font-weight:600",text:it.title+(it.small?" · ข้อมูลยังน้อย ดูเป็นแนวโน้ม":"")}),
+    h("div",{class:"small",text:"→ "+it.act}))));
+}
+function drawOverview(pane, csDocs, ttDocs, byV){
+  const stats={A:ttStats(byV.A),B:ttStats(byV.B),C:ttStats(byV.C)};
+  const withData=["A","B","C"].filter(k=>byV[k].length);
+  const best = withData.length? withData.reduce((a,b)=> stats[b].overall.success>stats[a].overall.success? b : a) : null;
+  const t=h("table",{class:"data"}, h("thead",{}, h("tr",{}, h("th",{text:"เมนู"}), h("th",{text:"คน"}), h("th",{text:"หาเจอ (ไม่นับข้ออุ่นเครื่อง)"}), h("th",{text:"ไปตรงไม่ลังเล"}), h("th",{text:"เวลากลางต่อข้อ"}))),
+    h("tbody",{}, ["A","B","C"].map(k=>h("tr",{class:k===best&&withData.length>1?"best":""}, h("td",{}, h("b",{text:TREES[k].label}), h("div",{class:"small muted",text:TREES[k].desc})), h("td",{class:"num",text:byV[k].length}), h("td",{}, byV[k].length? meter(stats[k].overall.success) : "—"), h("td",{}, byV[k].length? meter(stats[k].overall.direct,"") : "—"), h("td",{class:"num",text:fmtSec(stats[k].overall.med)})))));
+  pane.append(h("section",{class:"panel stack"}, h("h2",{text:"Tree test: เทียบ 3 เมนู"}), h("div",{class:"scroll"},t),
+    h("p",{class:"small muted",text: withData.length>1? "แถวที่ไฮไลต์ = หาเจอบ่อยที่สุดตอนนี้ ถ้าคนต่อเมนูยังน้อย (ต่ำกว่า 3 คน) ให้ดูเป็นแนวโน้ม ไม่ใช่ข้อสรุป" : "เมื่อมีคนทำครบหลายเมนู ตารางนี้จะเทียบให้"})));
+  // สิ่งที่ต้องทำกับ portal
+  if(withData.length){
+    const actions=[];
+    if(withData.length>1 && best){ const gap=stats[best].overall.success - Math.min(...withData.map(k=>stats[k].overall.success)); actions.push({lvl: gap>=15?"good":"info", title: gap>=15? `ใช้โครงเมนู ${TREES[best].label} เป็นแกนของ portal` : "คะแนน 3 เมนูยังใกล้กัน", act: gap>=15? `หาเจอสูงกว่าเมนูที่แย่ที่สุด ${gap} จุด นำโครงนี้ไปทำ sidebar ของ portal และหมวดใน Figma library` : "เลือกโครงที่ทีมดูแลง่ายกว่า แล้วแก้เฉพาะจุดที่ข้อเสนอแนะด้านล่างชี้", small: withData.some(k=>byV[k].length<MIN_N)}); }
+    const rank={bad:0,warn:1,info:2,good:3};
+    withData.forEach(k=>TASKS.forEach((task,ti)=>{ if(task.warm) return; guideFor(task,k,stats[k].rows[ti]).filter(x=>x.lvl==="bad"||x.lvl==="warn").forEach(x=>actions.push({...x, title:`ข้อ ${ti} · เมนู ${k}: ${x.title}`})); }));
+    actions.sort((a,b)=>rank[a.lvl]-rank[b.lvl]);
+    pane.append(h("section",{class:"panel stack"}, h("h2",{text:"สิ่งที่ต้องทำกับ portal"}), h("p",{class:"small muted",text:"แปลผลอัตโนมัติจากเกณฑ์ของแต่ละโจทย์ (ดูเกณฑ์ได้ที่แท็บ Tree test) · เรียงจากเรื่องที่ควรแก้ก่อน · เกณฑ์ % ทั้งหมด (เช่น หาเจอ ≥ 75% = ผ่าน, ข้าม ≥ 30%) เป็นเกณฑ์ที่ทีมตั้งเอง ไม่ใช่มาตรฐานจาก NN/g"}),
+      actions.length? guideEl(actions.slice(0,14)) : h("p",{class:"muted small",text:"ยังไม่มีจุดที่ต้องแก้"})));
+  }
+  const cl = csDocs.length? clusterCards(csDocs, clusterT) : null;
+  pane.append(h("section",{class:"panel stack"}, h("h2",{text:"Card sort: กลุ่มที่เกาะกันชัด"}),
+    cl? h("div",{class:"grid2"}, cl.clusters.filter(c=>c.cards.length>1).slice(0,8).map(c=>clusterEl(c))) : h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"}),
+    cl? h("p",{class:"small muted",text:"ดูรายละเอียด ปรับเกณฑ์ และตารางความถี่ได้ที่แท็บ Card sort · ผล card sort คือไอเดียการจัดกลุ่ม ควรเอาไปร่างโครงแล้วตรวจด้วย Tree test อีกรอบ"}) : null));
+}
+function coMatrix(csDocs){
+  const ids=CARDS.map(c=>c.id), ix=Object.fromEntries(ids.map((id,i)=>[id,i])), n=ids.length;
+  const M=Array.from({length:n},()=>new Array(n).fill(0));
+  csDocs.forEach(d=>d.cardsort.groups.forEach(g=>{ const cs=g.cards.filter(c=>c in ix); for(let a=0;a<cs.length;a++) for(let b=a+1;b<cs.length;b++){ M[ix[cs[a]]][ix[cs[b]]]++; M[ix[cs[b]]][ix[cs[a]]]++; } }));
+  return {M, ids, ix, N:csDocs.length};
+}
+function clusterCards(csDocs, threshold){
+  const {M, ids, N}=coMatrix(csDocs); const sim=(a,b)=>M[a][b]/N;
+  let clusters=ids.map((id,i)=>[i]);
+  const avg=(A,B)=>{ let s=0; for(const a of A) for(const b of B) s+=sim(a,b); return s/(A.length*B.length); };
+  while(clusters.length>1){ let best=-1,bi=0,bj=1; for(let i=0;i<clusters.length;i++) for(let j=i+1;j<clusters.length;j++){ const s=avg(clusters[i],clusters[j]); if(s>best){best=s;bi=i;bj=j;} } if(best<threshold) break; clusters[bi]=clusters[bi].concat(clusters[bj]); clusters.splice(bj,1); }
+  const out=clusters.map(cl=>{ const cards=cl.map(i=>ids[i]); const set=new Set(cards); const names={};
+    csDocs.forEach(d=>d.cardsort.groups.forEach(g=>{ const k=g.cards.filter(c=>set.has(c)).length; if(k>=Math.max(2,Math.ceil(cards.length/2))){ const raw=g.name.trim(); const nm=raw.toLowerCase(); if(!names[nm]) names[nm]={n:0,disp:{}}; names[nm].n++; names[nm].disp[raw]=(names[nm].disp[raw]||0)+1; } }));
+    const cohesion = cl.length>1? avg(cl,cl) : 1;
+    return { cards, cohesion, names:Object.values(names).sort((a,b)=>b.n-a.n).slice(0,4).map(x=>[Object.entries(x.disp).sort((a,b)=>b[1]-a[1])[0][0], x.n]) }; });
+  out.sort((a,b)=>b.cards.length-a.cards.length);
+  const order = out.flatMap(c=>c.cards);
+  return {clusters:out, order};
+}
+function clusterEl(c){
+  return h("div",{class:"cluster"},
+    h("div",{class:"row",style:"justify-content:space-between"}, h("h3",{text: c.names[0]? c.names[0][0] : "(ยังไม่มีชื่อที่คนใช้ตรงกัน)"}), h("span",{class:"pill mono",text:`${c.cards.length} ใบ · เกาะกัน ${Math.round(c.cohesion*100)}%`})),
+    c.names.length? h("div",{class:"cluster-names"}, c.names.map(([n,k])=>h("span",{class:"tagname"}, n, h("b",{text:"×"+k})))) : null,
+    h("div",{class:"minicards"}, c.cards.map(id=>h("span",{class:"mini",text:CARD_BY_ID[id].name}))));
+}
+/* ---------- Dynamic IA ---------- */
+let iaMode="cs"; let iaSample=null; let iaView="map";
+/* ข้อมูลตัวอย่าง (จำลอง 12 คน) — ใช้ดูหน้าตา IA ก่อนมีคำตอบจริง */
+let _sample=null;
+function sampleData(){
+  if(_sample) return _sample;
+  let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; };
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const base={
+    act:{names:["Actions","ปุ่มและการกด","Buttons"],cards:["button","icon-button","link","segmented"]},
+    inp:{names:["Inputs","ฟอร์ม","ช่องกรอกข้อมูล","Form controls"],cards:["text-field","text-area","select","combobox","checkbox","radio","switch","stepper-input","date-picker","file-upload","search","pin"]},
+    nav:{names:["Navigation","การนำทาง","เมนู"],cards:["tabs","top-bar","bottom-nav","side-nav","breadcrumb","pagination","stepper"]},
+    fb:{names:["Feedback","การแจ้งเตือน","สถานะ"],cards:["toast","alert","progress","spinner","skeleton","badge"]},
+    ov:{names:["Overlays","หน้าต่างลอย","Popups"],cards:["modal","bottom-sheet","tooltip","popover","overflow"]},
+    con:{names:["Content","แสดงข้อมูล","Data display"],cards:["card","list-item","table","accordion","chip","avatar","divider","carousel"]},
+    pat:{names:["Patterns","รูปแบบการใช้งาน","Templates"],cards:["form","login","filter","empty","confirm","error","onboarding","hero"]},
+    flow:{names:["Flows","Common flows","ขั้นตอนหลัก"],cards:["transfer","otp-flow"]}
+  };
+  const moves={tooltip:"fb",popover:"con",chip:"inp",segmented:"inp",stepper:"fb",pin:"flow",confirm:"ov",empty:"fb",filter:"inp",carousel:"pat",badge:"con",search:"nav",skeleton:"con",hero:"con",overflow:"nav"};
+  const cs=[];
+  for(let p=0;p<12;p++){
+    const g={}; Object.entries(base).forEach(([k,v])=>g[k]={name:pick(v.names),cards:[...v.cards]});
+    Object.entries(moves).forEach(([card,to])=>{ if(rnd()<0.33){ Object.values(g).forEach(x=>x.cards=x.cards.filter(c=>c!==card)); g[to].cards.push(card); } });
+    if(rnd()<0.4){ g.pat.cards.push(...g.flow.cards); g.flow.cards=[]; }
+    cs.push({uid:"s"+p, displayName:"ตัวอย่าง "+(p+1), cardsort:{groups:Object.values(g).filter(x=>x.cards.length).map(x=>({name:x.name,cards:x.cards})), unsure:[]}});
+  }
+  const pathOf=(v,name)=>{ const leaf=treeIndex(v).all.find(n=>n.leaf&&n.n===name); if(!leaf) return null; const p=[]; let x=leaf; while(x){ p.unshift(x.n); x=x.parent; } return p; };
+  const SUCC={A:[.95,.7,.55,.75,.8,.8,.85,.6,.55,.7,.45], B:[.9,.6,.45,.7,.55,.5,.5,.55,.4,.45,.4], C:[.95,.75,.6,.8,.85,.8,.75,.8,.6,.75,.5]};
+  const WRONG={t1:["Bottom sheet","Alert / Banner"],t2:["Skeleton","Card"],t3:["Text field","Number stepper"],t4:["Radio button","Combobox"],t5:["Alert / Banner","Tooltip"],t6:["Tabs","Side navigation"],t7:["Card","Hero banner"],t8:["Number stepper","Progress bar"],t9:["Badge","Alert / Banner"],t10:["Tag / Chip","Search field"]};
+  const tt=[];
+  ["A","B","C"].forEach(v=>{ for(let p=0;p<4;p++){
+    const results=TASKS.map((t,ti)=>{ const ok=rnd()<SUCC[v][ti]; const name= ok? (t.a.length>1 && rnd()<.45? t.a[1] : t.a[0]) : pick(WRONG[t.id]||t.a); const path=pathOf(v,name);
+      return {taskId:t.id, warm:!!t.warm, chosen:name, path, success:t.a.includes(name), direct: ok? rnd()<.8 : rnd()<.35, skipped:false, timeMs:Math.round(4000+rnd()*14000), firstTop:path?path[0]:null}; });
+    tt.push({uid:`t${v}${p}`, displayName:`ตัวอย่าง ${v}${p+1}`, treeVersion:v, treetest:{version:v, results, survey:{hardLabels:[], comment:""}, didCardSortFirst:false}});
+  }});
+  _sample={cs, tt}; return _sample;
+}
+const IA_COLORS=[["#2F3A74","#fff"],["#9BAF4C","#fff"],["#6B35C7","#fff"],["#D0164F","#fff"],["#1F8F84","#fff"],["#E3A13A","#1B2130"],["#7A7F87","#fff"],["#E0573F","#fff"],["#4B2360","#fff"],["#3B7DD8","#fff"]];
+const IA_BADGE={moved:"ย้าย",link:"ลิงก์",weak:"ยังไม่ลงตัว"};
+function iaMapEl(nodes, rootName){
+  const wrap=h("div",{class:"ia-map"});
+  const root=h("div",{class:"ia-root"}); root.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>';
+  root.append(h("span",{text:rootName})); wrap.append(root);
+  const cols=h("div",{class:"ia-cols"});
+  nodes.forEach((cat,ci)=>{
+    const [c,ct]=IA_COLORS[ci%IA_COLORS.length];
+    const col=h("div",{class:"ia-col",style:`--c:${c};--ct:${ct}`});
+    col.append(h("div",{class:"ia-head"}, h("b",{text:cat.name}), cat.meta? h("span",{text:cat.meta}) : null, cat.alt&&cat.alt.length? h("span",{text:"หรือ: "+cat.alt.join(", ")}) : null));
+    const list=h("div",{class:"ia-items"});
+    (cat.children||[]).forEach(ch=>{
+      if(ch.children){
+        const grp=h("div",{});
+        grp.append(h("div",{class:"ia-sub",text:ch.name}));
+        const sub=h("div",{class:"ia-subitems"}); ch.children.forEach(l=>sub.append(leafBox(l,true))); grp.append(sub); list.append(grp);
+      } else list.append(leafBox(ch,false));
+    });
+    if(!(cat.children||[]).length) list.style.display="none";
+    col.append(list); cols.append(col);
+  });
+  wrap.append(h("div",{class:"scroll",style:"padding-bottom:8px"},cols));
+  // shorten the vertical spine so it ends at the last box's middle
+  requestAnimationFrame(()=>wrap.querySelectorAll(".ia-items").forEach(list=>{ const last=list.lastElementChild; if(!last) return; const first=last.classList.contains("ia-item")? last : last.firstElementChild; const tail=list.getBoundingClientRect().bottom-(first.getBoundingClientRect().top+first.offsetHeight/2); list.style.setProperty("--tail",Math.max(0,tail)+"px"); }));
+  return wrap;
+}
+function leafBox(l, nested){ return h("div",{class:"ia-item"+(nested?" lvl3":""),title:l.detail||l.note||""}, h("span",{text:l.name}), l.note? h("small",{text:l.note}) : null, l.flag? h("span",{class:"ia-badge "+l.flag,text:IA_BADGE[l.flag]}) : null); }
+function iaTreeEl(nodes){
+  const ul=h("ul",{class:"ia-tree"});
+  nodes.forEach(n=>{
+    const li=h("li",{});
+    if(n.children){
+      li.append(h("div",{class:"ia-cat"}, h("span",{text:n.name}), n.meta? h("span",{class:"ia-meta",text:n.meta}) : null, n.alt&&n.alt.length? h("span",{class:"ia-meta",text:"ชื่ออื่นที่ใช้: "+n.alt.join(", ")}) : null));
+      li.append(iaTreeEl(n.children));
+    } else {
+      li.append(h("div",{class:"ia-leaf"+(n.flag?" "+n.flag:"")}, h("span",{text:n.name}), (n.detail||n.note)? h("span",{class:"ia-note",text:n.detail||n.note}) : null));
+    }
+    ul.append(li);
+  });
+  return ul;
+}
+function iaFromCardSort(csDocs){
+  const {M, ids, ix, N}=coMatrix(csDocs);
+  const cl=clusterCards(csDocs, clusterT);
+  const groups=cl.clusters.filter(c=>c.cards.length>1);
+  const loose=cl.clusters.filter(c=>c.cards.length===1).map(c=>c.cards[0]);
+  const avgTo=(i,cards)=>cards.length? cards.reduce((s,c)=>s+M[i][ix[c]],0)/(cards.length*N) : 0;
+  const usedNames=new Set();
+  const nodes=groups.map((g,gi)=>{
+    let name = g.names[0]? g.names[0][0] : `กลุ่ม ${gi+1} (ยังไม่มีชื่อที่ตรงกัน)`;
+    if(usedNames.has(name.toLowerCase())){ const alt=g.names.find(x=>!usedNames.has(x[0].toLowerCase())); name = alt? alt[0] : name+" (2)"; }
+    usedNames.add(name.toLowerCase());
+    const children=g.cards.map(id=>{ const i=ix[id]; const own=avgTo(i,g.cards.filter(c=>c!==id));
+      let best=null; groups.forEach((o,oi)=>{ if(o===g) return; const s=avgTo(i,o.cards); if(!best||s>best.s) best={s,oi}; });
+      const node={name:CARD_BY_ID[id].name};
+      if(best && best.s>=0.3){ const on=groups[best.oi].names[0]?.[0]||`กลุ่ม ${best.oi+1}`; node.flag="link"; node.note=`↔ ${on} ${Math.round(best.s*100)}%`; node.detail=`คนมักจัดไว้กับ “${on}” ด้วย (${Math.round(best.s*100)}%) → ทำลิงก์ข้าม`; }
+      else if(own<clusterT) { node.flag="weak"; node.note=`เกาะกลุ่ม ${Math.round(own*100)}%`; node.detail=`เกาะกลุ่มนี้แค่ ${Math.round(own*100)}%`; }
+      return node; });
+    return {name, meta:`${g.cards.length} ชิ้น · เกาะกัน ${Math.round(g.cohesion*100)}%`, alt:g.names.map(x=>x[0]).filter(x=>x!==name).slice(0,2), children};
+  });
+  if(loose.length) nodes.push({name:"ยังไม่ลงตัว — ทีมจัดไม่ตรงกัน", meta:"ควรทดสอบซ้ำหรือทบทวนชื่อ", children:loose.map(id=>({name:CARD_BY_ID[id].name, flag:"weak", detail:"ไม่มีกลุ่มที่เกาะกันพอ"}))});
+  return nodes;
+}
+function cloneTree(nodes){ return nodes.map(n=> n.c? {name:n.n, children:cloneTree(n.c)} : {name:n.n}); }
+function findPath(nodes, path){ let cur={children:nodes}; for(const p of path){ cur=(cur.children||[]).find(x=>x.name===p); if(!cur) return null; } return cur; }
+function removeLeaf(nodes, name){ for(const n of nodes){ if(n.children){ const i=n.children.findIndex(x=>!x.children&&x.name===name); if(i>=0){ n.children.splice(i,1); return true; } if(removeLeaf(n.children,name)) return true; } } return false; }
+function iaFromTreeTest(byV){
+  const withData=["A","B","C"].filter(k=>byV[k].length); if(!withData.length) return null;
+  const stats={}; withData.forEach(k=>stats[k]=ttStats(byV[k]));
+  const best=withData.reduce((a,b)=> stats[b].overall.success>stats[a].overall.success? b : a);
+  const tree=cloneTree(TREES[best].root); const changes=[];
+  TASKS.forEach((t,ti)=>{ if(t.warm) return;
+    const row=stats[best].rows[ti]; if(!row.n) return;
+    const parents={}; let correctN=0;
+    row.rs.forEach(r=>{ if(!r.path||r.skipped) return; if(t.a.includes(r.chosen)) correctN++; const pp=r.path.slice(0,-1); const key=pp.join(" › "); if(!parents[key]) parents[key]={pp,n:0,correct:t.a.includes(r.chosen)}; parents[key].n++; });
+    const target=t.a[0];
+    const wrong=Object.values(parents).filter(p=>!p.correct).sort((a,b)=>b.n-a.n)[0];
+    const wShare=wrong? pct(wrong.n,row.n) : 0, cShare=pct(correctN,row.n);
+    if(!wrong) return;
+    const origLeaf=treeIndex(best).all.find(n=>n.leaf&&n.n===target); const origPath=[]; { let x=origLeaf&&origLeaf.parent; while(x){ origPath.unshift(x.n); x=x.parent; } }
+    if(wrong.pp.join(" › ")===origPath.join(" › ")){
+      if(wShare>=30){ const leaf=findPath(tree,[...origPath,target]); const pickedWrong=Object.entries(row.rs.reduce((m,r)=>{ if(r.chosen&&!t.a.includes(r.chosen)) m[r.chosen]=(m[r.chosen]||0)+1; return m; },{})).sort((a,b)=>b[1]-a[1])[0];
+        if(leaf&&!leaf.children){ leaf.flag="weak"; leaf.note=`สับสนกับ ${pickedWrong?pickedWrong[0]:"ชิ้นอื่น"}`; leaf.detail=`คนมาถูกหมวด แต่ ${wShare}% เลือก “${pickedWrong?pickedWrong[0]:"ชิ้นอื่น"}” แทน → ปรับชื่อ/คำอธิบาย`; }
+        changes.push({lvl:"warn",title:`ปรับชื่อ “${target}”`,act:`คนหาเจอหมวดแต่เลือก “${pickedWrong?pickedWrong[0]:"ชิ้นอื่น"}” แทน ${wShare}% (ข้อ ${ti})`}); }
+      return;
+    }
+    const dest=findPath(tree, wrong.pp); if(!dest||!dest.children) return;
+    if(row.success<60 && wShare>=40){ removeLeaf(tree,target); dest.children.push({name:target, flag:"moved", note:`คน ${wShare}% หาที่นี่`, detail:`ย้ายมาที่นี่: คน ${wShare}% มาหาที่หมวดนี้ (เดิมหาเจอแค่ ${row.success}%)`}); changes.push({lvl:"bad",title:`ย้าย “${target}”`,act:`ไปไว้ใต้ ${wrong.pp.join(" › ")} (ข้อ ${ti})`}); }
+    else if(cShare>=30 && wShare>=30){ dest.children.push({name:target, flag:"link", note:`↔ คน ${wShare}% หาที่นี่`, detail:`ลิงก์: คน ${wShare}% มาหาที่นี่ด้วย`}); changes.push({lvl:"info",title:`เพิ่มลิงก์ “${target}”`,act:`ให้เจอได้จาก ${wrong.pp.join(" › ")} ด้วย (ข้อ ${ti})`}); }
+  });
+  // mark confident leaves
+  return {best, tree, changes, overall:stats[best].overall, n:byV[best].length};
+}
+function drawIA(pane, realCs, realByV){
+  const hasReal = iaMode==="cs"? realCs.length>0 : ["A","B","C"].some(k=>realByV[k].length);
+  const useSample = iaSample===null? !hasReal : iaSample;
+  let csDocs=realCs, byV=realByV;
+  if(useSample){ const s=sampleData(); csDocs=s.cs; byV={A:[],B:[],C:[]}; s.tt.forEach(d=>byV[d.treetest.version].push(d)); }
+  pane.append(h("div",{class:"row",style:"justify-content:space-between"},
+    h("div",{class:"subtabs"}, [["cs","จาก Card sort"],["tt","จาก Tree test"]].map(([k,l])=>h("button",{class:"subtab","aria-selected":String(iaMode===k),onclick:()=>{iaMode=k; drawResults();},text:l}))),
+    h("div",{class:"row"},
+      h("div",{class:"subtabs"}, [["map","แผนผัง"],["list","รายการ"]].map(([k,l])=>h("button",{class:"subtab","aria-selected":String(iaView===k),onclick:()=>{iaView=k; drawResults();},text:l}))),
+      h("button",{class:"btn "+(useSample?"primary":""),onclick:()=>{ iaSample=!useSample; drawResults(); },text: useSample? "กำลังดูข้อมูลตัวอย่าง · กลับไปข้อมูลจริง" : "ดูด้วยข้อมูลตัวอย่าง"}))));
+  if(useSample) pane.append(h("div",{class:"notice",text:"⚠ นี่คือข้อมูลตัวอย่างที่จำลองขึ้น (12 คนสำหรับ card sort · เมนูละ 4 คนสำหรับ tree test) เพื่อให้เห็นหน้าตา IA เท่านั้น ไม่ใช่คำตอบของทีม"+(hasReal?"":" · ยังไม่มีคำตอบจริง")}));
+  const render = (nodes, rootName)=> iaView==="map"? iaMapEl(nodes, rootName) : iaTreeEl(nodes);
+  const legend=h("div",{class:"row small muted",style:"gap:14px"}, h("span",{}, h("span",{class:"ia-dot moved"}), " ย้ายตามผลจริง"), h("span",{}, h("span",{class:"ia-dot link"}), " อยู่ได้สองที่ / ทำลิงก์ข้าม"), h("span",{}, h("span",{class:"ia-dot weak"}), " ยังไม่ลงตัว"));
+  if(iaMode==="cs"){
+    if(!csDocs.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"})); return; }
+    const slider=h("input",{type:"range",id:"ia-t",min:"0.2",max:"0.9",step:"0.05",value:String(clusterT)});
+    slider.addEventListener("change",()=>{ clusterT=parseFloat(slider.value); drawResults(); });
+    pane.append(h("section",{class:"panel stack"},
+      h("div",{class:"row",style:"justify-content:space-between"}, h("h2",{text:"เมนูที่ประกอบจากการจัดกลุ่มของทีม"}), h("label",{class:"range small muted",for:"ia-t"}, "ความเข้มของการรวมกลุ่ม", slider, h("span",{class:"mono",text:Math.round(clusterT*100)+"%"}))),
+      h("p",{class:"small muted",text:`สร้างจากคำตอบ ${csDocs.length} คน · หมวด = การ์ดที่ถูกจัดไว้ด้วยกันบ่อย · ชื่อหมวด = ชื่อที่ทีมตั้งบ่อยที่สุด · เลื่อนเกณฑ์ไปทางซ้ายจะได้หมวดใหญ่ขึ้น ไปทางขวาจะได้หมวดเล็กและแน่นขึ้น`}),
+      legend, render(iaFromCardSort(csDocs), "Design System Portal"),
+      h("p",{class:"small muted",text:"นี่คือร่างจากวัตถุดิบ (card sort ให้ไอเดีย ไม่ใช่คำตอบสุดท้าย) ควรเอาโครงนี้ไปทดสอบด้วย tree test อีกรอบก่อนใช้จริง"})));
+  } else {
+    const r=iaFromTreeTest(byV);
+    if(!r){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Tree test"})); return; }
+    pane.append(h("section",{class:"panel stack"},
+      h("h2",{text:`เมนู ${TREES[r.best].label} ปรับตามผลจริง`}),
+      h("p",{class:"small muted",text:`เริ่มจากเมนูที่หาเจอบ่อยที่สุด (${r.overall.success}% จาก ${r.n} คน) แล้วปรับอัตโนมัติ: ถ้าหาเจอต่ำกว่า 60% และคนไปหาที่หมวดอื่น ≥ 40% → ย้ายไปหมวดนั้น · ถ้าคนหาทั้งที่เดิมและที่อื่นอย่างละ ≥ 30% → เพิ่มลิงก์ให้เจอได้สองที่`+(r.n<MIN_N?" · คนยังน้อย ดูเป็นแนวโน้ม":"")}),
+      r.changes.length? guideEl(r.changes.map(c=>({...c,small:r.n<MIN_N}))) : h("p",{class:"small",text:"ยังไม่มีจุดที่ต้องย้ายหรือเพิ่มลิงก์"}),
+      legend, render(r.tree, "Design System Portal · เมนู "+r.best)));
+  }
+}
+function drawCs(pane, csDocs){
+  if(!csDocs.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"})); return; }
+  const {M, ids, ix, N}=coMatrix(csDocs);
+  const cl=clusterCards(csDocs, clusterT);
+  const slider=h("input",{type:"range",id:"cl-t",min:"0.2",max:"0.9",step:"0.05",value:String(clusterT)});
+  slider.addEventListener("change",()=>{ clusterT=parseFloat(slider.value); drawResults(); });
+  pane.append(h("section",{class:"panel stack"},
+    h("div",{class:"row",style:"justify-content:space-between"}, h("h2",{text:"กลุ่มที่แนะนำจากคำตอบทั้งหมด"}), h("label",{class:"range small muted",for:"cl-t"}, "เกณฑ์การรวมกลุ่ม", slider, h("span",{class:"mono",text:Math.round(clusterT*100)+"%"}))),
+    h("p",{class:"small muted",text:`รวมการ์ดที่ถูกจัดไว้ด้วยกันโดยเฉลี่ยอย่างน้อย ${Math.round(clusterT*100)}% ของคน (${N} คน) · ชื่อที่แสดง = ชื่อกลุ่มที่คนตั้งให้การ์ดชุดนี้บ่อยที่สุด`}),
+    h("div",{class:"grid2"}, cl.clusters.filter(c=>c.cards.length>1).map(clusterEl)),
+    (()=>{ const singles=cl.clusters.filter(c=>c.cards.length===1).map(c=>c.cards[0]); return singles.length? h("div",{class:"stack",style:"gap:6px"}, h("h3",{text:"การ์ดที่ยังไม่เข้ากลุ่มไหน (คนจัดไม่ตรงกัน)"}), h("div",{class:"minicards"}, singles.map(id=>h("span",{class:"mini",text:CARD_BY_ID[id].name})))) : null; })()));
+  // ambiguous cards
+  const amb=ids.map((id,i)=>{ const top=Math.max(...M[i].filter((_,j)=>j!==i)); const unsure=csDocs.filter(d=>d.cardsort.unsure.includes(id)).length; const partners=M[i].map((v,j)=>[j,v]).filter(([j])=>j!==i).sort((a,b)=>b[1]-a[1]).slice(0,3); return {id, top:pct(top,N), unsure, partners}; }).sort((a,b)=>a.top-b.top);
+  pane.append(h("section",{class:"panel stack"}, h("h2",{text:"การ์ดแต่ละใบถูกจัดคู่กับอะไร"}), h("p",{class:"small muted",text:"เรียงจากการ์ดที่คนจัดไม่ตรงกันที่สุด (คู่ที่เจอบ่อยสุดยังต่ำ) — การ์ดกลุ่มนี้ควรเอาไปเป็นโจทย์ tree test หรือทบทวนชื่อ"}),
+    h("div",{class:"scroll"}, h("table",{class:"data"}, h("thead",{}, h("tr",{}, h("th",{text:"การ์ด"}), h("th",{text:"คู่ที่เจอบ่อยสุด"}), h("th",{text:"ความตรงกัน"}), h("th",{text:"ไม่แน่ใจ"}))),
+      h("tbody",{}, amb.map(a=>h("tr",{}, h("td",{text:CARD_BY_ID[a.id].name}), h("td",{class:"small",text:a.partners.filter(p=>p[1]>0).map(([j,v])=>`${CARD_BY_ID[ids[j]].name} (${pct(v,N)}%)`).join(" · ")||"—"}), h("td",{},meter(a.top)), h("td",{class:"num",text:a.unsure? a.unsure+" คน":"—"}))))))));
+  // group names
+  const names={}; csDocs.forEach(d=>d.cardsort.groups.forEach(g=>{ const nm=g.name.trim(); if(nm) names[nm]=(names[nm]||0)+1; }));
+  pane.append(h("section",{class:"panel stack"}, h("h2",{text:"ชื่อกลุ่มที่ทีมตั้ง"}), h("div",{class:"cluster-names"}, Object.entries(names).sort((a,b)=>b[1]-a[1]).map(([n,k])=>h("span",{class:"tagname"}, n, h("b",{text:"×"+k}))))));
+  // matrix
+  const order=cl.order;
+  const thead=h("tr",{}, h("th",{}), order.map(id=>h("th",{text:CARD_BY_ID[id].name})));
+  const rows=order.map(a=>h("tr",{}, h("th",{text:CARD_BY_ID[a].name}), order.map(b=>{ const v=a===b? N : M[ix[a]][ix[b]]; const p=v/N; return h("td",{title:`${CARD_BY_ID[a].name} + ${CARD_BY_ID[b].name}: ${pct(v,N)}%`,style:`background:color-mix(in srgb, var(--accent) ${Math.round(p*100)}%, var(--surface-2))`}); })));
+  pane.append(h("details",{}, h("summary",{text:"ตารางความถี่ที่การ์ดถูกจัดไว้ด้วยกัน (co-occurrence matrix)"}), h("p",{class:"small muted",style:"margin:8px 0",text:"สีเข้ม = ถูกจัดไว้กลุ่มเดียวกันบ่อย เรียงตามกลุ่มที่แนะนำด้านบน ชี้ที่ช่องเพื่อดู %"}), h("div",{class:"scroll"}, h("table",{class:"matrix"}, h("thead",{},thead), h("tbody",{},rows)))));
+}
+function drawTt(pane, byV){
+  const withData=["A","B","C"].filter(k=>byV[k].length);
+  if(!withData.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Tree test"})); return; }
+  const stats={A:ttStats(byV.A),B:ttStats(byV.B),C:ttStats(byV.C)};
+  const head=h("tr",{}, h("th",{text:"โจทย์"}), withData.map(k=>h("th",{text:`หาเจอ · ${k} (${byV[k].length})`})), withData.map(k=>h("th",{text:`ตรงไม่ลังเล · ${k}`})));
+  const body=TASKS.map((t,ti)=>h("tr",{}, h("td",{}, h("div",{class:"small",text:t.q}), h("div",{class:"small muted",text:"คำตอบที่ถูก: "+t.a.join(" หรือ ")+(t.warm?" · ข้ออุ่นเครื่อง":"")})),
+    withData.map(k=>h("td",{}, meter(stats[k].rows[ti].success))), withData.map(k=>h("td",{}, stats[k].rows[ti].n? meter(stats[k].rows[ti].direct,""):"—"))));
+  pane.append(h("section",{class:"panel stack"}, h("h2",{text:"ผลรายโจทย์"}), h("p",{class:"small muted",text:"เลขข้อเริ่มที่ 0 ให้ตรงกับ diamond chart ใน Figma · เกณฑ์ % ทั้งหมด (เช่น หาเจอ ≥ 75% = ผ่าน, ข้าม ≥ 30%) เป็นเกณฑ์ที่ทีมตั้งเอง ไม่ใช่มาตรฐานจาก NN/g"}), h("div",{class:"scroll"}, h("table",{class:"data"}, h("thead",{},head), h("tbody",{},body)))));
+  TASKS.forEach((t,ti)=>{
+    const d=h("details",{}, h("summary",{text:`ข้อ ${ti}: ${t.q}`}), h("p",{class:"small muted",style:"margin-top:8px",text:"ทดสอบอะไร: "+(GUIDE[t.id]?.why||"")}));
+    withData.forEach(k=>{ const rs=stats[k].rows[ti].rs; if(!rs.length) return;
+      d.append(h("div",{style:"margin-top:10px"}, h("div",{class:"small",style:"font-weight:600;margin-bottom:4px",text:`สิ่งที่ต้องทำ (${TREES[k].label})`}), guideEl(guideFor(t,k,stats[k].rows[ti])))); const chosen={}, first={}; rs.forEach(r=>{ const c=r.chosen||"(ข้าม)"; chosen[c]=(chosen[c]||0)+1; if(r.firstTop){ first[r.firstTop]=(first[r.firstTop]||0)+1; } });
+      d.append(h("div",{class:"stack",style:"gap:6px;margin-top:10px"}, h("h3",{text:TREES[k].label}),
+        h("div",{class:"small"}, h("span",{class:"muted",text:"เลือกคำตอบ: "}), Object.entries(chosen).sort((a,b)=>b[1]-a[1]).map(([c,n])=>h("span",{class:"tagname",style:t.a.includes(c)?"background:var(--good-soft)":"",text:`${c} ×${n} `}))),
+        h("div",{class:"small"}, h("span",{class:"muted",text:"คลิกแรกไปที่หมวด: "}), Object.entries(first).sort((a,b)=>b[1]-a[1]).map(([c,n])=>h("span",{class:"mini",text:`${c} ×${n} `}))),
+        h("div",{class:"small muted",text:`เวลากลาง ${fmtSec(stats[k].rows[ti].med)} · ข้าม ${stats[k].rows[ti].skip}%`}))); });
+    pane.append(d);
+  });
+  withData.forEach(k=>{ const hard={}, comments=[]; byV[k].forEach(d=>{ (d.treetest.survey?.hardLabels||[]).forEach(l=>hard[l]=(hard[l]||0)+1); if(d.treetest.survey?.comment) comments.push(d.treetest.survey.comment); });
+    pane.append(h("section",{class:"panel stack"}, h("h2",{text:`${TREES[k].label}: ชื่อหมวดที่คนบอกว่าเข้าใจยาก`}),
+      Object.keys(hard).length? h("div",{class:"cluster-names"}, Object.entries(hard).sort((a,b)=>b[1]-a[1]).map(([n,c])=>h("span",{class:"tagname"}, n, h("b",{text:"×"+c})))) : h("p",{class:"muted small",text:"ไม่มีใครเลือก"}),
+      comments.length? h("ul",{class:"small"}, comments.map(c=>h("li",{text:c}))) : null)); });
+}
+async function drawPeople(pane, docs){
+  const ids=docs.map(d=>d.uid).filter(Boolean);
+  const ps = userNs && ids.length? await userNs.profiles(ids) : {};
+  pane.append(h("section",{class:"panel"}, h("div",{class:"scroll"}, h("table",{class:"data"},
+    h("thead",{}, h("tr",{}, h("th",{text:"ชื่อ"}), h("th",{text:"Card sort"}), h("th",{text:"Tree test"}), h("th",{text:"ลำดับ"}), h("th",{text:"อัปเดตล่าสุด"}))),
+    h("tbody",{}, docs.map(d=>{ const p=ps[d.uid]||{}; return h("tr",{},
+      h("td",{}, p.avatarUrl? h("img",{class:"avatar",src:p.avatarUrl,alt:""}):null, h("span",{text:d.displayName||p.name||"ไม่ทราบชื่อ"}), (d.displayName&&p.name&&p.name!==d.displayName)? h("div",{class:"small muted",text:"บัญชี: "+p.name}) : null),
+      h("td",{}, d.cardsort? h("span",{class:"pill good",text:`${d.cardsort.groups.length} กลุ่ม`}) : h("span",{class:"pill",text:"—"})),
+      h("td",{}, d.treetest? h("span",{class:"pill good",text:"เมนู "+d.treetest.version}) : (d.treeVersion? h("span",{class:"pill warn",text:"เริ่มแล้ว ("+d.treeVersion+")"}) : h("span",{class:"pill",text:"—"}))),
+      h("td",{class:"small muted",text: d.treetest? (d.treetest.didCardSortFirst? "ทำ card sort ก่อน" : "ทำ tree test ก่อน") : ""}),
+      h("td",{class:"num small",text:d.updatedAt? new Date(d.updatedAt).toLocaleString("th-TH"):"—"})); }))))));
+}
+async function exportCsv(){
+  if(!resDocs||!resDocs.length){ toast("ยังไม่มีข้อมูลให้ส่งออก"); return; }
+  if(!downloadsNs){ toast("หน้านี้ส่งออกไฟล์ไม่ได้"); return; }
+  const esc=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const rows=[["respondent","name","method","tree_version","task_or_group","value","success","direct","skipped","time_ms","path"]];
+  resDocs.forEach((d,i)=>{ const r="P"+String(i+1).padStart(2,"0"); const n=d.displayName||"";
+    d.cardsort?.groups.forEach(g=>g.cards.forEach(c=>rows.push([r,n,"cardsort","",g.name,CARD_BY_ID[c]?.name||c,"","","","",""])));
+    d.cardsort?.unsure.forEach(c=>rows.push([r,n,"cardsort","","(ไม่แน่ใจ)",CARD_BY_ID[c]?.name||c,"","","","",""]));
+    d.treetest?.results.forEach(x=>rows.push([r,n,"treetest",d.treetest.version,x.taskId,x.chosen||"",x.success,x.direct??"",x.skipped,x.timeMs,(x.path||[]).join(" > ")])); });
+  const csv="﻿"+rows.map(r=>r.map(esc).join(",")).join("\n");
+  try{ await downloadsNs.save({filename:"ia-lab-results.csv", data:csv}); }catch(e){ if(e.code!=="declined") toast("ส่งออกไม่สำเร็จ"); }
+}
+
+render();
+</script>
