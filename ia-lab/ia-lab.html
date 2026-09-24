@@ -198,6 +198,11 @@ details summary{cursor:pointer;font-weight:500}
 .ia-badge.moved{color:var(--bad);border-color:var(--bad)}
 .ia-badge.link{color:var(--accent);border-color:var(--accent)}
 .ia-badge.weak{color:var(--warn);border-color:var(--warn)}
+.ia-badge.changed{color:#fff;background:var(--bad);border-color:var(--bad)}
+.ia-tag{display:inline-block;margin-top:3px;font-size:.66rem;font-weight:700;padding:1px 8px;border-radius:999px;background:#fff;color:#1B2130}
+.ia-dot.changed{background:var(--bad);border-color:var(--bad)}
+.evo{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.evo input[type=range]{flex:1;min-width:180px}
 .ia-tree{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .ia-tree .ia-tree{padding-left:18px;margin:6px 0 4px 8px;border-left:1px solid var(--line);flex-direction:row;flex-wrap:wrap;gap:6px}
 .ia-tree li{min-width:0}
@@ -342,6 +347,7 @@ const TASKS = [
   {id:"t10", q:"อยากให้ผู้ใช้เลือกดูเฉพาะรายการเดินบัญชีของเดือนนี้ หรือเฉพาะเงินเข้า จะไปดูแนวทางที่ไหน?", a:["Filter & sort"]}
 ];
 const PASSCODE = "0000";
+const TT_ENABLED = false; // รอบ 2: เปิดเมื่อพร้อมทำ tree test จาก IA ของทีม
 
 /* ---------- Task → ผลลัพธ์ → สิ่งที่ทำกับ portal ----------
    ctx: { v:version, n, success, direct, skip, chosen:{name:count}, first:{top:count}, share(name), firstShare(top) } */
@@ -435,6 +441,8 @@ async function saveMyDoc(){
 function setView(v){ view=v; try{sessionStorage.setItem("ia-view",v)}catch(e){} render(); window.scrollTo({top:0}); }
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
 function render(){
+  const ttTab=document.getElementById("tab-tt"); if(ttTab) ttTab.hidden=!TT_ENABLED;
+  if(view==="tt" && !TT_ENABLED) view="home";
   document.querySelectorAll(".tab").forEach(b=>{ b.setAttribute("aria-selected", b.dataset.view===view); const d=b.querySelector(".dot"); if(d) d.remove(); if((b.dataset.view==="cs"&&myDoc.cardsort)||(b.dataset.view==="tt"&&myDoc.treetest)) b.append(h("span",{class:"dot",title:"ทำแล้ว"})); });
   const v=$("#view"); v.textContent="";
   if(resUnsub && view!=="res"){ resUnsub(); resUnsub=null; }
@@ -469,8 +477,8 @@ function renderHome(v){
       nameField(),
       methodCard("1","Card sort","ประมาณ 10–15 นาที","จัดการ์ด component เป็นกลุ่มตามที่คุณเข้าใจ แล้วตั้งชื่อกลุ่มเอง",
         ["เลือกการ์ด แล้วกดกลุ่มที่อยากใส่ (หรือลากวางบนคอมพิวเตอร์)","สร้างกลุ่มได้ไม่จำกัด ตั้งชื่อตามที่คุณเรียก","ถ้าไม่แน่ใจ ใส่กอง “ไม่แน่ใจ” ได้"], myDoc.cardsort, ()=>setView("cs")),
-      methodCard("2","Tree test","ประมาณ 5 นาที",`ลองหาของ ${TASKS.length} ข้อในเมนูที่ร่างไว้ ระบบจะสุ่มเมนูให้ 1 แบบ`,
-        ["อ่านโจทย์ แล้วกดไล่เมนูไปจนเจอของที่คิดว่าใช่","ถ้าหาไม่เจอ กดข้ามได้","ท้ายสุดมีคำถามสั้น ๆ 1 ข้อ"], myDoc.treetest, ()=>setView("tt"))
+      TT_ENABLED? methodCard("2","Tree test","ประมาณ 5 นาที",`ลองหาของ ${TASKS.length} ข้อในเมนูที่ร่างไว้ ระบบจะสุ่มเมนูให้ 1 แบบ`,
+        ["อ่านโจทย์ แล้วกดไล่เมนูไปจนเจอของที่คิดว่าใช่","ถ้าหาไม่เจอ กดข้ามได้","ท้ายสุดมีคำถามสั้น ๆ 1 ข้อ"], myDoc.treetest, ()=>setView("tt")) : h("article",{class:"method",style:"opacity:.7"}, h("div",{class:"row",style:"justify-content:space-between"}, h("h2",{text:"2 · Tree test"}), h("span",{class:"pill",text:"รอบ 2 · เร็ว ๆ นี้"})), h("p",{class:"muted",text:"เมื่อทุกคนทำ card sort เสร็จ เราจะเอาโครงที่ได้จากทีมมาให้ลองหาของในรอบถัดไป"}))
     )
   ));
 }
@@ -503,7 +511,7 @@ function renderCardSort(v){
       h("span",{class:"pill good",text:"ส่งคำตอบแล้ว ✓"}),
       h("h1",{text:"ขอบคุณ! Card sort ของคุณถูกบันทึกแล้ว"}),
       h("p",{class:"muted",text:`คุณจัดไว้ ${myDoc.cardsort.groups.length} กลุ่ม · ไม่แน่ใจ ${myDoc.cardsort.unsure.length} ใบ`}),
-      h("div",{class:"row"}, h("button",{class:"btn primary",onclick:()=>setView("tt"),text:"ไปทำ Tree test ต่อ"}), h("button",{class:"btn",onclick:()=>{csRedo=true; store.set("ia-cs-draft",null); cs=null; render();},text:"ทำใหม่ (ทับคำตอบเดิม)"}))
+      h("div",{class:"row"}, TT_ENABLED? h("button",{class:"btn primary",onclick:()=>setView("tt"),text:"ไปทำ Tree test ต่อ"}) : null, h("button",{class:"btn",onclick:()=>{csRedo=true; store.set("ia-cs-draft",null); cs=null; render();},text:"ทำใหม่ (ทับคำตอบเดิม)"}))
     )); return;
   }
   if(!cs) csInit();
@@ -704,8 +712,8 @@ async function drawResults(){
   if(!docs.length){ box.append(h("div",{class:"notice "+(canSee?"info":""),text: canSee? "ยังไม่มีใครส่งคำตอบ ส่งลิงก์ให้ทีม (ตั้งสิทธิ์ “Can interact”) แล้วผลจะขึ้นที่นี่ทันที" : "บัญชีนี้ไม่เห็นคำตอบของคนอื่น ผลลัพธ์เปิดดูได้เฉพาะเจ้าของหรือผู้แก้ไขหน้านี้"})); if(resTab!=="ia"){ resTab="ia"; } }
   const byV={A:[],B:[],C:[]}; ttDocs.forEach(d=>byV[d.treetest.version]?.push(d));
   box.append(h("div",{class:"kpis"},
-    kpi(docs.length,"คนที่ตอบ"), kpi(csDocs.length,"Card sort"), kpi(ttDocs.length,"Tree test"), kpi(`${byV.A.length} / ${byV.B.length} / ${byV.C.length}`,"Tree test แยกเมนู A / B / C")));
-  const tabs=[["overview","ภาพรวม"],["ia","IA จากผลลัพธ์"],["cs","Card sort"],["tt","Tree test"],["people","ผู้ตอบ"]];
+    kpi(docs.length,"คนที่ตอบ"), kpi(csDocs.length,"Card sort"), ...((TT_ENABLED||ttDocs.length)? [kpi(ttDocs.length,"Tree test"), kpi(`${byV.A.length} / ${byV.B.length} / ${byV.C.length}`,"Tree test แยกเมนู A / B / C")] : [kpi(csDocs.length? (csDocs.reduce((a,d)=>a+d.cardsort.groups.length,0)/csDocs.length).toFixed(1) : "—","กลุ่มเฉลี่ยต่อคน")])));
+  const tabs=[["overview","ภาพรวม"],["ia","IA จากผลลัพธ์"],["cs","Card sort"],...((TT_ENABLED||ttDocs.length)?[["tt","Tree test"]]:[]),["people","ผู้ตอบ"]];
   box.append(h("div",{class:"subtabs",style:"margin:18px 0"}, tabs.map(([k,l])=>h("button",{class:"subtab","aria-selected":String(resTab===k),onclick:()=>{resTab=k; drawResults();},text:l}))));
   const pane=h("div",{class:"stack"}); box.append(pane);
   if(resTab==="overview") drawOverview(pane, csDocs, ttDocs, byV);
@@ -741,6 +749,10 @@ function guideEl(items){
     h("div",{class:"small",text:"→ "+it.act}))));
 }
 function drawOverview(pane, csDocs, ttDocs, byV){
+  if(TT_ENABLED||ttDocs.length) drawOverviewTT(pane, byV);
+  drawOverviewCS(pane, csDocs);
+}
+function drawOverviewTT(pane, byV){
   const stats={A:ttStats(byV.A),B:ttStats(byV.B),C:ttStats(byV.C)};
   const withData=["A","B","C"].filter(k=>byV[k].length);
   const best = withData.length? withData.reduce((a,b)=> stats[b].overall.success>stats[a].overall.success? b : a) : null;
@@ -758,6 +770,8 @@ function drawOverview(pane, csDocs, ttDocs, byV){
     pane.append(h("section",{class:"panel stack"}, h("h2",{text:"สิ่งที่ต้องทำกับ portal"}), h("p",{class:"small muted",text:"แปลผลอัตโนมัติจากเกณฑ์ของแต่ละโจทย์ (ดูเกณฑ์ได้ที่แท็บ Tree test) · เรียงจากเรื่องที่ควรแก้ก่อน · เกณฑ์ % ทั้งหมด (เช่น หาเจอ ≥ 75% = ผ่าน, ข้าม ≥ 30%) เป็นเกณฑ์ที่ทีมตั้งเอง ไม่ใช่มาตรฐานจาก NN/g"}),
       actions.length? guideEl(actions.slice(0,14)) : h("p",{class:"muted small",text:"ยังไม่มีจุดที่ต้องแก้"})));
   }
+}
+function drawOverviewCS(pane, csDocs){
   const cl = csDocs.length? clusterCards(csDocs, clusterT) : null;
   pane.append(h("section",{class:"panel stack"}, h("h2",{text:"Card sort: กลุ่มที่เกาะกันชัด"}),
     cl? h("div",{class:"grid2"}, cl.clusters.filter(c=>c.cards.length>1).slice(0,8).map(c=>clusterEl(c))) : h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"}),
@@ -826,7 +840,7 @@ function sampleData(){
   _sample={cs, tt}; return _sample;
 }
 const IA_COLORS=[["#2F3A74","#fff"],["#9BAF4C","#fff"],["#6B35C7","#fff"],["#D0164F","#fff"],["#1F8F84","#fff"],["#E3A13A","#1B2130"],["#7A7F87","#fff"],["#E0573F","#fff"],["#4B2360","#fff"],["#3B7DD8","#fff"]];
-const IA_BADGE={moved:"ย้าย",link:"ลิงก์",weak:"ยังไม่ลงตัว"};
+const IA_BADGE={moved:"ย้าย",link:"ลิงก์",weak:"ยังไม่ลงตัว",changed:"เปลี่ยนกลุ่ม"};
 function iaMapEl(nodes, rootName){
   const wrap=h("div",{class:"ia-map"});
   const root=h("div",{class:"ia-root"}); root.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>';
@@ -835,7 +849,7 @@ function iaMapEl(nodes, rootName){
   nodes.forEach((cat,ci)=>{
     const [c,ct]=IA_COLORS[ci%IA_COLORS.length];
     const col=h("div",{class:"ia-col",style:`--c:${c};--ct:${ct}`});
-    col.append(h("div",{class:"ia-head"}, h("b",{text:cat.name}), cat.meta? h("span",{text:cat.meta}) : null, cat.alt&&cat.alt.length? h("span",{text:"หรือ: "+cat.alt.join(", ")}) : null));
+    col.append(h("div",{class:"ia-head"}, h("b",{text:cat.name}), cat.meta? h("span",{text:cat.meta}) : null, cat.alt&&cat.alt.length? h("span",{text:"หรือ: "+cat.alt.join(", ")}) : null, cat.tag? h("i",{class:"ia-tag",text:cat.tag}) : null));
     const list=h("div",{class:"ia-items"});
     (cat.children||[]).forEach(ch=>{
       if(ch.children){
@@ -858,7 +872,7 @@ function iaTreeEl(nodes){
   nodes.forEach(n=>{
     const li=h("li",{});
     if(n.children){
-      li.append(h("div",{class:"ia-cat"}, h("span",{text:n.name}), n.meta? h("span",{class:"ia-meta",text:n.meta}) : null, n.alt&&n.alt.length? h("span",{class:"ia-meta",text:"ชื่ออื่นที่ใช้: "+n.alt.join(", ")}) : null));
+      li.append(h("div",{class:"ia-cat"}, h("span",{text:n.name}), n.tag? h("span",{class:"pill warn",text:n.tag}) : null, n.meta? h("span",{class:"ia-meta",text:n.meta}) : null, n.alt&&n.alt.length? h("span",{class:"ia-meta",text:"ชื่ออื่นที่ใช้: "+n.alt.join(", ")}) : null));
       li.append(iaTreeEl(n.children));
     } else {
       li.append(h("div",{class:"ia-leaf"+(n.flag?" "+n.flag:"")}, h("span",{text:n.name}), (n.detail||n.note)? h("span",{class:"ia-note",text:n.detail||n.note}) : null));
@@ -919,37 +933,68 @@ function iaFromTreeTest(byV){
   // mark confident leaves
   return {best, tree, changes, overall:stats[best].overall, n:byV[best].length};
 }
+let iaStep=null;
+function orderCs(docs){ return [...docs].sort((x,y)=> String(x.cardsort.submittedAt||"").localeCompare(String(y.cardsort.submittedAt||""))); }
+function iaDiff(prevNodes, curNodes){
+  const setOf=n=>new Set((n.children||[]).map(c=>c.name));
+  const prev=prevNodes.map(n=>({name:n.name,set:setOf(n)}));
+  const match=new Map();
+  curNodes.forEach((cn,ci)=>{ const cs=setOf(cn); let best=null; prev.forEach((pn,pi)=>{ const inter=[...cs].filter(x=>pn.set.has(x)).length; const uni=new Set([...cs,...pn.set]).size; const j=uni? inter/uni : 0; if(!best||j>best.j) best={j,pi}; }); if(best&&best.j>=0.5) match.set(ci,best.pi); });
+  const prevCatOf={}; prev.forEach((pn,pi)=>pn.set.forEach(x=>prevCatOf[x]=pi));
+  let moved=0, newCats=0, renamed=0;
+  curNodes.forEach((cn,ci)=>{
+    const pi=match.get(ci);
+    if(pi===undefined){ if(prev.length && !cn.name.startsWith("ยังไม่ลงตัว")){ cn.tag="หมวดใหม่"; newCats++; } }
+    else if(prev[pi].name!==cn.name){ cn.tag="เดิมชื่อ "+prev[pi].name; renamed++; }
+    (cn.children||[]).forEach(c=>{ const was=prevCatOf[c.name]; if(was!==undefined && was!==pi){ c.flag="changed"; c.detail=`เปลี่ยนกลุ่ม: เดิมอยู่ “${prev[was].name}”`+(c.detail?` · ${c.detail}`:""); c.note=`เดิม: ${prev[was].name}`; moved++; } });
+  });
+  return {moved,newCats,renamed};
+}
+async function exportIA(nodes, basedOn){
+  if(!downloadsNs){ toast("หน้านี้ส่งออกไฟล์ไม่ได้"); return; }
+  const data={ exportedAt:new Date().toISOString(), basedOnResponses:basedOn, clusterThreshold:clusterT,
+    categories: nodes.map(n=>({ name:n.name, alternativeNames:n.alt||[], meta:n.meta||"", items:(n.children||[]).map(c=>({ name:c.name, id:(CARD_BY_NAME[c.name]||{}).id||null, flag:c.flag||null, note:c.detail||c.note||null })) })) };
+  try{ await downloadsNs.save({filename:`ia-from-card-sort-${basedOn}.json`, data:JSON.stringify(data,null,2)}); }catch(e){ if(e.code!=="declined") toast("ส่งออกไม่สำเร็จ"); }
+}
 function drawIA(pane, realCs, realByV){
-  const hasReal = iaMode==="cs"? realCs.length>0 : ["A","B","C"].some(k=>realByV[k].length);
+  const hasReal = realCs.length>0;
   const useSample = iaSample===null? !hasReal : iaSample;
-  let csDocs=realCs, byV=realByV;
-  if(useSample){ const s=sampleData(); csDocs=s.cs; byV={A:[],B:[],C:[]}; s.tt.forEach(d=>byV[d.treetest.version].push(d)); }
+  const all = useSample? sampleData().cs : orderCs(realCs);
   pane.append(h("div",{class:"row",style:"justify-content:space-between"},
-    h("div",{class:"subtabs"}, [["cs","จาก Card sort"],["tt","จาก Tree test"]].map(([k,l])=>h("button",{class:"subtab","aria-selected":String(iaMode===k),onclick:()=>{iaMode=k; drawResults();},text:l}))),
+    h("h2",{text:"IA จากการจัดกลุ่มของทีม"}),
     h("div",{class:"row"},
       h("div",{class:"subtabs"}, [["map","แผนผัง"],["list","รายการ"]].map(([k,l])=>h("button",{class:"subtab","aria-selected":String(iaView===k),onclick:()=>{iaView=k; drawResults();},text:l}))),
-      h("button",{class:"btn "+(useSample?"primary":""),onclick:()=>{ iaSample=!useSample; drawResults(); },text: useSample? "กำลังดูข้อมูลตัวอย่าง · กลับไปข้อมูลจริง" : "ดูด้วยข้อมูลตัวอย่าง"}))));
-  if(useSample) pane.append(h("div",{class:"notice",text:"⚠ นี่คือข้อมูลตัวอย่างที่จำลองขึ้น (12 คนสำหรับ card sort · เมนูละ 4 คนสำหรับ tree test) เพื่อให้เห็นหน้าตา IA เท่านั้น ไม่ใช่คำตอบของทีม"+(hasReal?"":" · ยังไม่มีคำตอบจริง")}));
-  const render = (nodes, rootName)=> iaView==="map"? iaMapEl(nodes, rootName) : iaTreeEl(nodes);
-  const legend=h("div",{class:"row small muted",style:"gap:14px"}, h("span",{}, h("span",{class:"ia-dot moved"}), " ย้ายตามผลจริง"), h("span",{}, h("span",{class:"ia-dot link"}), " อยู่ได้สองที่ / ทำลิงก์ข้าม"), h("span",{}, h("span",{class:"ia-dot weak"}), " ยังไม่ลงตัว"));
-  if(iaMode==="cs"){
-    if(!csDocs.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"})); return; }
-    const slider=h("input",{type:"range",id:"ia-t",min:"0.2",max:"0.9",step:"0.05",value:String(clusterT)});
-    slider.addEventListener("change",()=>{ clusterT=parseFloat(slider.value); drawResults(); });
-    pane.append(h("section",{class:"panel stack"},
-      h("div",{class:"row",style:"justify-content:space-between"}, h("h2",{text:"เมนูที่ประกอบจากการจัดกลุ่มของทีม"}), h("label",{class:"range small muted",for:"ia-t"}, "ความเข้มของการรวมกลุ่ม", slider, h("span",{class:"mono",text:Math.round(clusterT*100)+"%"}))),
-      h("p",{class:"small muted",text:`สร้างจากคำตอบ ${csDocs.length} คน · หมวด = การ์ดที่ถูกจัดไว้ด้วยกันบ่อย · ชื่อหมวด = ชื่อที่ทีมตั้งบ่อยที่สุด · เลื่อนเกณฑ์ไปทางซ้ายจะได้หมวดใหญ่ขึ้น ไปทางขวาจะได้หมวดเล็กและแน่นขึ้น`}),
-      legend, render(iaFromCardSort(csDocs), "Design System Portal"),
-      h("p",{class:"small muted",text:"นี่คือร่างจากวัตถุดิบ (card sort ให้ไอเดีย ไม่ใช่คำตอบสุดท้าย) ควรเอาโครงนี้ไปทดสอบด้วย tree test อีกรอบก่อนใช้จริง"})));
-  } else {
-    const r=iaFromTreeTest(byV);
-    if(!r){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Tree test"})); return; }
-    pane.append(h("section",{class:"panel stack"},
-      h("h2",{text:`เมนู ${TREES[r.best].label} ปรับตามผลจริง`}),
-      h("p",{class:"small muted",text:`เริ่มจากเมนูที่หาเจอบ่อยที่สุด (${r.overall.success}% จาก ${r.n} คน) แล้วปรับอัตโนมัติ: ถ้าหาเจอต่ำกว่า 60% และคนไปหาที่หมวดอื่น ≥ 40% → ย้ายไปหมวดนั้น · ถ้าคนหาทั้งที่เดิมและที่อื่นอย่างละ ≥ 30% → เพิ่มลิงก์ให้เจอได้สองที่`+(r.n<MIN_N?" · คนยังน้อย ดูเป็นแนวโน้ม":"")}),
-      r.changes.length? guideEl(r.changes.map(c=>({...c,small:r.n<MIN_N}))) : h("p",{class:"small",text:"ยังไม่มีจุดที่ต้องย้ายหรือเพิ่มลิงก์"}),
-      legend, render(r.tree, "Design System Portal · เมนู "+r.best)));
-  }
+      h("button",{class:"btn "+(useSample?"primary":""),onclick:()=>{ iaSample=!useSample; iaStep=null; drawResults(); },text: useSample? "กำลังดูข้อมูลตัวอย่าง · กลับไปข้อมูลจริง" : "ดูด้วยข้อมูลตัวอย่าง"}))));
+  if(useSample) pane.append(h("div",{class:"notice",text:"⚠ นี่คือข้อมูลตัวอย่างที่จำลองขึ้น (12 คน) เพื่อให้เห็นหน้าตา IA เท่านั้น ไม่ใช่คำตอบของทีม"+(hasReal?"":" · ยังไม่มีคำตอบจริง")}));
+  if(!all.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"})); return; }
+  const N=all.length; const n = iaStep===null? N : Math.min(Math.max(1,iaStep),N);
+  const cur=iaFromCardSort(all.slice(0,n));
+  const diff = n>1? iaDiff(iaFromCardSort(all.slice(0,n-1)), cur) : null;
+  const who=all[n-1]; const whoName=who.displayName||"ผู้ตอบคนที่ "+n;
+  // evolution control
+  const step=h("input",{type:"range",id:"ia-step",min:"1",max:String(N),step:"1",value:String(n),"aria-label":"ดู IA หลังคนที่"});
+  step.addEventListener("input",()=>{ iaStep=parseInt(step.value,10); drawResults(); });
+  const evo=h("div",{class:"evo"},
+    h("button",{class:"btn",disabled:n<=1?true:null,onclick:()=>{ iaStep=n-1; drawResults(); },"aria-label":"คนก่อนหน้า",text:"◀"}),
+    h("span",{class:"small",style:"min-width:9em"}, h("b",{text:`IA หลังคนที่ ${n}`}), h("span",{class:"muted",text:` จาก ${N}`})),
+    step,
+    h("button",{class:"btn",disabled:n>=N?true:null,onclick:()=>{ iaStep=n+1; drawResults(); },"aria-label":"คนถัดไป",text:"▶"}),
+    h("button",{class:"btn "+(n===N?"primary":""),onclick:()=>{ iaStep=null; drawResults(); },text:"ล่าสุด"}));
+  const summary = n===1? `คนแรก (${whoName}) จัดไว้ ${who.cardsort.groups.length} กลุ่ม — IA ตอนนี้คือกลุ่มของคนนี้ตรง ๆ`
+    : `เพิ่มคำตอบของ ${whoName} → เปลี่ยนกลุ่ม ${diff.moved} ชิ้น · หมวดใหม่ ${diff.newCats} · เปลี่ยนชื่อหมวด ${diff.renamed}` + (diff.moved+diff.newCats+diff.renamed===0? " (โครงไม่เปลี่ยน)" : "");
+  const slider=h("input",{type:"range",id:"ia-t",min:"0.2",max:"0.9",step:"0.05",value:String(clusterT)});
+  slider.addEventListener("change",()=>{ clusterT=parseFloat(slider.value); drawResults(); });
+  const legend=h("div",{class:"row small muted",style:"gap:14px"}, h("span",{}, h("span",{class:"ia-dot changed"}), " เปลี่ยนกลุ่มจากรอบก่อน"), h("span",{}, h("span",{class:"ia-dot link"}), " คนมักจัดไว้กับหมวดอื่นด้วย (ลิงก์ข้าม)"), h("span",{}, h("span",{class:"ia-dot weak"}), " ยังไม่ลงตัว"));
+  const render = iaView==="map"? iaMapEl(cur, "Design System Portal") : iaTreeEl(cur);
+  pane.append(h("section",{class:"panel stack"},
+    evo,
+    h("p",{class:"small",text:summary}),
+    n<8? h("p",{class:"small muted",text:`ตอนนี้มีคำตอบ ${n} คน โครงยังแกว่งได้มาก ควรดูเป็นข้อสรุปเมื่อมีคนตอบราว 8–10 คนขึ้นไป (ตัวเลขประมาณ ไม่ใช่เกณฑ์มาตรฐาน)`}) : null,
+    h("div",{class:"row",style:"justify-content:space-between"}, legend, h("label",{class:"range small muted",for:"ia-t"}, "ความเข้มของการรวมกลุ่ม", slider, h("span",{class:"mono",text:Math.round(clusterT*100)+"%"}))),
+    render,
+    h("div",{class:"row",style:"justify-content:space-between"},
+      h("p",{class:"small muted",style:"max-width:70ch",text:"หมวด = การ์ดที่ทีมจัดไว้ด้วยกันบ่อย · ชื่อหมวด = ชื่อที่ทีมตั้งบ่อยที่สุด · โครงนี้คือวัตถุดิบสำหรับทำ tree test รอบถัดไป"}),
+      h("button",{class:"btn primary",onclick:()=>exportIA(cur, n),text:"ส่งออก IA นี้ (JSON) สำหรับทำ tree test"}))));
 }
 function drawCs(pane, csDocs){
   if(!csDocs.length){ pane.append(h("p",{class:"muted",text:"ยังไม่มีคำตอบ Card sort"})); return; }
