@@ -1,0 +1,24 @@
+--sgds-gradient-1: linear-gradient(90deg, #0091B8 0%, #8055BB 100%)
+--sgds-gradient-2: linear-gradient(90deg, #4288D6 0%, #B82EA0 100%)
+--sgds-gradient-3: linear-gradient(90deg, #9A74CF 0%, #C7286A 100%)
+--sgds-gradient-4: linear-gradient(90deg, #C95EB7 0%, #CB2B33 100%)
+--sgds-outline-focus: var(--sgds-border-width-2) solid var(--sgds-blue-400)
+--sgds-outline-offset-focus: calc(-1 * var(--sgds-border-width-2))
+--sgds-form-outline-focus: var(--sgds-outline-focus)
+--sgds-form-outline-offset-focus: var(--sgds-outline-offset-focus)
+--sgds-motion-easing-enter: cubic-bezier(0.1, 0, 0.5, 0)
+--sgds-motion-easing-exit: cubic-bezier(0.15, 0.6, 0.6, 1)
+--sgds-motion-easing-standard: cubic-bezier(0.25, 0, 0.25, 1)
+--sgds-motion-duration-faster: 100ms
+--sgds-motion-duration-fast: 200ms
+--sgds-motion-duration-standard: 300ms
+--sgds-motion-duration-slow: 400ms
+--sgds-motion-duration-slower: 500ms
+--sgds-elevation-surface-1: 0 0 2px 0 rgba(14, 14, 14, 0.16)
+--sgds-elevation-surface-2: 0 0 2px 0 rgba(14, 14, 14, 0.16), 0 2px 4px 0 rgba(14, 14, 14, 0.08)
+--sgds-elevation-surface-3: 0 0 2px 0 rgba(14, 14, 14, 0.16), 0 4px 8px 0 rgba(14, 14, 14, 0.08)
+--sgds-elevation-surface-4: 0 0 2px 0 rgba(14, 14, 14, 0.16), 0 8px 16px 0 rgba(14, 14, 14, 0.08)
+--sgds-elevation-surface-5: 0 0 2px 0 rgba(14, 14, 14, 0.16), 0 16px 32px 0 rgba(14, 14, 14, 0.08)
+--sgds-elevation-edge-top: 0 -2px 4px 0 rgba(14, 14, 14, 0.08)
+--sgds-elevation-edge-bottom: 0 2px 4px 0 rgba(14, 14, 14, 0.08)
+--sgds-color-scheme: only light

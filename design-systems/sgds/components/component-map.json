@@ -1,0 +1,3788 @@
+{
+  "sgdsVersion": "3.29.0",
+  "count": 80,
+  "components": [
+    {
+      "tag": "sgds-accordion",
+      "group": "Accordion",
+      "description": "A dropdown mechanism that allow users to either show or hide related content. `SgdsAccordion` is a wrapper to manage the behaviour for multiple `SgdsAccordionItems`",
+      "props": [
+        {
+          "name": "allowMultiple",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "AccordionVariant",
+          "default": "\"default\""
+        },
+        {
+          "name": "density",
+          "type": "AccordionDensity",
+          "default": "\"default\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-accordion-item",
+      "group": "Accordion",
+      "description": "",
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "density",
+          "type": "AccordionDensity",
+          "default": "\"default\""
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [
+        "icon",
+        "header",
+        "badge",
+        "content",
+        "caret"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-alert",
+      "group": "Alert",
+      "description": "Alerts provide short, timely, and relevant information for your users. It can be a simple text message or customised HTML content with paragraphs, headings and links.",
+      "props": [
+        {
+          "name": "show",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "dismissible",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "AlertVariant",
+          "default": "\"info\""
+        },
+        {
+          "name": "outlined",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [
+        "default",
+        "icon",
+        "action"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-alert-link",
+      "group": "Alert",
+      "description": "Alert link are used within the alert's message that is passed into the default slot of `<sgds-alert>`",
+      "props": [
+        {
+          "name": "href",
+          "type": "string"
+        },
+        {
+          "name": "target",
+          "type": "\"_blank\" | \"_parent\" | \"_self\" | \"_top\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-appnav",
+      "group": "Appnav",
+      "description": "`SgdsAppnav` is a application navigation bar for operational apps. Accepts icon-buttons and profile in a fluid layout with collapse/expand behavior.",
+      "props": [
+        {
+          "name": "tone",
+          "type": "AppnavTone",
+          "default": "\"brand\""
+        },
+        {
+          "name": "hasStartSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "brandHref",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "expand",
+          "type": "NavExpandSize",
+          "default": "\"lg\""
+        }
+      ],
+      "slots": [
+        "default",
+        "start",
+        "brand",
+        "profile"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-appnav-profile",
+      "group": "Appnav",
+      "description": "`SgdsAppnavProfile` is a profile component for the appnav that shows a full dropdown in desktop and handles its own mobile menu.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "secondaryText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "close",
+          "type": "\"default\" | \"outside\" | \"inside\"",
+          "default": "\"default\""
+        }
+      ],
+      "slots": [
+        "avatar",
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-badge",
+      "group": "Badge",
+      "description": "Badges can be used to highlight important bits of information such as labels, notifications & status.",
+      "props": [
+        {
+          "name": "show",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "BadgeVariant",
+          "default": "\"primary\""
+        },
+        {
+          "name": "outlined",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "dismissible",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "fullWidth",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "icon"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-hide",
+        "sgds-after-show",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-breadcrumb",
+      "group": "Breadcrumb",
+      "description": "Breadcrumbs help users to navigate and understand where they are on the current website or service.",
+      "props": [
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"breadcrumb\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-breadcrumb-item",
+      "group": "Breadcrumb",
+      "description": "Breadcrumb Item are navigational links used in Breadcrumb component",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-button",
+      "group": "Button",
+      "description": "Custom button styles for actions in forms, dialogs, and more with support for multiple sizes, states, and more.",
+      "props": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "\"button\" | \"submit\" | \"reset\"",
+          "default": "\"button\""
+        },
+        {
+          "name": "form",
+          "type": "string"
+        },
+        {
+          "name": "formaction",
+          "type": "string"
+        },
+        {
+          "name": "formmethod",
+          "type": "\"post\" | \"get\""
+        },
+        {
+          "name": "formnovalidate",
+          "type": "boolean"
+        },
+        {
+          "name": "formtarget",
+          "type": "| \"_self\"\n    | \"_blank\"\n    | \"_parent\"\n    | \"_top\"\n    | string"
+        },
+        {
+          "name": "fullWidth",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasLeftIconSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasRightIconSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "ButtonVariant",
+          "default": "\"primary\""
+        },
+        {
+          "name": "tone",
+          "type": "ButtonTone",
+          "default": "\"brand\""
+        },
+        {
+          "name": "size",
+          "type": "\"xs\" | \"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "href",
+          "type": "string"
+        },
+        {
+          "name": "target",
+          "type": "\"_blank\" | \"_parent\" | \"_self\" | \"_top\"",
+          "default": "\"_self\""
+        },
+        {
+          "name": "download",
+          "type": "string"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string"
+        },
+        {
+          "name": "loading",
+          "type": "boolean"
+        }
+      ],
+      "slots": [
+        "default",
+        "leftIcon",
+        "rightIcon"
+      ],
+      "events": [
+        "sgds-blur",
+        "sgds-focus"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-card",
+      "group": "Card",
+      "description": "Cards can be used for headers and footers, a wide variety of content, contain contextual background colors and images.",
+      "props": [
+        {
+          "name": "imagePosition",
+          "type": "CardImagePosition",
+          "default": "\"before\""
+        },
+        {
+          "name": "imageAdjustment",
+          "type": "CardImageAdjustment",
+          "default": "\"default\""
+        },
+        {
+          "name": "hasImageSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasIconSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasUpperSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noPadding",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "stretchedLink",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hideBorder",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "tinted",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "orientation",
+          "type": "CardOrientation",
+          "default": "\"vertical\""
+        }
+      ],
+      "slots": [
+        "default",
+        "menu",
+        "upper",
+        "image",
+        "icon",
+        "subtitle",
+        "title",
+        "description",
+        "lower",
+        "footer",
+        "link"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-checkbox",
+      "group": "Checkbox",
+      "description": "Checkbox component is used when you require users to select multiple items from a list.",
+      "props": [
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasFeedback",
+          "type": "\"style\" | \"text\" | \"both\""
+        },
+        {
+          "name": "indeterminate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-blur",
+        "sgds-focus",
+        "sgds-check",
+        "sgds-uncheck",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-checkbox-group",
+      "group": "Checkbox",
+      "description": "CheckboxGroup is a form component for multiselection of checkboxes.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"Please tick at least one box if you want to proceed\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "invalidIcon"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-close-button",
+      "group": "CloseButton",
+      "description": "Close button for closing actions. Used in Modal, Drawer, Alert and Toast.",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "tone",
+          "type": "\"default\" | \"fixed-dark\" | \"fixed-light\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-combo-box",
+      "group": "ComboBox",
+      "description": "ComboBox component is used for users to make one or more selections from a list through user input, keyboard or mouse actions",
+      "props": [
+        {
+          "name": "multiSelect",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "badgeFullWidth",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "clearable",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "async",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "emptyMenuAsync",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "scrollBottomOffset",
+          "type": "number",
+          "default": "0"
+        },
+        {
+          "name": "filterFunction",
+          "type": "(inputValue: string, item: SgdsComboBoxOptionData) => boolean"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "placeholder",
+          "type": "string"
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autocomplete",
+          "type": "string",
+          "default": "\"on\""
+        },
+        {
+          "name": "menuList",
+          "type": "SgdsOptionData[]",
+          "default": "[]"
+        },
+        {
+          "name": "hidden",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "floatingOpts",
+          "type": "{ placement?: Placement; middleware?: Array<Middleware> }",
+          "default": "{}"
+        },
+        {
+          "name": "menuIsOpen",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-select",
+        "sgds-change",
+        "sgds-input",
+        "sgds-focus",
+        "sgds-blur",
+        "sgds-invalid",
+        "sgds-valid",
+        "sgds-scroll-end",
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-combo-box-option",
+      "group": "ComboBox",
+      "description": "ComboBoxOption is the option of the Combobox",
+      "props": [
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-data-table",
+      "group": "DataTable",
+      "description": "A data table container with pagination, row selection, loading, and sorting support.",
+      "props": [
+        {
+          "name": "multiSelect",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "dataLength",
+          "type": "number",
+          "default": "0"
+        },
+        {
+          "name": "currentPage",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "itemsPerPage",
+          "type": "number",
+          "default": "5"
+        },
+        {
+          "name": "paginationSummary",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "serverSort",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "paginationVariant",
+          "type": "\"default\" | \"number\" | \"button\" | \"description\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "layout",
+          "type": "\"auto\" | \"fixed\"",
+          "default": "\"auto\""
+        },
+        {
+          "name": "mode",
+          "type": "\"client\" | \"server\"",
+          "default": "\"client\""
+        }
+      ],
+      "slots": [
+        "default",
+        "no-data"
+      ],
+      "events": [
+        "sgds-row-select",
+        "sgds-sort",
+        "sgds-page-change"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-data-table-cell",
+      "group": "DataTable",
+      "description": "Data container for a table cell. Rendered as a `<td>` by the parent `sgds-data-table-row`.",
+      "props": [],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-data-table-head",
+      "group": "DataTable",
+      "description": "Data container for a table header cell. Rendered as a `<th>` by the parent `sgds-data-table-row`.",
+      "props": [
+        {
+          "name": "width",
+          "type": "string | undefined"
+        },
+        {
+          "name": "textAlign",
+          "type": "\"left\" | \"right\"",
+          "default": "\"left\""
+        },
+        {
+          "name": "sortDirection",
+          "type": "\"ascending\" | \"descending\" | \"none\" | \"other\" | undefined"
+        },
+        {
+          "name": "sorting",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "sortKey",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-data-table-row",
+      "group": "DataTable",
+      "description": "A data table row. Set `expand` to enable an expandable content area beneath",
+      "props": [
+        {
+          "name": "expand",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "content"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-datepicker",
+      "group": "Datepicker",
+      "description": "The `DatePicker` Component is built using `Dropdown`, `Input` and `Button` components. By default, the Calendar points to today's date and input has no value. Users can either pick dates from the calendar or type dates through the input",
+      "props": [
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "initialValue",
+          "type": "string[]",
+          "default": "[]"
+        },
+        {
+          "name": "minDate",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "maxDate",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "mode",
+          "type": "\"single\" | \"range\"",
+          "default": "\"single\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string"
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "noFlip",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "drop",
+          "type": "\"up\" | \"down\"",
+          "default": "\"down\""
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "floatingOpts",
+          "type": "{ placement?: Placement; middleware?: Array<Middleware> }",
+          "default": "{}"
+        },
+        {
+          "name": "menuIsOpen",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [
+        "sgds-change-date",
+        "sgds-invalid",
+        "sgds-valid",
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-description-list",
+      "group": "DescriptionList",
+      "description": "Description Lists are used with description list group as list components. A description list (often referred to as a “definition list”) is a type of list used in web design and documentation to pair terms with their corresponding descriptions or values.",
+      "props": [
+        {
+          "name": "stacked",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "data"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-description-list-group",
+      "group": "DescriptionList",
+      "description": "Description List Group organizes multiple description lists.",
+      "props": [
+        {
+          "name": "bordered",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "stacked",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasTitleSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasDescriptionSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "title",
+        "description"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-divider",
+      "group": "Divider",
+      "description": "A divider is a thin line that groups content in lists and layouts. They bring clarity to a layout by grouping and dividing content in close proximity.",
+      "props": [
+        {
+          "name": "orientation",
+          "type": "\"horizontal\" | \"vertical\"",
+          "default": "\"horizontal\""
+        },
+        {
+          "name": "thickness",
+          "type": "\"thin\" | \"thick\" | \"thicker\"",
+          "default": "\"thin\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-drawer",
+      "group": "Drawer",
+      "description": "Drawers slide in from a container to expose additional options and information.",
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\"",
+          "default": "\"sm\""
+        },
+        {
+          "name": "placement",
+          "type": "\"top\" | \"end\" | \"bottom\" | \"start\"",
+          "default": "\"end\""
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"Drawer\""
+        },
+        {
+          "name": "contained",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "title",
+        "description",
+        "footer"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide",
+        "sgds-initial-focus",
+        "sgds-request-close"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-dropdown",
+      "group": "Dropdown",
+      "description": "`SgdsDropdown` toggles contextual overlays for displaying lists of links.",
+      "props": [
+        {
+          "name": "noFlip",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "menuAlignRight",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "drop",
+          "type": "DropDirection",
+          "default": "\"down\""
+        },
+        {
+          "name": "close",
+          "type": "\"outside\" | \"default\" | \"inside\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "hidden",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "floatingOpts",
+          "type": "{ placement?: Placement; middleware?: Array<Middleware> }",
+          "default": "{}"
+        },
+        {
+          "name": "menuIsOpen",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "toggler"
+      ],
+      "events": [
+        "sgds-select",
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-dropdown-item",
+      "group": "Dropdown",
+      "description": "`SgdsDropdownItem` are navigation links built with `HTMLAnchorElement`. It should be used in the default slot of `SgdsDropdown`",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-file-upload",
+      "group": "FileUpload",
+      "description": "Allows users to upload files of various sizes and formats",
+      "props": [
+        {
+          "name": "multiple",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "accept",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "\"default\" | \"drag-and-drop\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"Choose files\""
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-files-selected",
+        "sgds-add-files",
+        "sgds-remove-file",
+        "sgds-change"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-footer",
+      "group": "Footer",
+      "description": "The footer contains supporting information for your service at the bottom of your website. All .gov.sg digital services shall contain a Global Footer Bar across all pages. The Global Footer Bar should include the name of the digital service, contact information, a privacy statement and the terms of use.",
+      "props": [
+        {
+          "name": "copyrightLiner",
+          "type": "string",
+          "default": "\"Government of Singapore\""
+        },
+        {
+          "name": "contactHref",
+          "type": "string",
+          "default": "\"#\""
+        },
+        {
+          "name": "feedbackHref",
+          "type": "string",
+          "default": "\"#\""
+        },
+        {
+          "name": "faqHref",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "sitemapHref",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "privacyHref",
+          "type": "string",
+          "default": "\"#\""
+        },
+        {
+          "name": "termsOfUseHref",
+          "type": "string",
+          "default": "\"#\""
+        },
+        {
+          "name": "layout",
+          "type": "\"default\" | \"sidebar\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "tone",
+          "type": "\"fixed-dark\" | \"neutral\"",
+          "default": "\"fixed-dark\""
+        },
+        {
+          "name": "hasDefaultSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasTitleSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasDescriptionSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasItemsSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "title",
+        "description",
+        "items"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-footer-item",
+      "group": "Footer",
+      "description": "The footer item component organizes links under a clear, descriptive title within the footer. It helps users easily navigate to related resources or information, ensuring clarity and accessibility.",
+      "props": [
+        {
+          "name": "tone",
+          "type": "\"fixed-dark\" | \"neutral\"",
+          "default": "\"fixed-dark\""
+        }
+      ],
+      "slots": [
+        "default",
+        "title"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-icon",
+      "group": "Icon",
+      "description": "Icons offer a form of visual shorthand that we are all familiar with. They can label, inform and aid navigation quickly and effectively in minimal space. Icons must first and foremost communicate meaning. By default, the icon component renders icons from `SgdsIcon` library set",
+      "props": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "type": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\" | \"2-xl\" | \"3-xl\"",
+          "default": "\"lg\""
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-icon-button",
+      "group": "IconButton",
+      "description": "An icon button is a user interface element that combines an icon and a button, serving as a clickable or tabbable component.",
+      "props": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "variant",
+          "type": "ButtonVariant",
+          "default": "\"primary\""
+        },
+        {
+          "name": "tone",
+          "type": "ButtonTone",
+          "default": "\"brand\""
+        },
+        {
+          "name": "size",
+          "type": "\"xs\" | \"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "href",
+          "type": "string"
+        },
+        {
+          "name": "target",
+          "type": "\"_blank\" | \"_parent\" | \"_self\" | \"_top\"",
+          "default": "\"_self\""
+        },
+        {
+          "name": "download",
+          "type": "string"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string"
+        },
+        {
+          "name": "loading",
+          "type": "boolean"
+        }
+      ],
+      "slots": [],
+      "events": [
+        "sgds-blur",
+        "sgds-focus"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-icon-card",
+      "group": "IconCard",
+      "description": "Icon cards can be used for headers and footers, a wide variety of content, contain contextual background colors and images.",
+      "props": [
+        {
+          "name": "noPadding",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "stretchedLink",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hideBorder",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "tinted",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "orientation",
+          "type": "CardOrientation",
+          "default": "\"vertical\""
+        }
+      ],
+      "slots": [
+        "default",
+        "icon",
+        "upper",
+        "subtitle",
+        "title",
+        "description",
+        "lower",
+        "footer",
+        "link"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-icon-list",
+      "group": "IconList",
+      "description": "A IconList can be used to display content related to the same topic. Each list item begins an icon.",
+      "props": [
+        {
+          "name": "role",
+          "type": "string",
+          "default": "\"list\""
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-image-card",
+      "group": "ImageCard",
+      "description": "Image cards can be used for headers and footers, a wide variety of content, contain contextual background colors and images.",
+      "props": [
+        {
+          "name": "noPadding",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "imagePosition",
+          "type": "CardImagePosition",
+          "default": "\"before\""
+        },
+        {
+          "name": "imageAdjustment",
+          "type": "CardImageAdjustment",
+          "default": "\"default\""
+        },
+        {
+          "name": "stretchedLink",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hideBorder",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "tinted",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "orientation",
+          "type": "CardOrientation",
+          "default": "\"vertical\""
+        }
+      ],
+      "slots": [
+        "default",
+        "image",
+        "image-badge",
+        "image-action",
+        "upper",
+        "subtitle",
+        "title",
+        "description",
+        "lower",
+        "footer",
+        "link"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-input",
+      "group": "Input",
+      "description": "Text inputs allow your users to enter letters, numbers and symbols on a single line.",
+      "props": [
+        {
+          "name": "type",
+          "type": "| \"email\"\n    | \"number\"\n    | \"password\"\n    | \"search\"\n    | \"tel\"\n    | \"text\"\n    | \"time\"\n    | \"url\"\n    | \"datetime-local\"",
+          "default": "\"text\""
+        },
+        {
+          "name": "prefix",
+          "type": "string"
+        },
+        {
+          "name": "suffix",
+          "type": "string"
+        },
+        {
+          "name": "minlength",
+          "type": "number"
+        },
+        {
+          "name": "maxlength",
+          "type": "number"
+        },
+        {
+          "name": "min",
+          "type": "number"
+        },
+        {
+          "name": "max",
+          "type": "number"
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "\"placeholder\""
+        },
+        {
+          "name": "pattern",
+          "type": "string"
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autocomplete",
+          "type": "string",
+          "default": "\"on\""
+        },
+        {
+          "name": "step",
+          "type": "number | \"any\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "\"style\" | \"text\" | \"both\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string"
+        },
+        {
+          "name": "valid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "icon",
+        "trailing-icon",
+        "action"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-input",
+        "sgds-focus",
+        "sgds-blur",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-link",
+      "group": "Link",
+      "description": "Link allows users to click and navigate their way from page to page",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"xs\" | \"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "variant",
+          "type": "\"primary\" | \"danger\" | \"neutral\" | \"light\" | \"dark\"",
+          "default": "\"primary\""
+        },
+        {
+          "name": "tone",
+          "type": "\"primary\" | \"danger\" | \"neutral\" | \"fixed-light\" | \"fixed-dark\"",
+          "default": "\"primary\""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-mainnav",
+      "group": "Mainnav",
+      "description": "This component is the primary means that your users will use to navigate through your portal. It includes horizontal navigation and branding to identify your site.",
+      "props": [
+        {
+          "name": "hasNonCollapsibleSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "fluid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "brandHref",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "expand",
+          "type": "NavExpandSize",
+          "default": "\"lg\""
+        }
+      ],
+      "slots": [
+        "default",
+        "end",
+        "brand",
+        "profile",
+        "non-collapsible"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-mainnav-dropdown",
+      "group": "Mainnav",
+      "description": "",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string"
+        }
+      ],
+      "slots": [
+        "default",
+        "toggler"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-mainnav-item",
+      "group": "Mainnav",
+      "description": "",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-mainnav-profile",
+      "group": "Mainnav",
+      "description": "A profile component for the mainnav that shows a full dropdown in desktop and handles its own mobile menu.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "secondaryText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "close",
+          "type": "\"default\" | \"outside\" | \"inside\"",
+          "default": "\"default\""
+        }
+      ],
+      "slots": [
+        "avatar",
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-masthead",
+      "group": "Masthead",
+      "description": "All .gov.sg digital services shall adopt The Official Government Banner for every page in the digital service and be placed at the top of the page.",
+      "props": [
+        {
+          "name": "fluid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-modal",
+      "group": "Modal",
+      "description": "The modal component inform users about a specific task and may contain critical information which users then have to make a decision.",
+      "props": [
+        {
+          "name": "open",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noAnimation",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"fullscreen\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "hasFooterSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noCloseButton",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "title",
+        "description",
+        "footer"
+      ],
+      "events": [
+        "sgds-close",
+        "sgds-show",
+        "sgds-hide",
+        "sgds-after-show",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-overflow-menu",
+      "group": "OverflowMenu",
+      "description": "An overflow menu is a UI element, often represented by three dots (⋮ or …), that opens a menu with additional actions or options.",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\"",
+          "default": "\"md\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-pagination",
+      "group": "Pagination",
+      "description": "The Pagination component enables the user to select a specific page from a range of pages",
+      "props": [
+        {
+          "name": "dataLength",
+          "type": "number",
+          "default": "0"
+        },
+        {
+          "name": "currentPage",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "itemsPerPage",
+          "type": "number",
+          "default": "5"
+        },
+        {
+          "name": "variant",
+          "type": "\"default\" | \"number\" | \"button\" | \"description\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "navigation",
+          "type": "Navigation",
+          "default": "\"icon-button\""
+        },
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\"",
+          "default": "\"md\""
+        }
+      ],
+      "slots": [],
+      "events": [
+        "sgds-page-change"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-progress-bar",
+      "group": "ProgressBar",
+      "description": "Provide up-to-date feedback on the progress of a workflow or action with simple yet flexible progress bars.",
+      "props": [
+        {
+          "name": "variant",
+          "type": "ProgressBarVariant",
+          "default": "\"primary\""
+        },
+        {
+          "name": "value",
+          "type": "number"
+        },
+        {
+          "name": "ariamin",
+          "type": "number"
+        },
+        {
+          "name": "ariamax",
+          "type": "number"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "arialabel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-quantity-toggle",
+      "group": "QuantityToggle",
+      "description": "The quantity toggle component is used to increase or decrease an incremental venue,  best used when the user needs to enter or adjust the quantity of a selected item.",
+      "props": [
+        {
+          "name": "value",
+          "type": "number",
+          "default": "0"
+        },
+        {
+          "name": "step",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "min",
+          "type": "number"
+        },
+        {
+          "name": "max",
+          "type": "number"
+        },
+        {
+          "name": "hasFeedback",
+          "type": "\"style\" | \"text\" | \"both\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "invalidIcon"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-input",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-radio",
+      "group": "Radio",
+      "description": "Radio allows the user to select one option from a set while seeing all available options.",
+      "props": [
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-focus",
+        "sgds-blur"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-radio-group",
+      "group": "Radio",
+      "description": "RadioGroup group multiple radios so they function as a single form control.",
+      "props": [
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "invalidIcon"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-select",
+      "group": "Select",
+      "description": "Select is used to make one selection from a list through keyboard or mouse actions",
+      "props": [
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "placeholder",
+          "type": "string"
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autocomplete",
+          "type": "string",
+          "default": "\"on\""
+        },
+        {
+          "name": "menuList",
+          "type": "SgdsOptionData[]",
+          "default": "[]"
+        },
+        {
+          "name": "hidden",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "floatingOpts",
+          "type": "{ placement?: Placement; middleware?: Array<Middleware> }",
+          "default": "{}"
+        },
+        {
+          "name": "menuIsOpen",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-select",
+        "sgds-change",
+        "sgds-focus",
+        "sgds-blur",
+        "sgds-invalid",
+        "sgds-valid",
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-select-option",
+      "group": "Select",
+      "description": "SelectOption is the option of the Select",
+      "props": [
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidebar",
+      "group": "Sidebar",
+      "description": "Sidebar is a collapsible navigation component that displays menu items and groups.",
+      "props": [
+        {
+          "name": "collapsed",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "active",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "scrim",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "variant",
+          "type": "\"collapsible\" | \"persistent\" | \"overlay\"",
+          "default": "\"collapsible\""
+        },
+        {
+          "name": "aria-label",
+          "type": "string",
+          "default": "\"Sidebar navigation\""
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"Sidebar navigation\""
+        }
+      ],
+      "slots": [
+        "default",
+        "upper",
+        "lower"
+      ],
+      "events": [
+        "sgds-select"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidebar-group",
+      "group": "Sidebar",
+      "description": "Sidebar group represents a navigable parent item within the sidebar that can have nested children.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasIconSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "indicator"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidebar-item",
+      "group": "Sidebar",
+      "description": "Sidebar item is a selectable navigation item within the sidebar component.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasIconSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "icon",
+        "indicator"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidebar-section",
+      "group": "Sidebar",
+      "description": "Sidebar section is a container component that groups related sidebar items into organized sections.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "collapsed",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "collapsible",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "separator",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "hasIconSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidenav",
+      "group": "Sidenav",
+      "description": "The side navigation is used to display a list of links to move between pages within a related category.",
+      "props": [
+        {
+          "name": "sticky",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidenav-item",
+      "group": "Sidenav",
+      "description": "",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string"
+        }
+      ],
+      "slots": [
+        "default",
+        "title",
+        "icon",
+        "caret-icon"
+      ],
+      "events": [
+        "sgds-toggle",
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-sidenav-link",
+      "group": "Sidenav",
+      "description": "",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-skeleton",
+      "group": "Skeleton",
+      "description": "A skeleton is a low-fidelity visual placeholder that represents the loading of interface elements",
+      "props": [
+        {
+          "name": "width",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "height",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "borderRadius",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "rows",
+          "type": "number"
+        },
+        {
+          "name": "sheen",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-spinner",
+      "group": "Spinner",
+      "description": "Spinners notify the users that their request is being processed.",
+      "props": [
+        {
+          "name": "variant",
+          "type": "SpinnerVariant",
+          "default": "\"primary\""
+        },
+        {
+          "name": "tone",
+          "type": "SpinnerTone",
+          "default": "\"brand\""
+        },
+        {
+          "name": "size",
+          "type": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "orientation",
+          "type": "\"horizontal\" | \"vertical\"",
+          "default": "\"vertical\""
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-step",
+      "group": "Stepper",
+      "description": "A single step within an sgds-stepper. Manages its own active, completed, and disabled states based on props set by the parent stepper.",
+      "props": [
+        {
+          "name": "stepHeader",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "iconName",
+          "type": "string | undefined"
+        },
+        {
+          "name": "component",
+          "type": "unknown"
+        },
+        {
+          "name": "clickable",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-stepper",
+      "group": "Stepper",
+      "description": "Steppers are used to inform users which step they are at in a form or a process",
+      "props": [
+        {
+          "name": "steps",
+          "type": "IStepMetaData[]",
+          "default": "[]"
+        },
+        {
+          "name": "activeStep",
+          "type": "number",
+          "default": "0"
+        },
+        {
+          "name": "orientation",
+          "type": "StepperOrientation",
+          "default": "\"horizontal\""
+        },
+        {
+          "name": "clickable",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "linear",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-next-step",
+        "sgds-previous-step",
+        "sgds-last-step",
+        "sgds-first-step",
+        "sgds-arrived",
+        "sgds-reset"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-subnav",
+      "group": "Subnav",
+      "description": "This component provides secondary navigation within a specific section or page. It typically appears below the main navigation and offers context-specific links or actions to help users explore related content.",
+      "props": [
+        {
+          "name": "hasActionsSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "header",
+        "actions"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-subnav-item",
+      "group": "Subnav",
+      "description": "",
+      "props": [
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-switch",
+      "group": "Switch",
+      "description": "Switch component is used to toggle on and off or yes or no action.",
+      "props": [
+        {
+          "name": "size",
+          "type": "\"sm\" | \"md\" | \"lg\"",
+          "default": "\"md\""
+        },
+        {
+          "name": "icon",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "checked",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasDefaultSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hasLeftLabelSlot",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "leftLabel"
+      ],
+      "events": [
+        "sgds-change"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-system-banner",
+      "group": "SystemBanner",
+      "description": "The system banner component for displaying important messages to users at the application level.",
+      "props": [
+        {
+          "name": "show",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "dismissible",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noClampAction",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "fluid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-system-banner-item",
+      "group": "SystemBanner",
+      "description": "",
+      "props": [
+        {
+          "name": "hasActionSlot",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noClampAction",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "icon",
+        "action",
+        "default",
+        "badge"
+      ],
+      "events": [
+        "sgds-show-more"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-tab",
+      "group": "Tab",
+      "description": "Tabs are used within tab group to activate the tab panels",
+      "props": [
+        {
+          "name": "panel",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "ariaLabel",
+          "type": "string",
+          "default": "\"\""
+        }
+      ],
+      "slots": [
+        "default",
+        "icon"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-tab-group",
+      "group": "Tab",
+      "description": "Tab Group organizes content into a container with the syncing of tab and their corresponding panels.",
+      "props": [
+        {
+          "name": "variant",
+          "type": "\"underlined\" | \"solid\"",
+          "default": "\"underlined\""
+        },
+        {
+          "name": "orientation",
+          "type": "\"horizontal\" | \"vertical\"",
+          "default": "\"horizontal\""
+        },
+        {
+          "name": "density",
+          "type": "\"compact\" | \"default\"",
+          "default": "\"default\""
+        },
+        {
+          "name": "fullWidth",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "nav"
+      ],
+      "events": [
+        "sgds-tab-show",
+        "sgds-tab-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-tab-panel",
+      "group": "Tab",
+      "description": "Tab panels are used inside tab groups to display tabbed content.",
+      "props": [
+        {
+          "name": "name",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-table",
+      "group": "Table",
+      "description": "Table is used for displaying collections of data in organized rows and columns.",
+      "props": [
+        {
+          "name": "responsive",
+          "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"always\""
+        },
+        {
+          "name": "rowHeader",
+          "type": "string[]",
+          "default": "[]"
+        },
+        {
+          "name": "columnHeader",
+          "type": "string[]",
+          "default": "[]"
+        },
+        {
+          "name": "tableData",
+          "type": "Array<(string | number)[]>",
+          "default": "[]"
+        },
+        {
+          "name": "headerPosition",
+          "type": "\"horizontal\" | \"vertical\" | \"both\"",
+          "default": "\"horizontal\""
+        },
+        {
+          "name": "headerBackground",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "tableBorder",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "layout",
+          "type": "\"auto\" | \"fixed\"",
+          "default": "\"auto\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-table-cell",
+      "group": "Table",
+      "description": "Table cell is used for presenting individual data values, interactive elements, or custom content within a table row.",
+      "props": [],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-table-head",
+      "group": "Table",
+      "description": "Table head represents a table header cell that identifies a group of information within the table.",
+      "props": [],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-table-of-contents",
+      "group": "TableOfContents",
+      "description": "Tables of contents provide a page overview and direct access to specific sections.",
+      "props": [],
+      "slots": [
+        "default",
+        "contents"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-table-row",
+      "group": "Table",
+      "description": "Table row organizes and groups table cells or header cells into a single horizontal line within the table.",
+      "props": [],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-textarea",
+      "group": "Textarea",
+      "description": "Text areas allow for the collection of input longer than a single line.",
+      "props": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "minlength",
+          "type": "number"
+        },
+        {
+          "name": "maxlength",
+          "type": "number"
+        },
+        {
+          "name": "spellcheck",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "rows",
+          "type": "number",
+          "default": "4"
+        },
+        {
+          "name": "placeholder",
+          "type": "string",
+          "default": "\"Placeholder\""
+        },
+        {
+          "name": "invalidFeedback",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "autofocus",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "resize",
+          "type": "\"none\" | \"vertical\" | \"auto\"",
+          "default": "\"vertical\""
+        },
+        {
+          "name": "inputmode",
+          "type": "| \"none\"\n    | \"text\"\n    | \"decimal\"\n    | \"numeric\"\n    | \"tel\"\n    | \"search\"\n    | \"email\"\n    | \"url\""
+        },
+        {
+          "name": "autocorrect",
+          "type": "boolean"
+        },
+        {
+          "name": "hasFeedback",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "noValidate",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hintText",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "invalid",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "invalidIcon"
+      ],
+      "events": [
+        "sgds-change",
+        "sgds-input",
+        "sgds-focus",
+        "sgds-blur",
+        "sgds-invalid",
+        "sgds-valid"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-thumbnail-card",
+      "group": "ThumbnailCard",
+      "description": "Thumbnail cards can be used for headers and footers, a wide variety of content, contain contextual background colors and images.",
+      "props": [
+        {
+          "name": "noPadding",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "stretchedLink",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "hideBorder",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "tinted",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "orientation",
+          "type": "CardOrientation",
+          "default": "\"vertical\""
+        }
+      ],
+      "slots": [
+        "default",
+        "thumbnail",
+        "upper",
+        "subtitle",
+        "title",
+        "description",
+        "lower",
+        "footer",
+        "link"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-toast",
+      "group": "Toast",
+      "description": "Toast allows you to convey quick messaging notifications to the user.",
+      "props": [
+        {
+          "name": "show",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "default": "\"Title\""
+        },
+        {
+          "name": "noAnimation",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "autohide",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "default": "5000"
+        },
+        {
+          "name": "variant",
+          "type": "\"success\" | \"warning\" | \"danger\" | \"info\"",
+          "default": "\"info\""
+        },
+        {
+          "name": "dismissible",
+          "type": "boolean",
+          "default": "false"
+        }
+      ],
+      "slots": [
+        "default",
+        "action",
+        "icon"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-toast-container",
+      "group": "Toast",
+      "description": "ToastContainer is the container component to position `sgds-toast` in screen. When there is multiple toasts in the container, the toast components are stacked vertically.",
+      "props": [
+        {
+          "name": "position",
+          "type": "ToastPosition"
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    },
+    {
+      "tag": "sgds-tooltip",
+      "group": "Tooltip",
+      "description": "Tooltips display more information when users hover over, focus on, or interact with an element.",
+      "props": [
+        {
+          "name": "content",
+          "type": "string",
+          "default": "\"\""
+        },
+        {
+          "name": "placement",
+          "type": "\"top\" | \"bottom\" | \"left\" | \"right\"",
+          "default": "\"top\""
+        },
+        {
+          "name": "trigger",
+          "type": "\"click\" | \"hover\" | \"focus\" | \"hover focus\"",
+          "default": "\"hover focus\""
+        }
+      ],
+      "slots": [
+        "default"
+      ],
+      "events": [
+        "sgds-show",
+        "sgds-after-show",
+        "sgds-hide",
+        "sgds-after-hide"
+      ],
+      "figma": {
+        "componentName": null,
+        "nodeUrl": null,
+        "componentKey": null
+      }
+    }
+  ]
+}

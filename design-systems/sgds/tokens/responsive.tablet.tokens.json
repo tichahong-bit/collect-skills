@@ -1,0 +1,329 @@
+{
+  "font-size": {
+    "display-sm": {
+      "$type": "number",
+      "$value": "{font-size.36}",
+      "$description": "--sgds-font-size-display-sm"
+    },
+    "display-md": {
+      "$type": "number",
+      "$value": "{font-size.44}",
+      "$description": "--sgds-font-size-display-md"
+    },
+    "display-lg": {
+      "$type": "number",
+      "$value": "{font-size.52}",
+      "$description": "--sgds-font-size-display-lg"
+    },
+    "heading-sm": {
+      "$type": "number",
+      "$value": "{font-size.22}",
+      "$description": "--sgds-font-size-heading-sm"
+    },
+    "heading-md": {
+      "$type": "number",
+      "$value": "{font-size.26}",
+      "$description": "--sgds-font-size-heading-md"
+    },
+    "heading-lg": {
+      "$type": "number",
+      "$value": "{font-size.30}",
+      "$description": "--sgds-font-size-heading-lg"
+    },
+    "heading-xl": {
+      "$type": "number",
+      "$value": "{font-size.36}",
+      "$description": "--sgds-font-size-heading-xl"
+    },
+    "subtitle-sm": {
+      "$type": "number",
+      "$value": "{font-size.16}",
+      "$description": "--sgds-font-size-subtitle-sm"
+    },
+    "subtitle-md": {
+      "$type": "number",
+      "$value": "{font-size.20}",
+      "$description": "--sgds-font-size-subtitle-md"
+    },
+    "body-sm": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-body-sm"
+    },
+    "body-md": {
+      "$type": "number",
+      "$value": "{font-size.16}",
+      "$description": "--sgds-font-size-body-md"
+    },
+    "body-lg": {
+      "$type": "number",
+      "$value": "{font-size.20}",
+      "$description": "--sgds-font-size-body-lg"
+    },
+    "label-xs": {
+      "$type": "number",
+      "$value": "{font-size.12}",
+      "$description": "--sgds-font-size-label-xs"
+    },
+    "label-sm": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-label-sm"
+    },
+    "label-md": {
+      "$type": "number",
+      "$value": "{font-size.16}",
+      "$description": "--sgds-font-size-label-md"
+    },
+    "label-lg": {
+      "$type": "number",
+      "$value": "{font-size.20}",
+      "$description": "--sgds-font-size-label-lg"
+    },
+    "list-sm": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-list-sm"
+    },
+    "list-md": {
+      "$type": "number",
+      "$value": "{font-size.16}",
+      "$description": "--sgds-font-size-list-md"
+    },
+    "list-lg": {
+      "$type": "number",
+      "$value": "{font-size.20}",
+      "$description": "--sgds-font-size-list-lg"
+    },
+    "caption-md": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-caption-md"
+    },
+    "overline-md": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-overline-md"
+    },
+    "link-xs": {
+      "$type": "number",
+      "$value": "{font-size.12}",
+      "$description": "--sgds-font-size-link-xs"
+    },
+    "link-sm": {
+      "$type": "number",
+      "$value": "{font-size.14}",
+      "$description": "--sgds-font-size-link-sm"
+    },
+    "link-md": {
+      "$type": "number",
+      "$value": "{font-size.16}",
+      "$description": "--sgds-font-size-link-md"
+    },
+    "link-lg": {
+      "$type": "number",
+      "$value": "{font-size.20}",
+      "$description": "--sgds-font-size-link-lg"
+    }
+  },
+  "line-height": {
+    "3-xs": {
+      "$type": "number",
+      "$value": "{line-height.16}",
+      "$description": "--sgds-line-height-3-xs"
+    },
+    "2-xs": {
+      "$type": "number",
+      "$value": "{line-height.20}",
+      "$description": "--sgds-line-height-2-xs"
+    },
+    "xs": {
+      "$type": "number",
+      "$value": "{line-height.24}",
+      "$description": "--sgds-line-height-xs"
+    },
+    "sm": {
+      "$type": "number",
+      "$value": "{line-height.28}",
+      "$description": "--sgds-line-height-sm"
+    },
+    "md": {
+      "$type": "number",
+      "$value": "{line-height.32}",
+      "$description": "--sgds-line-height-md"
+    },
+    "lg": {
+      "$type": "number",
+      "$value": "{line-height.36}",
+      "$description": "--sgds-line-height-lg"
+    },
+    "xl": {
+      "$type": "number",
+      "$value": "{line-height.44}",
+      "$description": "--sgds-line-height-xl"
+    },
+    "2-xl": {
+      "$type": "number",
+      "$value": "{line-height.52}",
+      "$description": "--sgds-line-height-2-xl"
+    },
+    "3-xl": {
+      "$type": "number",
+      "$value": "{line-height.60}",
+      "$description": "--sgds-line-height-3-xl"
+    }
+  },
+  "text": {
+    "gap-2-xs": {
+      "$type": "number",
+      "$value": "{spacer.2}",
+      "$description": "--sgds-text-gap-2-xs"
+    },
+    "gap-xs": {
+      "$type": "number",
+      "$value": "{spacer.3}",
+      "$description": "--sgds-text-gap-xs"
+    },
+    "gap-sm": {
+      "$type": "number",
+      "$value": "{spacer.4}",
+      "$description": "--sgds-text-gap-sm"
+    },
+    "gap-md": {
+      "$type": "number",
+      "$value": "{spacer.5}",
+      "$description": "--sgds-text-gap-md"
+    },
+    "gap-lg": {
+      "$type": "number",
+      "$value": "{spacer.6}",
+      "$description": "--sgds-text-gap-lg"
+    },
+    "gap-xl": {
+      "$type": "number",
+      "$value": "{spacer.7}",
+      "$description": "--sgds-text-gap-xl"
+    },
+    "gap-2-xl": {
+      "$type": "number",
+      "$value": "{spacer.8}",
+      "$description": "--sgds-text-gap-2-xl"
+    }
+  },
+  "layout": {
+    "gap-2-xs": {
+      "$type": "number",
+      "$value": "{spacer.4}",
+      "$description": "--sgds-layout-gap-2-xs"
+    },
+    "gap-xs": {
+      "$type": "number",
+      "$value": "{spacer.5}",
+      "$description": "--sgds-layout-gap-xs"
+    },
+    "gap-sm": {
+      "$type": "number",
+      "$value": "{spacer.6}",
+      "$description": "--sgds-layout-gap-sm"
+    },
+    "gap-md": {
+      "$type": "number",
+      "$value": "{spacer.7}",
+      "$description": "--sgds-layout-gap-md"
+    },
+    "gap-lg": {
+      "$type": "number",
+      "$value": "{spacer.8}",
+      "$description": "--sgds-layout-gap-lg"
+    },
+    "gap-xl": {
+      "$type": "number",
+      "$value": "{spacer.9}",
+      "$description": "--sgds-layout-gap-xl"
+    },
+    "padding-xs": {
+      "$type": "number",
+      "$value": "{spacer.6}",
+      "$description": "--sgds-layout-padding-xs"
+    },
+    "padding-sm": {
+      "$type": "number",
+      "$value": "{spacer.7}",
+      "$description": "--sgds-layout-padding-sm"
+    },
+    "padding-md": {
+      "$type": "number",
+      "$value": "{spacer.8}",
+      "$description": "--sgds-layout-padding-md"
+    },
+    "padding-lg": {
+      "$type": "number",
+      "$value": "{spacer.9}",
+      "$description": "--sgds-layout-padding-lg"
+    },
+    "padding-xl": {
+      "$type": "number",
+      "$value": "{spacer.10}",
+      "$description": "--sgds-layout-padding-xl"
+    }
+  },
+  "component": {
+    "gap-xs": {
+      "$type": "number",
+      "$value": "{spacer.5}",
+      "$description": "--sgds-component-gap-xs"
+    },
+    "gap-sm": {
+      "$type": "number",
+      "$value": "{spacer.6}",
+      "$description": "--sgds-component-gap-sm"
+    },
+    "gap-md": {
+      "$type": "number",
+      "$value": "{spacer.7}",
+      "$description": "--sgds-component-gap-md"
+    },
+    "gap-lg": {
+      "$type": "number",
+      "$value": "{spacer.8}",
+      "$description": "--sgds-component-gap-lg"
+    },
+    "gap-xl": {
+      "$type": "number",
+      "$value": "{spacer.9}",
+      "$description": "--sgds-component-gap-xl"
+    },
+    "padding-xs": {
+      "$type": "number",
+      "$value": "{spacer.6}",
+      "$description": "--sgds-component-padding-xs"
+    },
+    "padding-sm": {
+      "$type": "number",
+      "$value": "{spacer.7}",
+      "$description": "--sgds-component-padding-sm"
+    },
+    "padding-md": {
+      "$type": "number",
+      "$value": "{spacer.8}",
+      "$description": "--sgds-component-padding-md"
+    },
+    "padding-lg": {
+      "$type": "number",
+      "$value": "{spacer.9}",
+      "$description": "--sgds-component-padding-lg"
+    },
+    "padding-xl": {
+      "$type": "number",
+      "$value": "{spacer.10}",
+      "$description": "--sgds-component-padding-xl"
+    }
+  },
+  "container": {
+    "width": {
+      "$type": "number",
+      "$value": "{dimension.888}",
+      "$description": "--sgds-container-width"
+    }
+  }
+}
