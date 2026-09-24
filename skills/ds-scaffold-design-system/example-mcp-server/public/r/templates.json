@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "settings-list-detail",
+    "name": "Settings — List/Detail",
+    "screens": [
+      "settings-list",
+      "settings-detail"
+    ],
+    "version": "1.0.0",
+    "docs": "https://sample-ds-yourorg.vercel.app/#/templates/settings-list-detail",
+    "install": "npx shadcn@latest add https://sample-ds-yourorg.vercel.app/r/templates/settings-list-detail.json",
+    "componentsUsed": [
+      "text-field",
+      "button-primary",
+      "button-secondary"
+    ]
+  }
+]
